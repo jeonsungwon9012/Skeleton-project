@@ -1,20 +1,13 @@
----
-name: "\U0001F4CC ISSUE TEMPLATE"
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
+## 📌 작업 내용
+- 거래 등록 기능 구현
 
----
+## ✅ 체크리스트
+- [ ] UI 구현
+- [ ] API 연결
+- [ ] 테스트 완료
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## 🎯 목표
+- 등록 후 목록 반영
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
-
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
-
-**Additional context**
-Add any other context or screenshots about the feature request here.
+## 📎 참고
+- API: /budget
