@@ -1,0 +1,162 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+
+:root {
+  /* 폰트 지정 */
+  --font-main: 'Pretendard Variable', Pretendard, sans-serif;
+
+  /* ⚪️ Basic Colors */
+  --color-white: #ffffff;
+  --color-background: #f9fafc;
+  --color-overlay: rgba(44, 51, 51, 0.5); /* #2C3333 + Alpha 0.5 */
+  --color-shadow: rgba(44, 51, 51, 0.04); /* #2C3333 + Alpha 0.04 */
+
+  /* 🟢 Primary Scale (Green) */
+  --color-primary: #67ea76;
+  --color-primary-80: #85ee91;
+  --color-primary-60: #a4f3ad;
+  --color-primary-40: #c2f7c8;
+  --color-primary-30: #d1f9d6;
+  --color-primary-20: #e1fbe3;
+  --color-primary-10: #f0fdf1;
+
+  /* 🟠 Sub Scale (Coral/Orange) */
+  --color-sub-100: #ff8a65;
+  --color-sub-80: #ffa184;
+  --color-sub-60: #ffb8a3;
+  --color-sub-40: #ffcfc2;
+  --color-sub-30: #ffdbd1;
+  --color-sub-20: #ffe7e1;
+  --color-sub-10: #fff3f0;
+
+  /* 🌚 Deep Gray Scale */
+  --color-deepgray-100: #2c3333;
+  --color-deepgray-80: #565c5c;
+  --color-deepgray-60: #808585;
+  --color-deepgray-50: #959999;
+  --color-deepgray-40: #aaadad;
+  --color-deepgray-30: #bfc2c2;
+  --color-deepgray-20: #d5d6d6;
+  --color-deepgray-10: #eaeaea;
+  --color-gray-10: #f5f5f5;
+
+  /* 🌈 Category Colors (10 Types) */
+  --category-red: #ff7676; /* 식비/외식 */
+  --category-orange: #ffb347; /* 간식/카페 */
+  --category-yellow: #fde16d; /* 생활/마트 */
+  --category-green: #67ea76; /* 저축/고정지출 */
+  --category-mint: #4dd0e1; /* 교통/차량 */
+  --category-blue: #64b5f6; /* 주거/통신 */
+  --category-purple: #9575cd; /* 문화/취미 */
+  --category-pink: #f06292; /* 패션/미용 */
+  --category-brown: #a1887f; /* 교육/자기계발 */
+  --category-gray: #90a4ae; /* 기타/예비비 */
+
+  /* 📏 Text-size styles (rem 변환: px/16) */
+  --heading-1: 3.375rem; /* 54px / Bold */
+  --heading-2: 2.625rem; /* 42px / Bold */
+  --heading-3: 2rem; /* 32px / Bold */
+  --heading-4: 1.5rem; /* 24px / Bold */
+  --heading-5: 1.25rem; /* 20px / Bold */
+  --heading-6: 1.125rem; /* 18px / Bold */
+
+  --subtitle--m: 1rem; /* 16px / Medium */
+  --subtitle--s: 0.875rem; /* 14px / Medium */
+
+  --body--l: 1.125rem; /* 18px / Regular */
+  --body--m: 1.125rem; /* 18px / Regular */
+  --body--s: 1.125rem; /* 18px / Regular */
+  --body--x-s: 1.125rem; /* 18px / Regular */
+  --body--x-x-s: 1.125rem; /* 18px / Regular */
+
+  --c-a-p-t-i-o-n: 1.25rem; /* 20px / Regular */
+
+  --button--l: 1.25rem; /* 20px / Medium */
+  --button--m: 1rem; /* 16px / Medium */
+  --button--s: 0.875rem; /* 14px / Medium */
+
+  --menu-amp--tabs: 1rem; /* 16px / Medium */
+
+  /* ✨ Effect styles */
+  --drop--shadow: 0px 4px 10px rgba(44, 51, 51, 0.04);
+
+  /* 제목: Bold (700) */
+  .h1,
+  .h2,
+  .h3,
+  .h4,
+  .h5,
+  .h6 {
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .h1 {
+    font-size: var(--heading-1);
+  }
+  .h2 {
+    font-size: var(--heading-2);
+  }
+  .h3 {
+    font-size: var(--heading-3);
+  }
+  .h4 {
+    font-size: var(--heading-4);
+  }
+  .h5 {
+    font-size: var(--heading-5);
+  }
+  .h6 {
+    font-size: var(--heading-6);
+  }
+
+  /* 서브타이틀 & 탭: Medium (500) */
+  .subtitle-m {
+    font-size: var(--subtitle--m);
+    font-weight: 500;
+  }
+  .subtitle-s {
+    font-size: var(--subtitle--s);
+    font-weight: 500;
+  }
+  .tabs {
+    font-size: var(--menu-amp--tabs);
+    font-weight: 500;
+  }
+
+  /* 본문: Regular (400) */
+  .body-l,
+  .body-m,
+  .body-s {
+    font-weight: 400;
+    line-height: 1.6;
+  }
+  .body-l {
+    font-size: var(--body--l);
+  }
+  .body-m {
+    font-size: var(--body--m);
+  }
+  .body-s {
+    font-size: var(--body--s);
+  }
+
+  /* 버튼: Medium (500) */
+  .btn-l {
+    font-size: var(--button--l);
+    font-weight: 500;
+  }
+  .btn-m {
+    font-size: var(--button--m);
+    font-weight: 500;
+  }
+  .btn-s {
+    font-size: var(--button--s);
+    font-weight: 500;
+  }
+
+  /* 캡션: Regular (400) */
+  .caption {
+    font-size: var(--c-a-p-t-i-o-n);
+    font-weight: 400;
+    color: var(--color-deepgray-60);
+  }
+}
