@@ -1,11 +1,25 @@
-<script setup></script>
+<script setup>
+import Sidebar from './components/common/sidebar.vue';
+import Calendar from "./components/views/Calendar.vue";
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div class="app full-layout" v-if="$route.meta.isFullPage">
+    <router-view />
+  </div>
+
+  <div class="app app-layout" v-else>
+    <Sidebar />
+    <main class="main">
+      <router-view />
+      <Calendar/>
+    </main>
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.app-layout {
+  display: flex;
+  height: 100vh;
+}
+</style>
