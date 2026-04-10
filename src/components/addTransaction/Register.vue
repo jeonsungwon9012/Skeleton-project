@@ -198,7 +198,7 @@
       </div>
     </div>
 
-    <RigisterPopUP
+    <RegisterModal
       :visible="showSuccessModal"
       :icon="successModalIcon"
       :description="successModalDescription"
@@ -218,7 +218,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import AddCategory from './addCategory.vue';
 import { useTransactionStore } from '@/stores/budgetStores';
-import RigisterPopUP from './RigisterPopUP.vue';
+import RegisterModal from './RegisterModal.vue';
 
 const transactionStore = useTransactionStore();
 
