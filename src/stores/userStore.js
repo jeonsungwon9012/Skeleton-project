@@ -1,12 +1,33 @@
-import { defineStore } from 'pinia';
+import { ref, computed } from 'vue'
+import { defineStore } from 'pinia'
 
-export const useUserStore = defineStore('user', {
-  state: () => ({
-    user: {
-      uid: 'Darae_choi',
-      name: '최다래',
-      cids: [1, 2, 3, 4, 5], // 유저가 선택한 카테고리 ID들
-    },
-    isLoggedIn: true,
-  }),
-});
+export const useUserStore = defineStore('user', () => {
+  // --- State ---
+  const user = ref(null)
+  const isLoggedIn = ref(false)
+  const authStatus = ref('idle')
+
+  // --- Getters ---
+  const userCids = computed(() => user.value?.cids || [])
+
+  // --- Actions ---
+  async function login(loginData) {
+    authStatus.value = 'loading'
+    try {
+      // 가상의 API 통신
+      user.value = { uid: 'sooyeon_10', name: '김소연', cids: [1, 2, 3, 4] }
+      isLoggedIn.value = true
+      authStatus.value = 'success'
+    } catch (error) {
+      authStatus.value = 'error'
+    }
+  }
+
+  function logout() {
+    user.value = null
+    isLoggedIn.value = false
+    authStatus.value = 'idle'
+  }
+
+  return { user, isLoggedIn, authStatus, userCids, login, logout }
+})

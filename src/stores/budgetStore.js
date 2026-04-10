@@ -1,84 +1,129 @@
-import { defineStore } from 'pinia';
+import { ref, computed } from 'vue'
+import { defineStore } from 'pinia'
+import api from 'axios'// 이전에 만든 axios 인스턴스
 
-export const useBudgetStore = defineStore('budget', {
-  state: () => ({
-    budgets: [], // 원본 데이터
-    currentMonth: new Date(), // 현재 캘린더 기준 월
-    selectedDate: null, // 클릭한 날짜 (DailyList 출력용)
-    selectedCategory: null, // 클릭한 카테고리 (필터 및 최신내역 출력용)
-  }),
+export const useBudgetStore = defineStore('budget', () => {
+  // --- [State] ---
+  const budgets = ref([])      // BUDGET 테이블 데이터
+  const categories = ref([])   // CATEGORY 테이블 데이터
+  const users = ref([])        // USER 테이블 데이터
+  const currentUid = ref("1")  // 현재 로그인한 유저 ID (테스트용으로 1번 고정)
 
-  getters: {
-    // 1. 이번 달 데이터만 필터링
-    filteredBudgets: (state) => {
-      return state.budgets.filter((item) => {
-        const d = new Date(item.date);
-        return (
-          d.getMonth() === state.currentMonth.getMonth() &&
-          d.getFullYear() === state.currentMonth.getFullYear()
-        );
-      });
-    },
+  const currentMonth = ref(new Date())
+  const selectedDates = ref([])
+  const selectedCategories = ref([])
+  const selectedType = ref('all')
+  const isScheduledOnly = ref(false)
 
-    // 2. 캘린더 점 (카테고리 필터 영향 받음)
-    calendarDots: (state) => {
-      if (!state.selectedCategory) return state.filteredBudgets;
-      return state.filteredBudgets.filter(
-        (item) => item.cid === state.selectedCategory
-      );
-    },
+  // --- [Getters] ---
 
-    // 3. 데일리 리스트 및 최신 내역의 재료 (날짜/카테고리 동시 적용)
-    rangeBudgets: (state) => {
-      let result = state.budgets;
-      if (state.selectedDate) {
-        result = result.filter((item) => item.date === state.selectedDate);
-      }
-      if (state.selectedCategory) {
-        result = result.filter((item) => item.cid === state.selectedCategory);
-      }
-      return result;
-    },
+  // 현재 유저의 데이터만 필터링함
+  const myBudgets = computed(() => {
+    return budgets.value.filter(b => b.uid === Number(currentUid.value) || b.uid === currentUid.value)
+  })
 
-    // 4. 수입/지출 합계 객체
-    selectedTotal: (getters) => {
-      return getters.rangeBudgets.reduce(
-        (acc, cur) => {
-          if (cur.type === 'income') acc.income += cur.amount;
-          else acc.expense += cur.amount;
-          return acc;
-        },
-        { income: 0, expense: 0 }
-      );
-    },
+  // 달력 점 표시용 (현재 유저 + 카테고리/타입 필터)
+  const calendarDots = computed(() => {
+    return myBudgets.value.filter(item => {
+      const matchCat = selectedCategories.value.length === 0 || selectedCategories.value.includes(Number(item.cid))
+      const matchType = selectedType.value === 'all' || item.type === selectedType.value
+      return matchCat && matchType
+    })
+  })
 
-    // 5. 최신순 내림차순 정렬 (필터링된 데이터를 재사용)
-    monthlyRecentTransactions: (getters) => {
-      return [...getters.rangeBudgets].sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
-    },
-  },
+  // 상세 리스트 출력용 (모든 필터 통합)
+  const rangeBudgets = computed(() => {
+    return myBudgets.value.filter(item => {
+      const matchDate = selectedDates.value.length === 0 || selectedDates.value.includes(item.date)
+      const matchCat = selectedCategories.value.length === 0 || selectedCategories.value.includes(Number(item.cid))
+      const matchType = selectedType.value === 'all' || item.type === selectedType.value
 
-  actions: {
-    // [스왑 로직] 날짜 클릭 시 카테고리 해제
-    setRange(date) {
-      this.selectedDate = date;
-      this.selectedCategory = null;
-    },
+      const isFuture = new Date(item.date) > new Date()
+      const matchScheduled = !isScheduledOnly.value || isFuture
 
-    // [스왑 로직] 카테고리 클릭 시 날짜 해제
-    setCategory(cid) {
-      this.selectedCategory = this.selectedCategory === cid ? null : cid;
-      this.selectedDate = null;
-    },
+      return matchDate && matchCat && matchType && matchScheduled
+    })
+  })
 
-    changeMonth(diff) {
-      const next = new Date(this.currentMonth);
-      next.setMonth(next.getMonth() + diff);
-      this.currentMonth = next;
-      this.selectedDate = null;
-      this.selectedCategory = null;
-    },
-  },
-});
+  const selectedTotal = computed(() => {
+    return rangeBudgets.value.reduce((acc, cur) => {
+      if (cur.type === 'income') acc.income += cur.amount
+      else acc.expense += cur.amount
+      return acc
+    }, { income: 0, expense: 0 })
+  })
+
+  // --- [Actions] ---
+
+  // 초기 데이터 로드 (DB와 연결)
+  async function fetchData() {
+    try {
+      const [resB, resC, resU] = await Promise.all([
+        api.get('/BUDGET'),
+        api.get('/CATEGORY'),
+        api.get('/USER')
+      ])
+      budgets.value = resB.data
+      categories.value = resC.data
+      users.value = resU.data
+      console.log("DB 데이터 로드 성공 🍐")
+    } catch (error) {
+      console.error("데이터 로드 실패:", error)
+    }
+  }
+
+  // 가계부 내역 추가 (DB 저장)
+  async function addBudget(payload) {
+    try {
+      const res = await api.post('/BUDGET', {
+        ...payload,
+        uid: Number(currentUid.value) // 유저 ID 강제 할당
+      })
+      budgets.value.push(res.data)
+      return res.data
+    } catch (error) {
+      console.error("저장 실패:", error)
+    }
+  }
+// 월 이동 (이전달/다음달)
+  function changeMonth(diff) {
+    const next = new Date(currentMonth.value)
+    next.setMonth(next.getMonth() + diff)
+    currentMonth.value = next
+
+    // 달이 바뀌면 선택값들 초기화함
+    resetFilters()
+  }
+  // 필터 관련 액션들 (기존 로직 유지)
+  function toggleDate(date, isShiftPressed = false) {
+    if (isShiftPressed) {
+      const index = selectedDates.value.indexOf(date)
+      if (index > -1) selectedDates.value.splice(index, 1)
+      else selectedDates.value.push(date)
+    } else {
+      selectedDates.value = (selectedDates.value[0] === date && selectedDates.value.length === 1) ? [] : [date]
+    }
+    selectedCategories.value = []; isScheduledOnly.value = false;
+  }
+
+  function toggleCategory(cid) {
+    const numCid = Number(cid)
+    const index = selectedCategories.value.indexOf(numCid)
+    if (index > -1) selectedCategories.value.splice(index, 1)
+    else selectedCategories.value.push(numCid)
+    selectedDates.value = []; isScheduledOnly.value = false;
+  }
+
+  function setTransactionType(type) { selectedType.value = type }
+  function toggleScheduled() { isScheduledOnly.value = !isScheduledOnly.value }
+  function resetFilters() {
+    selectedType.value = 'all'; selectedCategories.value = [];
+    isScheduledOnly.value = false; selectedDates.value = [];
+  }
+
+  return {
+    budgets, categories, currentMonth, selectedDates, selectedCategories, selectedType, isScheduledOnly,
+    calendarDots, rangeBudgets, selectedTotal,
+    fetchData, addBudget, toggleDate, toggleCategory, setTransactionType, toggleScheduled, resetFilters,changeMonth
+  }
+})

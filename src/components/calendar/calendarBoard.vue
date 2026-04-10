@@ -1,94 +1,77 @@
 <script setup>
-import { computed } from 'vue';
-const props = defineProps(['currentMonth', 'selectedDate']);
-const emit = defineEmits(['dateClick']);
+import { useBudgetStore } from "@/stores/budgetStore.js"; // 💡 스토어 가져오기
 
-const calendarDays = computed(() => {
-  const days = [];
-  const year = props.currentMonth.getFullYear();
-  const month = props.currentMonth.getMonth();
-  const firstDayIdx = new Date(year, month, 1).getDay();
-  const lastDate = new Date(year, month + 1, 0).getDate();
-  const prevLastDate = new Date(year, month, 0).getDate();
+const props = defineProps({ dots: Array, selectedDates: Array })
+const emit = defineEmits(['click-date'])
 
-  for (let i = firstDayIdx - 1; i >= 0; i--) {
-    days.push({ day: prevLastDate - i, type: 'prev' });
-  }
-  for (let d = 1; d <= lastDate; d++) {
-    days.push({ day: d, type: 'current', fullDate: new Date(year, month, d) });
-  }
-  const nextFill = 42 - days.length;
-  for (let i = 1; i <= nextFill; i++) {
-    days.push({ day: i, type: 'next' });
-  }
-  return days;
-});
+const budgetStore = useBudgetStore(); // 💡 스토어 사용 선언
 
-const isSelected = (date) => props.selectedDate?.toDateString() === date?.toDateString();
+// 날짜 포맷 함수 (YYYY-MM-DD)
+const formatDate = (y, m, d) => `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+
+const handleDayClick = (event, date) => emit('click-date', date, event.shiftKey)
+
+/**
+ * 💡 [핵심 함수] 카테고리 ID로 실제 색상 코드를 찾아주는 함수임
+ * dot.cid를 받아서 budgetStore.categories 배열에서 일치하는 색상을 찾음
+ */
+const getCategoryColor = (cid) => {
+  // db.json의 CATEGORY 배열에서 id가 일치하는 녀석을 찾음
+  const category = budgetStore.categories.find(c => Number(c.id) === Number(cid));
+
+  // 찾으면 그 카테고리의 color(#xxxxxx)를 주고, 못 찾으면 기본 회색을 줌
+  return category ? category.color : '#90A4AE';
+}
+
+// 2026년 4월 기준 그리드 배열
+const prevMonthDays = [29, 30, 31];
+const currentMonthDays = Array.from({ length: 30 }, (_, i) => i + 1);
+const nextMonthDays = [1, 2, 3, 4];
 </script>
 
 <template>
-  <div class="board-container">
+  <div class="calendar-card">
+    <div class="days-header subtitle-s">
+      <span v-for="d in ['일','월','화','수','목','금','토']" :key="d">{{ d }}</span>
+    </div>
+
     <div class="grid">
-      <div v-for="lb in ['일','월','화','수','목','금','토']" :key="lb" class="label subtitle-m">
-        {{ lb }}
+      <div v-for="day in prevMonthDays" :key="'p'+day" class="cell other-month"
+           :class="{ 'is-selected': selectedDates.includes(formatDate(2026, 3, day)) }"
+           @click="handleDayClick($event, formatDate(2026, 3, day))">
+        <span class="date-num">{{ day }}</span>
       </div>
-      <div
-          v-for="(item, idx) in calendarDays" :key="idx"
-          class="cell"
-          :class="[item.type, { active: item.fullDate && isSelected(item.fullDate) }]"
-          @click="item.fullDate && emit('dateClick', item.fullDate)"
-      >
-        <span class="num body-m">{{ item.day }}</span>
-        <div class="dot-group" v-if="item.type === 'current'">
-          <div v-if="item.day % 5 === 0" class="dot bg-red"></div>
-          <div v-if="item.day % 3 === 0" class="dot bg-blue"></div>
+
+      <div v-for="day in currentMonthDays" :key="'c'+day" class="cell"
+           :class="{ 'is-selected': selectedDates.includes(formatDate(2026, 4, day)) }"
+           @click="handleDayClick($event, formatDate(2026, 4, day))">
+        <span class="date-num">{{ day }}</span>
+
+        <div class="dots-container">
+          <div v-for="dot in dots.filter(d => d.date === formatDate(2026, 4, day))"
+               :key="dot.id"
+               class="dot"
+               :style="{ backgroundColor: getCategoryColor(dot.cid) }">
+          </div>
         </div>
+      </div>
+
+      <div v-for="day in nextMonthDays" :key="'n'+day" class="cell other-month"
+           :class="{ 'is-selected': selectedDates.includes(formatDate(2026, 5, day)) }"
+           @click="handleDayClick($event, formatDate(2026, 5, day))">
+        <span class="date-num">{{ day }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.board-container {
-  background: var(--color-white);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: var(--drop--shadow);
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
-  background-color: var(--color-deepgray-10);
-}
-.label {
-  padding: 16px;
-  text-align: center;
-  background-color: var(--color-white);
-  color: var(--color-deepgray-60);
-}
-.cell {
-  min-height: clamp(100px, 15vh, 160px);
-  padding: 12px;
-  background-color: var(--color-white);
-  cursor: pointer;
-}
-.prev, .next {
-  background-color: var(--color-gray-10);
-  color: var(--color-deepgray-40);
-  cursor: default;
-}
-.active .num {
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700;
-}
-.dot-group { display: flex; gap: 4px; margin-top: 8px; }
-.dot { width: 6px; height: 6px; border-radius: 50%; }
-.bg-red { background-color: var(--category-red); }
-.bg-blue { background-color: var(--category-blue); }
+.calendar-card { background: white; border-radius: 16px; box-shadow: var(--drop--shadow); min-width: 700px; overflow: hidden; }
+.days-header { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--color-gray-10); padding: 14px 0; text-align: center; }
+.grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cell { min-height: 120px; padding: 12px; border-bottom: 1px solid var(--color-gray-10); cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; }
+.date-num { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; }
+.cell.is-selected .date-num { background: var(--color-primary) !important; color: white !important; font-weight: 700; }
+.dots-container { display: flex; gap: 4px; flex-wrap: wrap; margin-top: auto; }
+.dot { width: 7px; height: 7px; border-radius: 50%; transition: transform 0.2s; }
 </style>

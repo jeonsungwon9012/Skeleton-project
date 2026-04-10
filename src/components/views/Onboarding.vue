@@ -1,13 +1,16 @@
 <script setup>
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/userStore';
 
+const userStore = useUserStore();
 const router = useRouter();
 
-const startApp = () => {
+const startApp = async () => {
   // 실제 서비스라면 여기서 로그인 처리를 하겠지만,
   // 지금은 바로 대시보드로 이동하는 기능을 연결합니다.
   // 🚩 주의: router/index.js에서 isLoggedIn을 true로 바꿔야 통과됩니다!
-  router.push('/');
+  await userStore.login();
+  router.push('/calendar');
 };
 </script>
 
