@@ -38,6 +38,7 @@ export const useTemplateStore = defineStore('template', () => {
   const deleteTemplate = async (id, uid) => {
     await templateApi.deleteTemplate(id);
     await fetchTemplates(uid); // 목록 갱신
+    // templates.value = templates.value.filter((template) => String(template.id) !== String(id));
   };
 
   return {
