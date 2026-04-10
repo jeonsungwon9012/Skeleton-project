@@ -262,8 +262,6 @@ const filteredMC = computed(() => {
   console.log(filteredMC);
   return filteredCategory.value.filter((item) => {
     const matchMonth = parseInt(item.date.split('-')[1], 10);
-    // console.log(budgetmonth);
-    // console.log(currentMonth.value);
 
     return matchMonth === currentMonth.value;
   });
