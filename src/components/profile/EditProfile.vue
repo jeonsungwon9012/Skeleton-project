@@ -160,7 +160,7 @@ const handleSave = async () => {
 .profile {
   display: flex;
   flex-direction: column;
-  margin-right: 5rem;
+  margin: 2rem;
   gap: 0.5rem;
   width: 100%;
   max-width: 60rem;
@@ -281,5 +281,18 @@ tr td:nth-child(2) {
   color: #ff4d4f;
   font-size: 0.8rem;
   margin-top: 0.2rem;
+}
+
+@media (max-width: 900px) {
+  .edit-button {
+    position: static;
+    margin-top: 1rem;
+    justify-content: flex-end;
+  }
+
+  .profile-container {
+    display: flex;
+    flex-direction: column;
+  }
 }
 </style>

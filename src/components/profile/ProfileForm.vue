@@ -62,7 +62,7 @@ onMounted(fetchUser);
 .profile {
   display: flex;
   flex-direction: column;
-  margin-right: 5rem;
+  margin: 2rem;
   gap: 0.5rem;
   width: 100%;
   max-width: 60rem;
@@ -97,7 +97,7 @@ onMounted(fetchUser);
 }
 
 .setting-button:hover {
-  transform: rotate(30deg);
+  transform: rotate(90deg);
 }
 
 .setting-button img {
