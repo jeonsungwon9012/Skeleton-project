@@ -1,92 +1,179 @@
 <script setup>
-import { computed } from "vue";
-import { useBudgetStore } from "@/stores/budgetStore.js";
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useBudgetStore } from "@/stores/budgetStore.js"; // 💡 스토어 임포트
 
-const props = defineProps({ items: Array, total: Object, dates: Array })
-const budgetStore = useBudgetStore();
+const props = defineProps({
+  items: { type: Array, default: () => [] }, // 스토어의 rangeBudgets
+  dates: { type: Array, default: () => [] }, // 선택된 날짜
+  total: { type: Object, default: () => ({ income: 0, expense: 0 }) }
+});
 
-// 💡 '2026-04-03' -> '04월 03일'로 변환하는 함수
-const formatDateLabel = (dateStr) => {
-  if (!dateStr) return '';
-  const [year, month, day] = dateStr.split('-');
-  return `${month}월 ${day}일`; // 문자열 그대로 사용하여 04월 형식 유지함
-}
+const router = useRouter();
+const budgetStore = useBudgetStore(); // 💡 카테고리 맵을 쓰기 위해 선언
 
-// 가계부 작성 로직 (선택된 모든 날짜 반복)
-const handleWrite = () => {
-  if (props.dates.length === 0) return;
+// 1. 날짜 포맷팅 (예: 4월 1일 (수))
+const formattedDate = computed(() => {
+  if (!props.dates[0]) return '';
+  const date = new Date(props.dates[0]);
+  return date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' });
+});
 
-  props.dates.forEach(date => {
-    console.log(`${date} 날짜 내역 추가 시도 🚀`);
-    // budgetStore.addTransaction({...}) 호출부
-  });
+/**
+ * 💡 [핵심 로직] 카테고리별로 내역 묶기
+ * - item.cid를 사용해 budgetStore.categoryMap에서 카테고리 정보를 찾아옵니다.
+ */
+const groupedItems = computed(() => {
+  return props.items.reduce((acc, cur) => {
+    // 💡 cid를 통해 카테고리 이름(name)을 가져옴
+    const categoryName = budgetStore.categoryMap[cur.cid]?.name || '기타';
+    if (!acc[categoryName]) acc[categoryName] = [];
+    acc[categoryName].push(cur);
+    return acc;
+  }, {});
+});
 
-  alert(`${props.dates.length}개 날짜 가계부 작성 시작`);
-}
+// 2. 가장 많이 지출한 카테고리 메시지용
+const topCategoryName = computed(() => {
+  if (props.items.length === 0) return null;
+  const expenseItems = props.items.filter(i => i.type === 'expense');
+  if (expenseItems.length === 0) return null;
 
-// 버튼 텍스트 고정
-const buttonText = computed(() => '선택한 날짜로 가계부 쓰기 ✏️');
+  const totals = expenseItems.reduce((acc, cur) => {
+    const catName = budgetStore.categoryMap[cur.cid]?.name || '기타';
+    acc[catName] = (acc[catName] || 0) + cur.amount;
+    return acc;
+  }, {});
+
+  return Object.keys(totals).reduce((a, b) => totals[a] > totals[b] ? a : b);
+});
+
+// 금액 포맷팅
+const formatPrice = (price) => price?.toLocaleString() + ' 원';
+
+// 가계부 추가 페이지 이동
+const goToAdd = () => {
+  router.push({ path: '/addTransaction', query: { date: props.dates[0] } });
+};
 </script>
 
 <template>
-  <div class="daily-list">
+  <div class="daily-list-card">
     <header class="list-header">
-      <h3 class="h5 date-title">
-        {{ dates.length > 1
-          ? `${formatDateLabel(dates[0])} 외 ${dates.length - 1}일`
-          : formatDateLabel(dates[0])
-        }} 내역
-      </h3>
-      <div class="summary subtitle-s">
-        <span class="income-text">+{{ total.income.toLocaleString() }}</span>
-        <span class="expense-text"> -{{ total.expense.toLocaleString() }}</span>
-      </div>
+      <h2 class="date-title h3">{{ formattedDate }}</h2>
+      <p v-if="topCategoryName" class="status-msg body-m">
+        {{ topCategoryName }}에 평소보다 많이 썼어요!
+      </p>
     </header>
 
-    <ul class="list-body">
-      <li v-for="item in items" :key="item.id" class="body-s item">
-        <div class="item-info">
-          <span class="memo">{{ item.memo }}</span>
+    <div class="summary-chips">
+      <div class="chip expense body-m">
+        <span>😡 총 지출</span> <span class="amount">{{ formatPrice(total.expense) }}</span>
+      </div>
+      <div class="chip income body-m">
+        <span>😊 총 수입</span> <span class="amount">{{ formatPrice(total.income) }}</span>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="list-content">
+      <h3 class="section-title subtitle-m">카테고리별 내역</h3>
+
+      <div v-for="(list, categoryName) in groupedItems" :key="categoryName" class="category-group">
+        <div class="category-badge subtitle-s"
+             :style="{ color: budgetStore.categoryMap[list[0].cid]?.color }">
+          <span class="emoji">{{ budgetStore.categoryMap[list[0].cid]?.img || '❓' }}</span>
+          {{ categoryName }}
         </div>
-        <span :class="['amount', item.type]">
-          {{ item.amount.toLocaleString() }}원
-        </span>
-      </li>
 
-      <li v-if="items.length === 0" class="empty-list body-s">
-        선택한 날짜에 내역이 없어요 🍐
-      </li>
-    </ul>
+        <ul class="transaction-items">
+          <li v-for="item in list" :key="item.id" class="item-row">
+            <span class="item-name body-m">{{ item.detail }}</span>
+            <div class="item-right">
+              <span class="item-amount body-m" :class="item.type">
+                {{ item.type === 'expense' ? '-' : '+' }} {{ formatPrice(item.amount) }}
+              </span>
+              <button class="more-btn">⋮</button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
 
-    <button class="write-btn btn-m" @click="handleWrite">
-      {{ buttonText }}
+    <button class="add-btn btn-m" @click="goToAdd">
+      이 날짜로 가계부 추가하기
+      <span class="plus-circle">+</span>
     </button>
   </div>
 </template>
 
 <style scoped>
-/* 이전 스타일과 동일 */
-.daily-list {
-  background: var(--color-white);
+.daily-list-card {
+  background-color: var(--color-gray-10); /* 소연님 변수 적용 */
+  border-radius: 24px;
   padding: 24px;
-  border-radius: 16px;
-  box-shadow: var(--drop--shadow);
   display: flex;
   flex-direction: column;
-  height: 500px;
+  height: 600px;
+  box-shadow: var(--drop--shadow);
 }
-.list-header { margin-bottom: 20px; border-bottom: 2px solid var(--color-gray-10); padding-bottom: 12px; }
-.date-title { color: var(--color-deepgray-100); margin-bottom: 8px; }
-.summary { display: flex; gap: 12px; }
-.income-text { color: var(--color-primary); font-weight: 600; }
-.expense-text { color: var(--color-sub-100); font-weight: 600; }
-.list-body { flex: 1; overflow-y: auto; margin-bottom: 16px; padding: 0; list-style: none; }
-.list-body::-webkit-scrollbar { width: 4px; }
-.list-body::-webkit-scrollbar-thumb { background: var(--color-deepgray-10); border-radius: 10px; }
-.item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--color-gray-10); }
-.amount.income { color: var(--color-primary); }
-.amount.expense { color: var(--color-sub-100); }
-.empty-list { text-align: center; color: var(--color-deepgray-40); padding: 40px 0; }
-.write-btn { background: var(--color-primary); color: var(--color-white); border: none; padding: 16px; border-radius: 12px; cursor: pointer; width: 100%; transition: 0.2s; font-weight: 600; }
-.write-btn:hover { filter: brightness(0.9); }
+
+.list-header { margin-bottom: 24px; }
+.date-title { color: var(--color-deepgray-100); margin-bottom: 4px; }
+.status-msg { color: var(--color-deepgray-60); }
+
+.summary-chips { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.chip {
+  background: var(--color-white);
+  padding: 12px 20px;
+  border-radius: 99px;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.divider { border: 0; border-top: 1px solid var(--color-deepgray-10); margin-bottom: 24px; }
+
+.list-content { flex: 1; overflow-y: auto; padding-right: 8px; }
+.section-title { margin-bottom: 16px; color: var(--color-deepgray-100); }
+
+.category-group { margin-bottom: 28px; }
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-white);
+  padding: 6px 16px;
+  border-radius: 99px;
+  margin-bottom: 12px;
+}
+
+.item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+.item-right { display: flex; align-items: center; gap: 14px; }
+.item-amount.expense { color: var(--color-deepgray-100); }
+.item-amount.income { color: var(--color-primary); font-weight: 600; }
+
+.add-btn {
+  margin-top: 16px;
+  background-color: var(--color-white);
+  border: none;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+.plus-circle {
+  width: 28px; height: 28px;
+  background-color: var(--color-deepgray-100);
+  color: var(--color-white);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* 스크롤바 커스텀 */
+.list-content::-webkit-scrollbar { width: 4px; }
+.list-content::-webkit-scrollbar-thumb { background: var(--color-deepgray-20); border-radius: 10px; }
 </style>

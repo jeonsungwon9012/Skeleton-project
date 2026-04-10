@@ -1,13 +1,13 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import api from 'axios'// 이전에 만든 axios 인스턴스
+import api from 'axios' // 생 axios 사용
 
 export const useBudgetStore = defineStore('budget', () => {
   // --- [State] ---
-  const budgets = ref([])      // BUDGET 테이블 데이터
-  const categories = ref([])   // CATEGORY 테이블 데이터
-  const users = ref([])        // USER 테이블 데이터
-  const currentUid = ref("1")  // 현재 로그인한 유저 ID (테스트용으로 1번 고정)
+  const budgets = ref([])
+  const categories = ref([])
+  const users = ref([])
+  const currentUid = ref("1")
 
   const currentMonth = ref(new Date())
   const selectedDates = ref([])
@@ -17,12 +17,22 @@ export const useBudgetStore = defineStore('budget', () => {
 
   // --- [Getters] ---
 
-  // 현재 유저의 데이터만 필터링함
-  const myBudgets = computed(() => {
-    return budgets.value.filter(b => b.uid === Number(currentUid.value) || b.uid === currentUid.value)
+  /**
+   * 💡 [추가] 카테고리 ID를 키로 하는 매핑 객체
+   * 리스트나 달력에서 cid만 가지고 아이콘(img)과 색상(color)을 바로 찾을 때 유용함
+   */
+  const categoryMap = computed(() => {
+    return categories.value.reduce((acc, cat) => {
+      acc[Number(cat.id)] = cat
+      return acc
+    }, {})
   })
 
-  // 달력 점 표시용 (현재 유저 + 카테고리/타입 필터)
+  const myBudgets = computed(() => {
+    return budgets.value.filter(b => String(b.uid) === String(currentUid.value))
+  })
+
+  // 달력 점 표시용 (아이콘 정보가 포함된 카테고리 맵을 나중에 컴포넌트에서 활용)
   const calendarDots = computed(() => {
     return myBudgets.value.filter(item => {
       const matchCat = selectedCategories.value.length === 0 || selectedCategories.value.includes(Number(item.cid))
@@ -31,16 +41,13 @@ export const useBudgetStore = defineStore('budget', () => {
     })
   })
 
-  // 상세 리스트 출력용 (모든 필터 통합)
   const rangeBudgets = computed(() => {
     return myBudgets.value.filter(item => {
       const matchDate = selectedDates.value.length === 0 || selectedDates.value.includes(item.date)
       const matchCat = selectedCategories.value.length === 0 || selectedCategories.value.includes(Number(item.cid))
       const matchType = selectedType.value === 'all' || item.type === selectedType.value
-
       const isFuture = new Date(item.date) > new Date()
       const matchScheduled = !isScheduledOnly.value || isFuture
-
       return matchDate && matchCat && matchType && matchScheduled
     })
   })
@@ -55,16 +62,16 @@ export const useBudgetStore = defineStore('budget', () => {
 
   // --- [Actions] ---
 
-  // 초기 데이터 로드 (DB와 연결)
+  // 🚩 [중요] 경로 앞에 /api를 붙여서 Vite 프록시를 타게 만듭니다.
   async function fetchData() {
     try {
       const [resB, resC, resU] = await Promise.all([
-        api.get('/BUDGET'),
-        api.get('/CATEGORY'),
-        api.get('/USER')
+        api.get('/api/BUDGET'),
+        api.get('/api/CATEGORY'),
+        api.get('/api/USER')
       ])
       budgets.value = resB.data
-      categories.value = resC.data
+      categories.value = resC.data // 여기서 img, name, color 등이 다 들어옴
       users.value = resU.data
       console.log("DB 데이터 로드 성공 🍐")
     } catch (error) {
@@ -72,12 +79,11 @@ export const useBudgetStore = defineStore('budget', () => {
     }
   }
 
-  // 가계부 내역 추가 (DB 저장)
   async function addBudget(payload) {
     try {
-      const res = await api.post('/BUDGET', {
+      const res = await api.post('/api/BUDGET', {
         ...payload,
-        uid: Number(currentUid.value) // 유저 ID 강제 할당
+        uid: Number(currentUid.value)
       })
       budgets.value.push(res.data)
       return res.data
@@ -85,16 +91,14 @@ export const useBudgetStore = defineStore('budget', () => {
       console.error("저장 실패:", error)
     }
   }
-// 월 이동 (이전달/다음달)
+
   function changeMonth(diff) {
     const next = new Date(currentMonth.value)
     next.setMonth(next.getMonth() + diff)
     currentMonth.value = next
-
-    // 달이 바뀌면 선택값들 초기화함
     resetFilters()
   }
-  // 필터 관련 액션들 (기존 로직 유지)
+
   function toggleDate(date, isShiftPressed = false) {
     if (isShiftPressed) {
       const index = selectedDates.value.indexOf(date)
@@ -117,13 +121,15 @@ export const useBudgetStore = defineStore('budget', () => {
   function setTransactionType(type) { selectedType.value = type }
   function toggleScheduled() { isScheduledOnly.value = !isScheduledOnly.value }
   function resetFilters() {
-    selectedType.value = 'all'; selectedCategories.value = [];
-    isScheduledOnly.value = false; selectedDates.value = [];
+    selectedType.value = 'all'
+    selectedCategories.value = []
+    isScheduledOnly.value = false
+    selectedDates.value = []
   }
 
   return {
     budgets, categories, currentMonth, selectedDates, selectedCategories, selectedType, isScheduledOnly,
-    calendarDots, rangeBudgets, selectedTotal,
-    fetchData, addBudget, toggleDate, toggleCategory, setTransactionType, toggleScheduled, resetFilters,changeMonth
+    categoryMap, calendarDots, rangeBudgets, selectedTotal,
+    fetchData, addBudget, toggleDate, toggleCategory, setTransactionType, toggleScheduled, resetFilters, changeMonth
   }
 })

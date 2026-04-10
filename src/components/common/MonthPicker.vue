@@ -34,8 +34,6 @@ const formattedDate = computed(() => {
   display: flex;
   align-items: center;
   gap: 24px;
-  justify-content: flex-start;
-  margin-bottom: 32px;
 }
 .color-title { color: var(--color-deepgray-100); }
 .nav-btn {
@@ -48,7 +46,7 @@ const formattedDate = computed(() => {
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;d
+  justify-content: center;
   font-size: var(--button--m);
   transition: background 0.2s;
 }

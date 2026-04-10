@@ -12,6 +12,15 @@ const startApp = async () => {
   await userStore.login();
   router.push('/calendar');
 };
+
+const handleLogin = async () => {
+  const success = await userStore.login('user1@example.com'); // db.json에 있는 이메일
+  if (success) {
+    router.push('/calendar');
+  } else {
+    alert('로그인에 실패했어요!');
+  }
+}
 </script>
 
 <template>
