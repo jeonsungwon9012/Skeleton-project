@@ -83,6 +83,14 @@
         </button>
       </div>
     </div>
+
+    <SuccessModal
+      :visible="modal.visible"
+      :icon="modal.icon"
+      :title="modal.title"
+      :description="modal.description"
+      @close="handleModalClose"
+    />
   </div>
 </template>
 
@@ -90,6 +98,7 @@
 import { onMounted, ref, computed, watch } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { useRouter } from 'vue-router';
+import SuccessModal from '@/components/addTransaction/RegisterModal.vue';
 
 const router = useRouter();
 const store = useUserStore();
@@ -101,6 +110,8 @@ const editForm = ref({
   age: null,
   gender: '',
 });
+
+const modal = ref({ visible: false, icon: '', title: '', description: '' });
 
 const goToProfile = () => {
   router.push('/profile'); // 다시 기본 프로필로 이동
@@ -147,12 +158,37 @@ const isFormValid = computed(() => {
 
 const handleSave = async () => {
   if (!userId) {
-    alert('유저 ID를 찾을 수 없습니다.');
+    modal.value = {
+      visible: true,
+      icon: '⚠️',
+      title: '오류',
+      description: '유저 ID를 찾을 수 없습니다.',
+    };
     return;
   }
-  await store.updateUser(userId, editForm.value);
-  alert('성공적으로 수정되었습니다!');
-  goToProfile();
+
+  try {
+    await store.updateUser(userId, editForm.value);
+    modal.value = {
+      visible: true,
+      icon: '✅',
+      title: '수정 완료!',
+      description: `${editForm.value.nickname}님의 정보가\n성공적으로 업데이트되었어요.`,
+    };
+  } catch {
+    modal.value = {
+      visible: true,
+      icon: '❌',
+      title: '수정 실패',
+      description: '저장 중 오류가 발생했어요.\n잠시 후 다시 시도해주세요.',
+    };
+  }
+};
+
+// 모달 닫기 — 성공한 경우에만 프로필 페이지로 이동
+const handleModalClose = () => {
+  modal.value.visible = false;
+  if (modal.value.icon === '✅') goToProfile();
 };
 </script>
 
