@@ -61,22 +61,38 @@
           <div v-if="showTemplates" class="template-popup">
             <!-- 템플릿이 있으면 목록 표시 -->
             <template v-if="templateStore.templates.length > 0">
-              <RouterLink
+              <div
                 v-for="tmpl in templateStore.templates"
                 :key="tmpl.id"
-                :to="{
-                  path: '/addTransaction',
-                  query: { templateId: tmpl.id },
-                }"
                 class="template-item"
-                @click="closeAll"
               >
-                <span class="tmpl-title">템플릿 {{ tmpl.id }}</span>
-                <span class="tmpl-desc">
-                  {{ tmpl.detail }} / {{ tmpl.type === 'expense' ? '-' : '+'
-                  }}{{ tmpl.amount.toLocaleString() }}원
-                </span>
-              </RouterLink>
+                <!-- 템플릿 정보 — 클릭 시 즉시 거래 추가 -->
+                <div class="tmpl-info" @click="handleApplyTemplate(tmpl)">
+                  <span class="tmpl-title">{{ tmpl.detail }}</span>
+                  <span class="tmpl-desc">
+                    {{ tmpl.type === 'expense' ? '-' : '+'
+                    }}{{ tmpl.amount.toLocaleString() }}원
+                  </span>
+                </div>
+                <!-- 수정 / 삭제 버튼 -->
+                <div class="tmpl-actions">
+                  <RouterLink
+                    :to="{
+                      path: '/addTransaction',
+                      query: { templateId: tmpl.id },
+                    }"
+                    class="tmpl-btn"
+                    @click="closeAll"
+                  >
+                    <img :src="editPencil" />
+                  </RouterLink>
+                  <img
+                    class="tmpl-btn tmpl-delete-img"
+                    :src="trash"
+                    @click="handleDeleteTemplate(tmpl)"
+                  />
+                </div>
+              </div>
             </template>
 
             <!-- 템플릿이 3개 미만이면 추가 버튼 표시 -->
@@ -102,6 +118,14 @@
         </RouterLink>
       </div>
 
+      <!-- 추가 완료 토스트 -->
+      <div v-if="toast.visible" class="toast">
+        <p>{{ toast.message }}</p>
+        <RouterLink to="/TransactionList" class="toast-link" @click="closeAll">
+          거래내역 리스트로 이동 →
+        </RouterLink>
+      </div>
+
       <!-- 메인 버튼 -->
       <div
         class="add-budget"
@@ -116,10 +140,12 @@
 </template>
 
 <script setup>
-import logo from '@/assets/icons/TT_logo-signiture.svg';
+import logo from '@/assets/icons/logo-signiture.svg';
 import profileIcon from '@/assets/icons/profile.svg';
 import placeholder from '@/assets/icons/placeholder.svg';
-import coinIcon from '@/assets/icons/TT_money.svg';
+import coinIcon from '@/assets/icons/money.svg';
+import editPencil from '@/assets/icons/edit-pencil.svg';
+import trash from '@/assets/icons/trash.svg';
 import { ref, computed, onMounted } from 'vue';
 import { useCategoryStore } from '@/stores/category';
 import { useTemplateStore } from '@/stores/template';
@@ -130,6 +156,8 @@ const categoryStore = useCategoryStore();
 const templateStore = useTemplateStore();
 
 const userName = computed(() => userStore.user?.nickname || '');
+const uid = localStorage.getItem('userId') || '1';
+
 const navItems = [
   { name: '대시보드', icon: '📊', path: '/' },
   { name: '거래내역', icon: '📝', path: '/TransactionList' },
@@ -137,15 +165,21 @@ const navItems = [
   { name: '프로필', icon: '👤', path: '/profile' },
 ];
 
-// 뱃지
 const badges = computed(() => {
   const result = Array(6).fill(null);
-  if (categoryStore.topCountCategory) {
-    result[0] = {
-      emoji: categoryStore.topCountCategory.img,
-      title: `이달의 최다 지출: ${categoryStore.topCountCategory.name}`,
-    };
-  }
+
+  const monthlyData = categoryStore.monthlyTopCountCategories;
+
+  monthlyData.slice(0, 6).forEach((data, index) => {
+    if (data.category) {
+      const [year, month] = data.month.split('-');
+      result[index] = {
+        emoji: data.category.img,
+        title: `${year.slice(-2)}년 ${parseInt(month)}월 지출 빈도가 높은 카테고리: ${data.category.name} (${data.count}회)`,
+      };
+    }
+  });
+
   return result;
 });
 
@@ -155,11 +189,8 @@ const getBadgeEmoji = (row, col) =>
 const getBadgeTitle = (row, col) =>
   badges.value[getBadgeIndex(row, col)]?.title ?? '';
 
-const uid = localStorage.getItem('userId') || '1';
 onMounted(async () => {
-  if (!categoryStore.chartData.length) {
-    await categoryStore.fetchAll(uid);
-  }
+  if (!categoryStore.chartData.length) await categoryStore.fetchAll(uid);
   await userStore.fetchUser(uid);
   await templateStore.fetchTemplates(uid);
 });
@@ -182,6 +213,40 @@ const closeAll = () => {
   isCollapsed.value = false;
   showMenu.value = false;
   showTemplates.value = false;
+};
+
+// 토스트
+const toast = ref({ visible: false, message: '' });
+let toastTimer = null;
+
+const showToast = (message) => {
+  if (toastTimer) clearTimeout(toastTimer);
+  toast.value = { visible: true, message };
+  toastTimer = setTimeout(() => {
+    toast.value.visible = false;
+  }, 4000);
+};
+
+// 템플릿으로 즉시 거래 추가
+const handleApplyTemplate = async (tmpl) => {
+  try {
+    await templateStore.applyTemplate(tmpl, uid);
+    closeAll();
+    showToast(`✅ "${tmpl.detail}" 추가되었습니다`);
+  } catch {
+    showToast('❌ 추가에 실패했어요. 다시 시도해주세요.');
+  }
+};
+
+// 템플릿 삭제
+const handleDeleteTemplate = async (tmpl) => {
+  const confirmed = confirm(`"${tmpl.detail}" 템플릿을 삭제하시겠습니까?`);
+  if (!confirmed) return;
+  try {
+    await templateStore.deleteTemplate(tmpl.id, uid);
+  } catch {
+    alert('삭제에 실패했어요. 다시 시도해주세요.');
+  }
 };
 </script>
 
@@ -365,29 +430,32 @@ const closeAll = () => {
   padding: 8px;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  min-width: 180px;
+  min-width: 200px;
   animation: fadeIn 0.2s ease;
 }
 
 /* 템플릿 아이템 */
 .template-item {
   display: flex;
-  flex-direction: column;
-  padding: 8px 10px;
-  border: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
   border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-  text-decoration: none;
-  color: inherit;
+  gap: 6px;
   transition: background 0.15s;
-  gap: 2px;
 }
 .template-item:hover {
   background-color: var(--color-gray-10, #f5f5f5);
 }
 
+/* 템플릿 정보 영역 (클릭 시 즉시 추가) */
+.tmpl-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  cursor: pointer;
+}
 .tmpl-title {
   font-size: 0.85rem;
   font-weight: 600;
@@ -398,13 +466,79 @@ const closeAll = () => {
   color: #888;
 }
 
+/* 수정 / 삭제 버튼 */
+.tmpl-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.tmpl-btn {
+  font-size: 0.7rem;
+  padding: 3px 7px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.tmpl-btn > img:first-child {
+  width: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.tmpl-delete-img {
+  width: 2rem;
+  transition: transform 0.2s ease;
+}
+
+.tmpl-btn:hover > img:first-child {
+  transform: scale(1.1);
+}
+
+.tmpl-delete-img:hover {
+  transform: scale(1.05);
+}
+
 /* 템플릿 추가하기 버튼 */
 .template-item.add {
+  justify-content: flex-start;
   color: #aaa;
   font-size: 0.85rem;
   border-top: 1px solid #f0f0f0;
   margin-top: 4px;
   padding-top: 10px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 토스트 */
+.toast {
+  position: absolute;
+  bottom: 70px;
+  left: 0;
+  background: #222;
+  color: white;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: fadeIn 0.2s ease;
+  z-index: 100;
+}
+.toast p {
+  margin: 0;
+}
+.toast-link {
+  color: #7dd3fc;
+  text-decoration: none;
+  font-size: 0.78rem;
+}
+.toast-link:hover {
+  text-decoration: underline;
 }
 
 @keyframes fadeIn {

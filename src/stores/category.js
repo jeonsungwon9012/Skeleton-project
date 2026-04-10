@@ -104,6 +104,47 @@ export const useCategoryStore = defineStore('category', () => {
     }
   };
 
+  // 월별 지출 '빈도(횟수)'가 가장 높은 카테고리 목록 추출
+  const monthlyTopCountCategories = computed(() => {
+    const monthlyGroups = {}; // { '2024-04': { '카테고리ID': 횟수 } }
+
+    // 1. 전체 지출 내역을 순회하며 월별/카테고리별 결제 횟수 카운트
+    budgets.value.forEach((b) => {
+      if (b.type !== 'expense') return; // 지출 내역만 포함
+
+      const month = b.date.substring(0, 7); // "2024-04" 형식 추출
+      if (!monthlyGroups[month]) {
+        monthlyGroups[month] = {};
+      }
+
+      // 해당 월의 카테고리 결제 횟수 +1
+      monthlyGroups[month][b.cid] = (monthlyGroups[month][b.cid] || 0) + 1;
+    });
+
+    // 2. 각 월별로 횟수가 가장 많은 카테고리 객체 매핑
+    const results = Object.keys(monthlyGroups)
+      .sort()
+      .reverse() // 최신 달이 앞으로 오게 정렬
+      .map((month) => {
+        const counts = monthlyGroups[month];
+        // 횟수가 가장 높은 카테고리 ID 찾기
+        const topCid = Object.keys(counts).sort(
+          (a, b) => counts[b] - counts[a],
+        )[0];
+        const category = categories.value.find(
+          (c) => String(c.id) === String(topCid),
+        );
+
+        return {
+          month,
+          category,
+          count: counts[topCid],
+        };
+      });
+
+    return results;
+  });
+
   return {
     categories, // 전체 카테고리 목록
     categoryBudgets, // 유저별 카테고리 목표 예산
@@ -114,6 +155,7 @@ export const useCategoryStore = defineStore('category', () => {
     topExpenseCategory, // 이번 달 지출액 1위 카테고리
     expenseCountByCategory, // { cid: 이번 달 지출 횟수 }
     topCountCategory, // 이번 달 지출 빈도 1위 카테고리
+    monthlyTopCountCategories, // 각 월별로 가장 많이 쓴 카테고리
     chartData, // 차트/리스트 렌더링용 가공 데이터
     fetchAll, // 전체 데이터 fetch (uid 필요)
   };

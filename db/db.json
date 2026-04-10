@@ -123,7 +123,7 @@
       "date": "2026-04-05",
       "type": "expense",
       "amount": 14900,
-      "cid": 6,
+      "cid": 7,
       "detail": "넷플릭스",
       "memo": "정기결제",
       "uid": 1,
@@ -159,6 +159,7 @@
     {
       "id": "1",
       "uid": 1,
+      "cid": 2,
       "amount": 4500,
       "type": "expense",
       "detail": "스타벅스 아메리카노",
@@ -167,14 +168,7 @@
     {
       "id": "2",
       "uid": 1,
-      "amount": 850000,
-      "type": "income",
-      "detail": "편의점 알바비",
-      "memo": "고생했다 나자신"
-    },
-    {
-      "id": "3",
-      "uid": 2,
+      "cid": 1,
       "amount": 1200,
       "type": "expense",
       "detail": "삼각김밥",
