@@ -38,8 +38,8 @@ export const useTransactionStore = defineStore('transaction', () => {
     computed(() =>
       budgetList.value.filter((item) => {
         const matchCategory =
-          selectedCategory.value === '전체' ||
-          item.categoryName === selectedCategory.value;
+          selectedCategory.value.includes('전체') ||
+          selectedCategory.value.includes(item.categoryName); // 배열로 체크
         const matchSearch =
           item.detail.includes(search.value) ||
           item.memo.includes(search.value);
@@ -63,6 +63,35 @@ export const useTransactionStore = defineStore('transaction', () => {
           selectedType.value === '전체' || selectedType.value === item.type,
       ),
     );
+  const filteredByToday = (list) =>
+    computed(() => {
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+
+      const past = list.value
+        .filter((item) => new Date(item.date) <= today)
+        .sort((a, b) => new Date(b.date) - new Date(a.date)); // 이전 날짜 내림차순
+
+      const future = list.value
+        .filter(
+          (item) => new Date(item.date) > today && item.isRecurring === true,
+        )
+        .sort((a, b) => new Date(a.date) - new Date(b.date)); // 이후 날짜 오름차순
+
+      return [...past, ...future]; // 이전 날짜 먼저, 이후 날짜 아래
+    });
+
+  const upcomingList = computed(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return budgetList.value
+      .filter(
+        (item) => item.isRecurring === true && new Date(item.date) > today,
+      )
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(0, 5);
+  });
 
   return {
     budgetList,
@@ -71,5 +100,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     filteredByCategory,
     filteredByMonth,
     filteredByType,
+    filteredByToday,
+    upcomingList,
   };
 });
