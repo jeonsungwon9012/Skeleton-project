@@ -118,14 +118,6 @@
         </RouterLink>
       </div>
 
-      <!-- 추가 완료 토스트 -->
-      <div v-if="toast.visible" class="toast">
-        <p>{{ toast.message }}</p>
-        <RouterLink to="/TransactionList" class="toast-link" @click="closeAll">
-          거래내역 리스트로 이동 →
-        </RouterLink>
-      </div>
-
       <!-- 메인 버튼 -->
       <div
         class="add-budget"
@@ -135,6 +127,14 @@
         <img :src="coinIcon" />
         <span class="label">가계부 쓰기</span>
       </div>
+
+      <SuccessModal
+        :visible="modal.visible"
+        :icon="modal.icon"
+        :title="modal.title"
+        :description="modal.description"
+        @close="modal.visible = false"
+      />
     </div>
   </div>
 </template>
@@ -150,10 +150,13 @@ import { ref, computed, onMounted } from 'vue';
 import { useCategoryStore } from '@/stores/category';
 import { useTemplateStore } from '@/stores/template';
 import { useUserStore } from '@/stores/user';
+import { useReactionStore } from '@/stores/reaction';
+import SuccessModal from '@/components/addTransaction/RegisterModal.vue';
 
 const userStore = useUserStore();
 const categoryStore = useCategoryStore();
 const templateStore = useTemplateStore();
+const reactionStore = useReactionStore();
 
 const userName = computed(() => userStore.user?.nickname || '');
 const uid = localStorage.getItem('userId') || '1';
@@ -215,26 +218,42 @@ const closeAll = () => {
   showTemplates.value = false;
 };
 
-// 토스트
-const toast = ref({ visible: false, message: '' });
-let toastTimer = null;
-
-const showToast = (message) => {
-  if (toastTimer) clearTimeout(toastTimer);
-  toast.value = { visible: true, message };
-  toastTimer = setTimeout(() => {
-    toast.value.visible = false;
-  }, 4000);
-};
+// 모달 상태
+const modal = ref({ visible: false, icon: '', title: '', description: '' });
 
 // 템플릿으로 즉시 거래 추가
 const handleApplyTemplate = async (tmpl) => {
   try {
     await templateStore.applyTemplate(tmpl, uid);
+
+    // 카테고리 스토어 갱신 (횟수 반영)
+    await categoryStore.fetchAll(uid);
+
+    // reactionMessages 로드 (최초 1회만)
+    await reactionStore.fetchReactionMessages();
+
+    // 이번 달 누적 횟수 조회
+    const cid = tmpl.cid ?? 10;
+    const count = categoryStore.expenseCountByCategory[cid] ?? 1;
+    const category = categoryStore.categories.find(
+      (c) => String(c.id) === String(cid),
+    );
+    const categoryName = category
+      ? `${category.img} ${category.name}`
+      : '해당 카테고리';
+
+    // 메시지 결정 후 모달 표시
+    const message = reactionStore.resolveMessage(cid, count, categoryName);
+    modal.value = {
+      visible: true,
+      icon: category?.img ?? '✅',
+      title: '가계부 작성 완료!',
+      description: message,
+    };
+
     closeAll();
-    showToast(`✅ "${tmpl.detail}" 추가되었습니다`);
   } catch {
-    showToast('❌ 추가에 실패했어요. 다시 시도해주세요.');
+    alert('추가에 실패했어요. 다시 시도해주세요.');
   }
 };
 
@@ -515,33 +534,12 @@ const handleDeleteTemplate = async (tmpl) => {
   cursor: pointer;
 }
 
-/* 토스트 */
-.toast {
-  position: absolute;
-  bottom: 70px;
-  left: 0;
-  background: #222;
-  color: white;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 0.82rem;
-  width: 200px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  animation: fadeIn 0.2s ease;
-  z-index: 100;
-}
-.toast p {
+.success-modal-description {
   margin: 0;
-}
-.toast-link {
-  color: #7dd3fc;
-  text-decoration: none;
-  font-size: 0.78rem;
-}
-.toast-link:hover {
-  text-decoration: underline;
+  color: var(--color-deepgray-80);
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-line;
 }
 
 @keyframes fadeIn {
