@@ -232,12 +232,14 @@ onUnmounted(() => {});
   display: flex;
   gap: 2rem;
   align-items: flex-start;
+  margin: 2rem;
 }
 
 .bubble-wrap {
   flex: 1;
   min-width: 0;
   position: relative;
+  max-width: 40%;
 }
 
 /* 툴팁 */
@@ -376,6 +378,7 @@ onUnmounted(() => {});
   gap: 0.3rem;
   opacity: 0;
   animation: slideIn 0.4s ease forwards;
+  margin-bottom: 0.4rem;
 }
 
 .category-row {
