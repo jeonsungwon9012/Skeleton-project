@@ -3,15 +3,14 @@
     <div class="add-transaction-card">
       <h2 class="page-title">가계부 쓰기</h2>
 
-      <!-- 유형 -->
       <div class="form-group">
         <label class="form-label">유형</label>
         <div class="type-tabs">
           <button
-              type="button"
-              class="type-tab income-tab"
-              :class="{ active: form.type === 'income' && !form.isRecurring }"
-              @click="selectType('income')"
+            type="button"
+            class="type-tab income-tab"
+            :class="{ active: form.type === 'income' && !form.isRecurring }"
+            @click="selectType('income')"
           >
             수입
           </button>
@@ -23,20 +22,17 @@
           >
             지출
           </button>
-
           <button
             type="button"
             class="type-tab recurring-tab"
             :class="{ active: form.type === 'expense' && form.isRecurring }"
-            @click="selectRecurring()"
+            @click="selectRecurring"
           >
             정기결제
           </button>
-
         </div>
       </div>
 
-      <!-- 내역명 / 카테고리 / 템플릿 등록 -->
       <div class="form-row triple">
         <div class="form-group">
           <label class="form-label">내역명</label>
@@ -50,53 +46,41 @@
 
         <div class="form-group">
           <label class="form-label">카테고리</label>
-
           <div class="custom-category-select">
-            <button
-              type="button"
-              class="category-selected"
-              @click="toggleDropdown"
-            >
+            <button type="button" class="category-selected" @click="toggleDropdown">
               <div class="category-selected-left">
                 <div
                   class="category-icon-circle"
                   :style="{
                     backgroundColor: selectedCategory
                       ? getCategoryColor(selectedCategory.id)
-                      : '#e9ecef'
+                      : '#e9ecef',
                   }"
                 >
                   {{ selectedCategory ? selectedCategory.img : '' }}
                 </div>
-
                 <span class="category-selected-text">
                   {{ selectedCategory ? selectedCategory.name : '카테고리 선택' }}
                 </span>
               </div>
-
-              <span class="category-arrow">
-                {{ dropdownOpen ? '▼' : '▼' }}
-              </span>
+              <span class="category-arrow">{{ dropdownOpen ? '▲' : '▼' }}</span>
             </button>
 
             <div v-if="dropdownOpen" class="category-dropdown">
               <button
-                v-for="c in categories"
-                :key="c.id"
+                v-for="category in categories"
+                :key="category.id"
                 type="button"
                 class="category-option"
-                @click="selectCategory(c)"
+                @click="selectCategory(category)"
               >
                 <div
                   class="category-icon-circle"
-                  :style="{ backgroundColor: getCategoryColor(c.id) }"
+                  :style="{ backgroundColor: getCategoryColor(category.id) }"
                 >
-                  {{ c.img }}
+                  {{ category.img }}
                 </div>
-
-                <span class="category-option-text">
-                  {{ c.name }}
-                </span>
+                <span class="category-option-text">{{ category.name }}</span>
               </button>
             </div>
           </div>
@@ -108,19 +92,16 @@
             <input
               id="isTemplate"
               :checked="form.isTemplate"
-              @change="handleTemplateCheck"
               type="checkbox"
               class="template-checkbox"
+              @change="handleTemplateCheck"
             />
-            <label for="isTemplate" class="checkbox-label">
-              자주 쓰는 내역으로 저장
-            </label>
+            <label for="isTemplate" class="checkbox-label">자주 쓰는 내역으로 저장</label>
           </div>
           <small class="sub-text">필요할 때 바로 등록해서 다시 사용할 수 있어요.</small>
         </div>
       </div>
 
-            <!-- 금액 / 날짜 -->
       <div class="form-row double">
         <div class="form-group">
           <label class="form-label">금액</label>
@@ -133,24 +114,16 @@
           />
         </div>
 
-        <!-- 일반 수입/지출이면 날짜 입력 -->
-        <div class="form-group" v-if="!form.isRecurring">
+        <div v-if="!form.isRecurring" class="form-group">
           <label class="form-label">날짜</label>
-          <input
-            v-model="form.date"
-            type="date"
-            class="form-input"
-          />
+          <input v-model="form.date" type="date" class="form-input" />
         </div>
 
-        <!-- 정기결제면 반복주기 입력 -->
-        <div class="form-group recurring-group" v-else>
+        <div v-else class="form-group recurring-group">
           <label class="form-label">반복 주기</label>
-
           <div class="recurring-card">
             <div class="recurring-top">
               <span class="recurring-title">반복 주기</span>
-
               <select v-model="form.cycle" class="cycle-select">
                 <option value="daily">매일</option>
                 <option value="weekly">매주</option>
@@ -158,16 +131,13 @@
               </select>
             </div>
 
-            <!-- 매일 -->
-            <div class="recurring-detail" v-if="form.cycle === 'daily'">
+            <div v-if="form.cycle === 'daily'" class="recurring-detail">
               <span class="detail-label">반복</span>
               <span class="detail-value">매일</span>
             </div>
 
-            <!-- 매주 -->
-            <div class="recurring-detail weekly-box" v-else-if="form.cycle === 'weekly'">
+            <div v-else-if="form.cycle === 'weekly'" class="recurring-detail weekly-box">
               <span class="detail-label">매주</span>
-
               <div class="weekday-list">
                 <button
                   v-for="day in weekdays"
@@ -182,10 +152,8 @@
               </div>
             </div>
 
-            <!-- 매월 -->
-            <div class="recurring-detail monthly-box" v-else-if="form.cycle === 'monthly'">
+            <div v-else-if="form.cycle === 'monthly'" class="recurring-detail monthly-box">
               <span class="detail-label">매월</span>
-
               <div class="monthly-input-wrap">
                 <input
                   v-model.number="form.recurringValue"
@@ -202,7 +170,6 @@
         </div>
       </div>
 
-      <!-- 메모 -->
       <div class="form-group">
         <label class="form-label">메모</label>
         <textarea
@@ -212,48 +179,43 @@
         ></textarea>
       </div>
 
-      <!-- 에러 / 성공 메시지 -->
       <p v-if="errorMessage" class="message error-message">
         {{ errorMessage }}
       </p>
 
-      <!-- 버튼 -->
       <div class="button-area">
         <button
           type="button"
           class="submit-btn"
-          @click="submitTransaction"
           :disabled="isSubmitting"
+          @click="submitTransaction"
         >
           {{ isSubmitting ? '등록 중...' : '등록하기' }}
         </button>
       </div>
     </div>
 
-    <div v-if="showSuccessModal" class="success-modal-backdrop" @click="closeSuccessModal">
-      <div class="success-modal" @click.stop>
-        <div class="success-modal-icon">{{ successModalIcon }}</div>
-        <h3 class="success-modal-title">가계부 작성 완료!</h3>
-        <p class="success-modal-description">{{ successModalDescription }}</p>
-        <button type="button" class="success-modal-button" @click="closeSuccessModal">
-          확인
-        </button>
-      </div>
-    </div>
+    <RigisterPopUP
+      :visible="showSuccessModal"
+      :icon="successModalIcon"
+      :description="successModalDescription"
+      @close="closeSuccessModal"
+    />
   </section>
 </template>
+
 <script setup>
-import { reactive, ref, onMounted, computed, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useTransactionStore } from '@/stores/budgetStores';
+import RigisterPopUP from './RigisterPopUP.vue';
 
 const transactionStore = useTransactionStore();
 
 const isSubmitting = ref(false);
 const errorMessage = ref('');
-const successMessage = ref('');
 const dropdownOpen = ref(false);
 const showSuccessModal = ref(false);
-const successModalIcon = ref('✅');
+const successModalIcon = ref('*');
 const successModalDescription = ref('');
 
 const weekdays = [
@@ -283,16 +245,32 @@ const form = reactive({
 
 const categories = computed(() => transactionStore.categories);
 
+const categoryColorMap = {
+  '1': 'var(--category-red)',
+  '2': 'var(--category-orange)',
+  '3': 'var(--category-yellow)',
+  '4': 'var(--category-green)',
+  '5': 'var(--category-mint)',
+  '6': 'var(--category-blue)',
+  '7': 'var(--category-purple)',
+  '8': 'var(--category-pink)',
+  '9': 'var(--category-brown)',
+  '10': 'var(--category-gray)',
+};
+
+const selectedCategory = computed(
+  () => categories.value.find((category) => String(category.id) === String(form.cid)) || null,
+);
+
 const resetMessages = () => {
   errorMessage.value = '';
-  successMessage.value = '';
 };
 
 const closeSuccessModal = () => {
   showSuccessModal.value = false;
 };
 
-const openSuccessModal = (description, icon = '✅') => {
+const openSuccessModal = (description, icon = '*') => {
   successModalDescription.value = description;
   successModalIcon.value = icon;
   showSuccessModal.value = true;
@@ -331,7 +309,9 @@ const selectRecurring = () => {
 watch(
   () => form.cycle,
   (newValue) => {
-    if (!form.isRecurring) return;
+    if (!form.isRecurring) {
+      return;
+    }
 
     if (newValue === 'daily') {
       form.recurringValue = null;
@@ -340,34 +320,14 @@ watch(
     } else if (newValue === 'monthly') {
       form.recurringValue = 1;
     }
-  }
+  },
 );
 
 onMounted(async () => {
   await transactionStore.loadData();
-  console.log('Register에서 보는 categories:', categories.value);
 });
 
-const categoryColorMap = {
-  '1': 'var(--category-red)',
-  '2': 'var(--category-orange)',
-  '3': 'var(--category-yellow)',
-  '4': 'var(--category-green)',
-  '5': 'var(--category-mint)',
-  '6': 'var(--category-blue)',
-  '7': 'var(--category-purple)',
-  '8': 'var(--category-pink)',
-  '9': 'var(--category-brown)',
-  '10': 'var(--category-gray)',
-};
-
-const selectedCategory = computed(() => {
-  return categories.value.find((c) => String(c.id) === String(form.cid)) || null;
-});
-
-const getCategoryColor = (id) => {
-  return categoryColorMap[String(id)] || 'var(--category-gray)';
-};
+const getCategoryColor = (id) => categoryColorMap[String(id)] || 'var(--category-gray)';
 
 const toggleDropdown = () => {
   dropdownOpen.value = !dropdownOpen.value;
@@ -393,7 +353,7 @@ const handleTemplateCheck = (event) => {
   if (templateCount >= 3) {
     form.isTemplate = false;
     event.target.checked = false;
-    errorMessage.value = '템플릿은 최대 3개까지만 등록할 수 있습니다.';
+    errorMessage.value = '템플릿은 최대 3개까지 등록할 수 있습니다.';
     return;
   }
 
@@ -408,10 +368,7 @@ const formatDate = (dateObj) => {
   return `${year}-${month}-${day}`;
 };
 
-const getNextDailyDate = () => {
-  const today = new Date();
-  return formatDate(today);
-};
+const getNextDailyDate = () => formatDate(new Date());
 
 const getNextWeeklyDate = (targetDay) => {
   const dayMap = {
@@ -434,7 +391,6 @@ const getNextWeeklyDate = (targetDay) => {
 
   const result = new Date(today);
   result.setDate(today.getDate() + diff);
-
   return formatDate(result);
 };
 
@@ -456,9 +412,7 @@ const getNextMonthlyDate = (targetDate) => {
 
   const lastDay = new Date(year, month + 1, 0).getDate();
   const safeDate = Math.min(wantedDate, lastDay);
-
-  const result = new Date(year, month, safeDate);
-  return formatDate(result);
+  return formatDate(new Date(year, month, safeDate));
 };
 
 const getCalculatedRecurringDate = () => {
@@ -472,12 +426,10 @@ const getCalculatedRecurringDate = () => {
 
   if (form.cycle === 'monthly') {
     const day = Number(form.recurringValue);
-
     if (!Number.isInteger(day) || day < 1 || day > 31) {
       errorMessage.value = '매월 날짜는 1일부터 31일 사이로 입력해주세요.';
       return false;
     }
-
     return getNextMonthlyDate(day);
   }
 
@@ -531,16 +483,17 @@ const validateForm = () => {
 const submitTransaction = async () => {
   resetMessages();
 
-  if (!validateForm()) return;
+  if (!validateForm()) {
+    return;
+  }
 
   isSubmitting.value = true;
 
   try {
-    const calculatedDate = form.isRecurring
-      ? getCalculatedRecurringDate()
-      : form.date;
-
-    if (!calculatedDate) return;
+    const calculatedDate = form.isRecurring ? getCalculatedRecurringDate() : form.date;
+    if (!calculatedDate) {
+      return;
+    }
 
     const payload = {
       uid: form.uid,
@@ -562,20 +515,13 @@ const submitTransaction = async () => {
     }
 
     if (form.isTemplate) {
-      const templatePayload = {
+      await transactionStore.addTemplate({
         uid: form.uid,
         amount: Number(form.amount),
         type: form.type,
         detail: form.detail.trim(),
         memo: form.memo.trim(),
-      };
-
-      await transactionStore.addTemplate(templatePayload);
-      successMessage.value = '거래와 템플릿이 성공적으로 등록되었습니다.';
-    } else {
-      successMessage.value = form.id
-        ? '거래가 성공적으로 수정되었습니다.'
-        : '거래가 성공적으로 등록되었습니다.';
+      });
     }
 
     const successCategory = selectedCategory.value;
@@ -583,11 +529,11 @@ const submitTransaction = async () => {
       ? `${successCategory.img} ${successCategory.name} 항목이 저장되었어요!`
       : '입력한 가계부 내역이 저장되었어요!';
 
-    openSuccessModal(modalDescription, successCategory?.img || '✅');
+    openSuccessModal(modalDescription, successCategory?.img || '*');
     resetForm();
   } catch (error) {
     console.error('처리 실패:', error);
-    errorMessage.value = '처리 실패';
+    errorMessage.value = '처리에 실패했습니다.';
   } finally {
     isSubmitting.value = false;
   }
@@ -605,7 +551,6 @@ const submitTransaction = async () => {
   align-items: flex-start;
   padding: 24px;
   box-sizing: border-box;
-
   border-radius: 32px;
 }
 
@@ -683,23 +628,6 @@ const submitTransaction = async () => {
   --tab-active-text: var(--color-white);
 }
 
-.template-header {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.template-help {
-  color: #7a7a7a;
-  font-size: 0.9rem;
-}
-
-.template-load-box {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
 .form-row {
   display: grid;
   gap: 18px;
@@ -707,7 +635,6 @@ const submitTransaction = async () => {
 
 .form-row.double {
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
   align-items: start;
 }
 
@@ -780,73 +707,10 @@ const submitTransaction = async () => {
   color: #d13d3d;
 }
 
-.success-message {
-  color: #247a38;
-}
-
 .button-area {
   display: flex;
   justify-content: center;
   margin-top: 32px;
-}
-
-.success-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background-color: rgba(44, 51, 51, 0.18);
-}
-
-.success-modal {
-  width: min(100%, 320px);
-  padding: 28px 24px 22px;
-  border-radius: 28px;
-  background-color: var(--color-white);
-  box-shadow: 0 20px 40px rgba(44, 51, 51, 0.14);
-  text-align: center;
-}
-
-.success-modal-icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 18px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--color-primary-10);
-  font-size: 1.8rem;
-}
-
-.success-modal-title {
-  margin: 0 0 10px;
-  color: var(--color-deepgray-100);
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.success-modal-description {
-  margin: 0;
-  color: var(--color-deepgray-80);
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-.success-modal-button {
-  width: 100%;
-  height: 48px;
-  margin-top: 22px;
-  border: none;
-  border-radius: 14px;
-  background-color: var(--color-primary);
-  color: var(--color-deepgray-100);
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
 }
 
 .submit-btn {
@@ -867,65 +731,11 @@ const submitTransaction = async () => {
   opacity: 0.92;
 }
 
-.submit-btn:disabled,
-.secondary-btn:disabled {
+.submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.secondary-btn {
-  border: none;
-  background-color: #737b8f;
-  color: #fff;
-  border-radius: 12px;
-  padding: 0 18px;
-  height: 56px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-@media (max-width: 992px) {
-  .form-row.triple {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .template-save-group {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 768px) {
-  .add-transaction-wrapper {
-    padding: 16px;
-  }
-
-  .add-transaction-card {
-    padding: 24px 18px 28px;
-    border-radius: 20px;
-  }
-
-  .page-title {
-    font-size: 1.6rem;
-  }
-
-  .form-row.double,
-  .form-row.triple {
-    grid-template-columns: 1fr;
-  }
-
-  .template-load-box {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .type-tab {
-    font-size: 1.05rem;
-  }
-
-  .submit-btn {
-    max-width: 100%;
-  }
-}
 .recurring-group {
   width: 100%;
 }
@@ -947,7 +757,11 @@ const submitTransaction = async () => {
   border-bottom: 1px solid #ddd;
 }
 
-.recurring-title {
+.recurring-title,
+.cycle-select,
+.detail-label,
+.detail-value,
+.monthly-suffix {
   font-size: 1rem;
   font-weight: 700;
   color: #596174;
@@ -956,9 +770,6 @@ const submitTransaction = async () => {
 .cycle-select {
   border: none;
   background: transparent;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #596174;
   outline: none;
   cursor: pointer;
 }
@@ -969,19 +780,6 @@ const submitTransaction = async () => {
   justify-content: space-between;
   padding-top: 18px;
   gap: 16px;
-}
-
-.detail-label {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #596174;
-  min-width: 60px;
-}
-
-.detail-value {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #596174;
 }
 
 .weekly-box {
@@ -1033,12 +831,6 @@ const submitTransaction = async () => {
   outline: none;
 }
 
-.monthly-suffix {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #596174;
-  
-}
 .custom-category-select {
   position: relative;
   width: 100%;
@@ -1088,7 +880,6 @@ const submitTransaction = async () => {
   transition: all 0.2s ease;
 }
 
-
 .category-dropdown {
   position: absolute;
   top: calc(100%);
@@ -1117,5 +908,43 @@ const submitTransaction = async () => {
 
 .category-option:hover {
   background-color: #f5f5f5;
+}
+
+@media (max-width: 992px) {
+  .form-row.triple {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .template-save-group {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .add-transaction-wrapper {
+    padding: 16px;
+  }
+
+  .add-transaction-card {
+    padding: 24px 18px 28px;
+    border-radius: 20px;
+  }
+
+  .page-title {
+    font-size: 1.6rem;
+  }
+
+  .form-row.double,
+  .form-row.triple {
+    grid-template-columns: 1fr;
+  }
+
+  .type-tab {
+    font-size: 1.05rem;
+  }
+
+  .submit-btn {
+    max-width: 100%;
+  }
 }
 </style>
