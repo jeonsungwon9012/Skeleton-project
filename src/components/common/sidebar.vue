@@ -384,6 +384,7 @@ const handleDeleteTemplate = async (tmpl) => {
   flex-direction: column;
   gap: 8px;
   animation: slideUp 0.25s ease;
+  z-index: 999;
 }
 
 /* 버튼 공통 */
@@ -432,6 +433,8 @@ const handleDeleteTemplate = async (tmpl) => {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   min-width: 200px;
   animation: fadeIn 0.2s ease;
+  z-index: 1000;
+  overflow: visible;
 }
 
 /* 템플릿 아이템 */
