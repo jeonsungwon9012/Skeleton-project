@@ -93,6 +93,26 @@ export const useTransactionStore = defineStore('transaction', () => {
       .slice(0, 5);
   });
 
+  const getMonthlySummary = (month) => {
+    const monthlyList = budgetList.value.filter(
+      (item) => parseInt(item.date.split('-')[1], 10) === month,
+    );
+
+    const expense = monthlyList
+      .filter((item) => item.type === 'expense')
+      .reduce((sum, item) => sum + item.amount, 0);
+
+    const income = monthlyList
+      .filter((item) => item.type === 'income')
+      .reduce((sum, item) => sum + item.amount, 0);
+
+    return {
+      expense,
+      income,
+      net: income - expense,
+    };
+  };
+
   return {
     budgetList,
     categories,
@@ -102,5 +122,6 @@ export const useTransactionStore = defineStore('transaction', () => {
     filteredByType,
     filteredByToday,
     upcomingList,
+    getMonthlySummary,
   };
 });

@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard">
+  <div class="summary">
     <p class="page-title">대시보드</p>
 
     <!-- 헤더 -->
@@ -39,27 +39,27 @@
     <!-- 카드 3개 -->
     <div class="cards">
       <div class="card">
-        <div class="card-icon">⬚</div>
+        <div class="card-icon">📉</div>
         <p class="card-label expense">이번 달 지출</p>
-        <p class="card-value">320,000원</p>
+        <p class="card-value">{{ summary.expense.toLocaleString() }}원</p>
       </div>
       <div class="card">
-        <div class="card-icon">⬚</div>
+        <div class="card-icon">📈</div>
         <p class="card-label income">이번 달 수입</p>
-        <p class="card-value">1,500,000원</p>
+        <p class="card-value">{{ summary.income.toLocaleString() }}원</p>
       </div>
       <div class="card">
-        <div class="card-icon">⬚</div>
-        <div class="card-badge">지난달 8일보다 8%↑</div>
+        <div class="card-icon">💰</div>
         <p class="card-label net">이번달 순 수익</p>
-        <p class="card-value">1,180,000원</p>
+        <p class="card-value">{{ summary.net.toLocaleString() }}원</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useTransactionStore } from '@/stores/budgetStore';
 
 const currentMonth = ref(new Date().getMonth() + 1);
 
@@ -69,10 +69,18 @@ const prevMonth = () => {
 const nextMonth = () => {
   currentMonth.value = currentMonth.value === 12 ? 1 : currentMonth.value + 1;
 };
+
+const store = useTransactionStore();
+
+onMounted(async () => {
+  await store.loadData();
+});
+
+const summary = computed(() => store.getMonthlySummary(currentMonth.value));
 </script>
 
 <style scoped>
-.dashboard {
+.summary {
   padding: 24px;
   font-family: 'Noto Sans KR', sans-serif;
 }
@@ -95,6 +103,7 @@ const nextMonth = () => {
   display: flex;
   align-items: center;
   gap: 10px;
+  justify-content: center; /* ✅ 추가 */
 }
 
 .month-nav h2 {
@@ -102,6 +111,7 @@ const nextMonth = () => {
   font-weight: 800;
   color: #1a1a1a;
   min-width: 80px;
+  text-align: center; /* ✅ 추가 */
 }
 
 .month-nav button {
