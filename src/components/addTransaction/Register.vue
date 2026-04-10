@@ -82,6 +82,9 @@
                 </div>
                 <span class="category-option-text">{{ category.name }}</span>
               </button>
+              <button type="button" class="category-add-button" @click="openAddCategoryModal">
+                + 카테고리 추가
+              </button>
             </div>
           </div>
         </div>
@@ -201,11 +204,19 @@
       :description="successModalDescription"
       @close="closeSuccessModal"
     />
+
+    <AddCategory
+      :visible="showAddCategoryModal"
+      :categories="categories"
+      @close="closeAddCategoryModal"
+      @created="handleCategoryCreated"
+    />
   </section>
 </template>
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import AddCategory from './addCategory.vue';
 import { useTransactionStore } from '@/stores/budgetStores';
 import RigisterPopUP from './RigisterPopUP.vue';
 
@@ -215,6 +226,7 @@ const isSubmitting = ref(false);
 const errorMessage = ref('');
 const dropdownOpen = ref(false);
 const showSuccessModal = ref(false);
+const showAddCategoryModal = ref(false);
 const successModalIcon = ref('*');
 const successModalDescription = ref('');
 
@@ -268,6 +280,15 @@ const resetMessages = () => {
 
 const closeSuccessModal = () => {
   showSuccessModal.value = false;
+};
+
+const openAddCategoryModal = () => {
+  dropdownOpen.value = false;
+  showAddCategoryModal.value = true;
+};
+
+const closeAddCategoryModal = () => {
+  showAddCategoryModal.value = false;
 };
 
 const openSuccessModal = (description, icon = '*') => {
@@ -337,6 +358,12 @@ const selectCategory = (category) => {
   form.cid = category.id;
   dropdownOpen.value = false;
   errorMessage.value = '';
+};
+
+const handleCategoryCreated = (createdCategory) => {
+  form.cid = createdCategory.id;
+  errorMessage.value = '';
+  showAddCategoryModal.value = false;
 };
 
 const handleTemplateCheck = (event) => {
@@ -908,6 +935,19 @@ const submitTransaction = async () => {
 
 .category-option:hover {
   background-color: #f5f5f5;
+}
+
+.category-add-button {
+  width: 100%;
+  margin-top: 8px;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--color-primary-10);
+  color: var(--color-deepgray-100);
+  padding: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 @media (max-width: 992px) {
