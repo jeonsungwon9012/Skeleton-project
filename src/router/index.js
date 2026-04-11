@@ -38,6 +38,12 @@ const router = createRouter({
       meta: { isFullPage: false },
     },*/
     {
+      path: '/api/transactionList',
+      name: 'transactionList',
+      component: () => import('@/components/views/TransactionList.vue'),
+      meta: { isFullPage: false },
+    },
+    {
       path: '/profile',
       name: 'profile',
       component: () => import('@/components/views/Profile.vue'),

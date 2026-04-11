@@ -163,7 +163,7 @@ const uid = localStorage.getItem('userId') || '1';
 
 const navItems = [
   { name: '대시보드', icon: '📊', path: '/' },
-  { name: '거래내역', icon: '📝', path: '/TransactionList' },
+  { name: '거래내역', icon: '📝', path: '/transactionList' },
   { name: '캘린더', icon: '📅', path: '/calendar' },
   { name: '프로필', icon: '👤', path: '/profile' },
 ];
