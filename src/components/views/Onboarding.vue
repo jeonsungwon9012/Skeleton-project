@@ -7,20 +7,18 @@ const router = useRouter();
 
 const startApp = async () => {
   // 실제 서비스라면 여기서 로그인 처리를 하겠지만,
-  // 지금은 바로 대시보드로 이동하는 기능을 연결합니다.
-  // 🚩 주의: router/index.js에서 isLoggedIn을 true로 바꿔야 통과됩니다!
-  await userStore.login();
-  router.push('/calendar');
+  // 사용자의 요청에 따라 로그인 페이지로 먼저 이동합니다.
+  router.push('/login');
 };
 
 const handleLogin = async () => {
   const success = await userStore.login('user1@example.com'); // db.json에 있는 이메일
   if (success) {
-    router.push('/calendar');
+    router.push('/dashboard');
   } else {
     alert('로그인에 실패했어요!');
   }
-}
+};
 </script>
 
 <template>
@@ -29,9 +27,7 @@ const handleLogin = async () => {
       <h1 class="h1 color-primary">TTokTTak</h1>
       <p class="body-m color-gray">똑똑하게 관리하는 나만의 가계부</p>
 
-      <div class="visual-placeholder">
-        ✨
-      </div>
+      <div class="visual-placeholder">✨</div>
 
       <button @click="startApp" class="btn-main">시작하기</button>
     </div>

@@ -96,7 +96,7 @@
 
 <script setup>
 import { onMounted, ref, computed, watch } from 'vue';
-import { useUserStore } from '@/stores/user';
+import { useUserStore } from '@/stores/userStore';
 import { useRouter } from 'vue-router';
 import SuccessModal from '@/components/common/CompleteModal.vue';
 

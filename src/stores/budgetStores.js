@@ -5,7 +5,6 @@ import { categoryApi } from '@/api/category';
 import { templateApi } from '@/api/template';
 
 const BASE_URL = '/api';
-const DEFAULT_USER_ID = 1;
 
 export const useTransactionStore = defineStore('transaction', () => {
   const categories = ref([]);
@@ -25,14 +24,15 @@ export const useTransactionStore = defineStore('transaction', () => {
     sanitizeCategories(categories.value),
   );
 
-  const loadData = async (uid = DEFAULT_USER_ID) => {
+  const loadData = async (uid) => {
     isLoading.value = true;
     try {
-      const [categoryResponse, budgetResponse, templateResponse] = await Promise.all([
-        categoryApi.getCategories(),
-        axios.get(`${BASE_URL}/BUDGET?uid=${uid}`),
-        templateApi.getTemplates(uid),
-      ]);
+      const [categoryResponse, budgetResponse, templateResponse] =
+        await Promise.all([
+          categoryApi.getCategories(),
+          axios.get(`${BASE_URL}/BUDGET?uid=${uid}`),
+          templateApi.getTemplates(uid),
+        ]);
 
       categories.value = sanitizeCategories(categoryResponse.data ?? []);
       budgets.value = budgetResponse.data ?? [];
@@ -50,7 +50,9 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   const editBudget = async (id, payload) => {
     const response = await axios.put(`${BASE_URL}/BUDGET/${id}`, payload);
-    const index = budgets.value.findIndex((budget) => String(budget.id) === String(id));
+    const index = budgets.value.findIndex(
+      (budget) => String(budget.id) === String(id),
+    );
     if (index !== -1) {
       budgets.value[index] = response.data;
     }
@@ -72,8 +74,12 @@ export const useTransactionStore = defineStore('transaction', () => {
     return response.data;
   };
 
-  const getTemplateCountByUser = (uid = DEFAULT_USER_ID) =>
-    templates.value.filter((template) => String(template.uid) === String(uid)).length;
+  const getTemplateCountByUser = (uid) =>
+    uid
+      ? templates.value.filter(
+          (template) => String(template.uid) === String(uid),
+        ).length
+      : 0;
 
   return {
     budgets,

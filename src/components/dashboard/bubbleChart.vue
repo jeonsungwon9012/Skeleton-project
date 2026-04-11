@@ -145,9 +145,11 @@
 import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue';
 import { useCategoryStore } from '@/stores/category';
 import { useDashboardStore } from '@/stores/dashboard';
+import { useUserStore } from '@/stores/userStore'; // 💡 유저 스토어 추가
 
 const store = useCategoryStore();
 const dashboard = useDashboardStore();
+const userStore = useUserStore(); // 💡 스토어 인스턴스 생성
 
 const bubbleWrapRef = ref(null);
 const svgSize = 300;
@@ -209,8 +211,9 @@ const refreshBubbles = () => {
 };
 
 onMounted(async () => {
-  const uid = localStorage.getItem('userId') || '1';
-  await store.fetchAll(uid);
+  // 💡 이제 하드코딩된 기본값 '1'을 사용하지 않고, 로그인된 유저 ID만 사용합니다.
+  const currentUid = userStore.user?.id;
+  await store.fetchAll(currentUid);
   await nextTick();
   refreshBubbles();
 });

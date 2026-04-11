@@ -8,9 +8,27 @@
     <!-- 유저 -->
     <div class="user-profile">
       <img :src="profileIcon" alt="프로필 아이콘" />
-      <div class="user-info">
-        <p class="user-sub">{{ userName }}님의 가계부</p>
-      </div>
+
+      <!-- 로그아웃 버튼 추가 -->
+      <button class="logout-btn" @click="handleLogout" title="로그아웃">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+      </button>
+    </div>
+    <div class="user-info">
+      <p class="user-sub">{{ userName }}님의 가계부</p>
     </div>
 
     <!-- 뱃지 -->
@@ -147,7 +165,10 @@ import coinIcon from '@/assets/icons/money.svg';
 import editPencil from '@/assets/icons/edit-pencil.svg';
 import trash from '@/assets/icons/trash.svg';
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useCategoryStore } from '@/stores/category';
+import { useTransactionStore } from '@/stores/budgetStore';
+import { useBudgetStore } from '@/stores/budgetStore2';
 import { useTemplateStore } from '@/stores/template';
 import { useUserStore } from '@/stores/user';
 import { useReactionStore } from '@/stores/reaction';
@@ -155,8 +176,18 @@ import SuccessModal from '@/components/common/CompleteModal.vue';
 
 const userStore = useUserStore();
 const categoryStore = useCategoryStore();
+const transactionStore = useTransactionStore();
+const budgetStore = useBudgetStore();
 const templateStore = useTemplateStore();
 const reactionStore = useReactionStore();
+const router = useRouter();
+
+const handleLogout = () => {
+  if (confirm('로그아웃 하시겠습니까?')) {
+    userStore.logout();
+    router.push('/'); // 온보딩 페이지로 이동
+  }
+};
 
 const userName = computed(() => userStore.user?.nickname || '');
 const uid = localStorage.getItem('userId') || '1';
@@ -226,6 +257,12 @@ const handleApplyTemplate = async (tmpl) => {
   try {
     await templateStore.applyTemplate(tmpl, uid);
 
+    // 💡 캘린더용 데이터 갱신 (budgetStore2)
+    await budgetStore.fetchData();
+
+    // 💡 거래내역 리스트용 데이터 갱신 (budgetStore)
+    await transactionStore.loadData();
+
     // 카테고리 스토어 갱신 (횟수 반영)
     await categoryStore.fetchAll(uid);
 
@@ -250,6 +287,9 @@ const handleApplyTemplate = async (tmpl) => {
       title: '가계부 작성 완료!',
       description: message,
     };
+
+    // 💡 거래내역 페이지로 이동
+    router.push('/transactionList');
 
     closeAll();
   } catch {
@@ -285,12 +325,30 @@ const handleDeleteTemplate = async (tmpl) => {
 
 .user-profile {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 0.6rem;
+}
+.user-sub {
   font-weight: 700;
 }
 .user-profile img {
   width: 1.875rem;
+}
+.logout-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-deepgray-40);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.logout-btn:hover {
+  color: var(--color-primary);
 }
 
 .user-badge {

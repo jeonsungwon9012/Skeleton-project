@@ -132,13 +132,14 @@
     <table class="table">
       <thead>
         <tr>
-          <th>
+          <th width="40px">
             <input
               type="checkbox"
               :checked="isAllSelected"
               @change="toggleAll"
             />
           </th>
+          <th width="50px" class="item-index">No.</th>
           <th>날짜</th>
           <th>거래 내역</th>
           <th>금액</th>
@@ -153,7 +154,7 @@
       </thead>
       <tbody>
         <tr
-          v-for="item in filteredMCT"
+          v-for="(item, index) in filteredMCT"
           :key="item.id"
           class="btn_hover"
           :class="{
@@ -172,6 +173,7 @@
               :disabled="item.isRecurring && new Date(item.date) > new Date()"
             />
           </td>
+          <td class="item-index">{{ index + 1 }}</td>
           <td>{{ item.date }}</td>
           <td>{{ item.detail }}</td>
           <td>
@@ -302,14 +304,15 @@ const visibleCategories = computed(() =>
 
 // 전체 선택 체크박스도 filteredMCT 기준이라 문제없지만
 // filteredMCT 안에서 selectedCategory 비교 부분 확인
-const isAllSelected = computed(
-  () =>
-    filteredMCT.value.length > 0 &&
-    selectedIds.value.length ===
-      filteredMCT.value.filter(
-        (item) => !(item.isRecurring && new Date(item.date) > new Date()),
-      ).length,
-);
+const isAllSelected = computed(() => {
+  const selectableItems = filteredMCT.value.filter(
+    (item) => !(item.isRecurring && new Date(item.date) > new Date()),
+  );
+  return (
+    selectableItems.length > 0 &&
+    selectedIds.value.length === selectableItems.length
+  );
+});
 
 const toggleAll = (e) => {
   selectedIds.value = e.target.checked
@@ -618,5 +621,12 @@ td {
 .positive {
   color: #2ecc71;
   font-weight: 500;
+}
+
+.item-index {
+  padding-left: 45px !important;
+  padding-right: 70px !important;
+  color: #888;
+  font-size: 0.85rem;
 }
 </style>

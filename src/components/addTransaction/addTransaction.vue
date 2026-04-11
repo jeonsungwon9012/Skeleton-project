@@ -207,6 +207,9 @@
       </p>
 
       <div class="button-area">
+        <button type="button" class="cancel-btn" @click="handleCancel">
+          취소
+        </button>
         <button
           type="button"
           class="submit-btn"
@@ -236,11 +239,17 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import AddCategory from './addCategory.vue';
+import { useUserStore } from '@/stores/userStore';
+import { useTemplateStore } from '@/stores/template';
 import { useTransactionStore } from '@/stores/budgetStores';
 import RegisterModal from '../common/CompleteModal.vue';
 
 const transactionStore = useTransactionStore();
+const userStore = useUserStore();
+const templateStore = useTemplateStore();
+const router = useRouter();
 
 const isSubmitting = ref(false);
 const errorMessage = ref('');
@@ -262,7 +271,7 @@ const weekdays = [
 
 const form = reactive({
   id: null,
-  uid: 1,
+  uid: userStore.user?.id || 1,
   type: 'expense',
   detail: '',
   amount: '',
@@ -320,9 +329,13 @@ const openSuccessModal = (description, icon = '*') => {
   showSuccessModal.value = true;
 };
 
+const handleCancel = () => {
+  router.back();
+};
+
 const resetForm = () => {
   form.id = null;
-  form.uid = 1;
+  form.uid = userStore.user?.id || 1;
   form.type = 'expense';
   form.detail = '';
   form.amount = '';
@@ -548,33 +561,56 @@ const submitTransaction = async () => {
       return;
     }
 
-    const payload = {
-      uid: form.uid,
-      date: calculatedDate,
-      type: form.type,
-      amount: Number(form.amount),
-      cid: Number(form.cid),
-      detail: form.detail.trim(),
-      memo: form.memo.trim(),
-      isRecurring: form.isRecurring,
-      cycle: form.isRecurring ? form.cycle : null,
-      isTemplate: form.isTemplate,
-    };
-
     if (form.id) {
-      await transactionStore.editBudget(form.id, payload);
-    } else {
-      await transactionStore.addBudget(payload);
-    }
-
-    if (form.isTemplate) {
-      await transactionStore.addTemplate({
+      // 기존 가계부 내역 수정
+      const payload = {
         uid: form.uid,
-        amount: Number(form.amount),
+        date: form.date, // 기존 내역은 날짜가 이미 있으므로 calculatedDate를 사용하지 않음
         type: form.type,
+        amount: Number(form.amount),
+        cid: Number(form.cid),
         detail: form.detail.trim(),
         memo: form.memo.trim(),
-      });
+        isRecurring: form.isRecurring,
+        cycle: form.isRecurring ? form.cycle : null,
+      };
+      await transactionStore.editBudget(form.id, payload);
+    } else {
+      // 새로운 내역 추가 (템플릿 또는 일반 가계부)
+      if (form.isTemplate) {
+        await transactionStore.addTemplate({
+          uid: form.uid,
+          amount: Number(form.amount),
+          type: form.type,
+          detail: form.detail.trim(),
+          memo: form.memo.trim(),
+          cid: Number(form.cid), // 템플릿 저장 시 cid 추가
+        });
+        // 💡 사이드바 템플릿 목록 즉시 갱신
+        await templateStore.fetchTemplates(form.uid);
+      } else {
+        const calculatedDate = form.isRecurring
+          ? getCalculatedRecurringDate()
+          : form.date;
+        if (!calculatedDate) {
+          // validateForm에서 이미 처리되지만, 혹시 모를 경우를 대비한 방어 코드
+          errorMessage.value = '날짜를 선택해주세요.';
+          isSubmitting.value = false;
+          return;
+        }
+        const payload = {
+          uid: form.uid,
+          date: calculatedDate,
+          type: form.type,
+          amount: Number(form.amount),
+          cid: Number(form.cid),
+          detail: form.detail.trim(),
+          memo: form.memo.trim(),
+          isRecurring: form.isRecurring,
+          cycle: form.isRecurring ? form.cycle : null,
+        };
+        await transactionStore.addBudget(payload);
+      }
     }
 
     const successCategory = selectedCategory.value;
@@ -765,17 +801,21 @@ const submitTransaction = async () => {
 
 .button-area {
   display: flex;
+  gap: 16px;
   justify-content: center;
   margin-top: 32px;
-}
-
-.submit-btn {
   width: 100%;
   max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cancel-btn,
+.submit-btn {
+  flex: 1;
   height: 62px;
   border: none;
   border-radius: 16px;
-  background-color: #5b667a;
   color: #fff;
   font-size: 1.25rem;
   font-weight: 700;
@@ -783,7 +823,16 @@ const submitTransaction = async () => {
   transition: opacity 0.2s ease;
 }
 
-.submit-btn:hover {
+.cancel-btn {
+  background-color: var(--color-sub-100);
+}
+
+.submit-btn {
+  background-color: var(--color-primary);
+}
+
+.submit-btn:hover,
+.cancel-btn:hover {
   opacity: 0.92;
 }
 

@@ -5,16 +5,16 @@
  * - 하위 컴포넌트들에게 Props로 데이터를 전달하며
  * - 발생한 이벤트들을 스토어 액션으로 연결함
  */
-import { onMounted } from "vue";
+import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // 💡 전역 상태 관리(Pinia) 및 컴포넌트 임포트
-import { useBudgetStore } from "@/stores/budgetStore2.js";
-import MonthPicker from "@/components/common/MonthPicker.vue";
-import CategoryFilter from "@/components/common/CategoryFilter.vue";
-import CalendarBoard from "@/components/calendar/calendarBoard.vue";
-import DailyList from "@/components/calendar/dailyList.vue";
-import MonthlyRecentTransactions from "@/components/calendar/MonthlyRecentTransactions.vue";
+import { useBudgetStore } from '@/stores/budgetStore2.js';
+import MonthPicker from '@/components/common/MonthPicker.vue';
+import CategoryFilter from '@/components/common/CategoryFilter.vue';
+import CalendarBoard from '@/components/calendar/calendarBoard.vue';
+import DailyList from '@/components/calendar/dailyList.vue';
+import MonthlyRecentTransactions from '@/components/calendar/MonthlyRecentTransactions.vue';
 
 // 1. 스토어 사용 선언
 const budgetStore = useBudgetStore();
@@ -25,82 +25,78 @@ const budgetStore = useBudgetStore();
  * - [중요] categories: DB에서 가져온 진짜 카테고리 목록
  */
 const {
-  currentMonth,         // 현재 보고 있는 달 (Date 객체)
-  categories,           // [DB 데이터] 식비, 카페 등 카테고리 배열
-  selectedDates,        // 사용자가 클릭한 날짜들 (YYYY-MM-DD 형식)
-  selectedCategories,   // 필터링 선택된 카테고리 ID들
-  selectedType,         // 전체/수입/지출 필터링 상태
-  isScheduledOnly,      // 예정 내역만 보기 여부
-  calendarDots,         // 달력 셀 안에 찍힐 점들 데이터
-  rangeBudgets,         // 선택한 날짜에 해당하는 상세 내역 리스트
+  currentMonth, // 현재 보고 있는 달 (Date 객체)
+  categories, // [DB 데이터] 식비, 카페 등 카테고리 배열
+  selectedDates, // 사용자가 클릭한 날짜들 (YYYY-MM-DD 형식)
+  selectedCategories, // 필터링 선택된 카테고리 ID들
+  selectedType, // 전체/수입/지출 필터링 상태
+  isScheduledOnly, // 예정 내역만 보기 여부
+  calendarDots, // 달력 셀 안에 찍힐 점들 데이터
+  rangeBudgets, // 선택한 날짜에 해당하는 상세 내역 리스트
   monthlyRecentTransactions, // 카테고리 클릭 시 보여줄 월간 내역
-  selectedTotal         // 선택된 내역의 수입/지출 합계
-} = storeToRefs(budgetStore)
+  selectedTotal, // 선택된 내역의 수입/지출 합계
+} = storeToRefs(budgetStore);
 
 /**
  * 3. Actions 추출 (로직 함수들)
  * - 액션은 반응형일 필요가 없으므로 스토어에서 바로 꺼내옴
  */
 const {
-  changeMonth,          // 월 변경 (이전/다음)
-  toggleCategory,       // 카테고리 필터 토글
-  toggleDate,           // 날짜 선택 토글
-  setTransactionType,   // 수입/지출 타입 변경
-  toggleScheduled,      // 예정 내역 필터 토글
-  resetFilters          // 모든 필터 초기화 (전체 버튼)
-} = budgetStore
+  changeMonth, // 월 변경 (이전/다음)
+  toggleCategory, // 카테고리 필터 토글
+  toggleDate, // 날짜 선택 토글
+  setTransactionType, // 수입/지출 타입 변경
+  toggleScheduled, // 예정 내역 필터 토글
+  resetFilters, // 모든 필터 초기화 (전체 버튼)
+} = budgetStore;
 
 /**
  * 4. 라이프사이클 훅
  * - 컴포넌트가 화면에 나타나자마자 DB(json-server)에서 데이터를 긁어옴
  */
 onMounted(() => {
-  budgetStore.fetchData() // BUDGET, CATEGORY, USER 테이블을 한꺼번에 로드함
-})
+  budgetStore.fetchData(); // BUDGET, CATEGORY, USER 테이블을 한꺼번에 로드함
+});
 </script>
 
 <template>
   <div class="calendar-main">
     <header class="header-container">
-      <MonthPicker
-          :current-month="currentMonth"
-          @change="changeMonth"
-      />
+      <MonthPicker :current-month="currentMonth" @change="changeMonth" />
 
       <CategoryFilter
-          :categories="categories"
-          :selected-categories="selectedCategories"
-          :selected-type="selectedType"
-          :is-scheduled-only="isScheduledOnly"
-          @select-type="setTransactionType"
-          @toggle-category="toggleCategory"
-          @toggle-scheduled="toggleScheduled"
-          @select-all="resetFilters"
+        :categories="categories"
+        :selected-categories="selectedCategories"
+        :selected-type="selectedType"
+        :is-scheduled-only="isScheduledOnly"
+        @select-type="setTransactionType"
+        @toggle-category="toggleCategory"
+        @toggle-scheduled="toggleScheduled"
+        @select-all="resetFilters"
       />
     </header>
 
     <main class="content-wrapper">
       <section class="calendar-area">
         <CalendarBoard
-            :dots="calendarDots"
-            :selected-dates="selectedDates"
-            @click-date="toggleDate"
+          :dots="calendarDots"
+          :selected-dates="selectedDates"
+          @click-date="toggleDate"
         />
       </section>
 
       <section class="list-area">
         <DailyList
-            v-if="selectedDates.length > 0"
-            :items="rangeBudgets"
-            :total="selectedTotal"
-            :dates="selectedDates"
+          v-if="selectedDates.length > 0"
+          :items="rangeBudgets"
+          :total="selectedTotal"
+          :dates="selectedDates"
         />
 
         <MonthlyRecentTransactions
-            v-else-if="selectedCategories.length > 0"
-            :items="monthlyRecentTransactions"
+          v-else-if="selectedCategories.length > 0"
+          :items="monthlyRecentTransactions"
         />
-
       </section>
     </main>
   </div>

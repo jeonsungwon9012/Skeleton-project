@@ -8,7 +8,8 @@ const app = express();
 
 const port = 3000;
 
-const dataFilePath = path.join(__dirname, '..', 'db', 'db.json');
+// 현재 파일 위치(src/api)에서 루트의 db/db.json을 찾으려면 ../../db/db.json이어야 합니다.
+const dataFilePath = path.resolve(__dirname, '../../db/db.json');
 
 app.use(express.json());
 
@@ -22,11 +23,29 @@ app.use((req, res, next) => {
   next();
 });
 
-// 모든 데이터 가져오기
-app.get('/api/data', async (req, res) => {
+// json-server처럼 /CATEGORY, /USER 등의 경로를 동적으로 처리
+app.get('/:resource', async (req, res) => {
   try {
+    const { resource } = req.params;
     const data = await readDataFile();
-    res.json(data);
+
+    if (data[resource]) {
+      let result = data[resource];
+
+      // 쿼리 필터링 지원 (예: ?email=... 또는 ?uid=1)
+      if (Object.keys(req.query).length > 0) {
+        result = result.filter((item) => {
+          return Object.keys(req.query).every((key) => {
+            // db.json의 ID는 숫자이므로 타입을 맞춰서 비교
+            return String(item[key]) === String(req.query[key]);
+          });
+        });
+      }
+
+      res.json(result);
+    } else {
+      res.status(404).json({ error: `Resource ${resource} not found` });
+    }
   } catch (error) {
     res.status(500).json({
       error: 'Internal Server Error',
@@ -34,46 +53,65 @@ app.get('/api/data', async (req, res) => {
   }
 });
 
-// 데이터 삭제
-app.delete('/api/data/:id', async (req, res) => {
+// 특정 ID 데이터 가져오기 (예: GET /USER/1)
+app.get('/:resource/:id', async (req, res) => {
   try {
-    // URL에서 id 추출 후 숫자로 변환
-    const id = Number(req.params.id);
-
-    // 기존 데이터 읽기
+    const { resource, id } = req.params;
     const data = await readDataFile();
 
-    // 삭제할 데이터의 index 찾기
-    const index = data.findIndex((item) => item.id === id);
+    if (data[resource]) {
+      // ID 비교 시 데이터 타입(숫자/문자열)에 상관없이 비교하기 위해 String() 사용
+      const item = data[resource].find(
+        (item) => String(item.id) === String(id),
+      );
+      if (item) {
+        res.json(item);
+      } else {
+        res.status(404).json({ error: 'Item not found' });
+      }
+    } else {
+      res.status(404).json({ error: 'Resource not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
-    // 해당 데이터가 존재하면
+// 데이터 삭제 (예: DELETE /BUDGET/1)
+app.delete('/:resource/:id', async (req, res) => {
+  try {
+    const { resource, id } = req.params;
+    const data = await readDataFile();
+
+    if (!data[resource]) {
+      return res.status(404).json({ error: 'Resource not found' });
+    }
+
+    const index = data[resource].findIndex(
+      (item) => String(item.id) === String(id),
+    );
+
     if (index !== -1) {
-      // splice(index, 1) : index 위치에서 1개 삭제
-      // [0] : 삭제된 첫 번째 요소 꺼내기
-      const deletedItem = data.splice(index, 1)[0];
-
-      // 삭제 후 남은 데이터 다시 파일에 저장
+      const deletedItem = data[resource].splice(index, 1)[0];
       await writeDataFile(data);
-
-      // 삭제된 데이터 응답
       res.json(deletedItem);
     } else {
-      // 삭제 대상이 없으면 404
       res.status(404).json({ error: 'Not Found' });
     }
   } catch (error) {
-    // 서버 내부 오류 응답
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
 async function readDataFile() {
-  // data.json 파일을 UTF-8 문자열로 읽기
-  const data = await fs.readFile(dataFilePath, 'utf-8');
-
-  // 파일 내용이 있으면 JSON.parse로 JS 객체/배열로 변환
-  // 비어 있으면 빈 배열 반환
-  return data ? JSON.parse(data) : [];
+  try {
+    const data = await fs.readFile(dataFilePath, 'utf-8');
+    // db.json은 객체 형식이므로 기본값을 {}로 설정해야 안전합니다.
+    return data ? JSON.parse(data) : {};
+  } catch (error) {
+    console.error('파일 읽기 오류:', error);
+    return {};
+  }
 }
 
 // ==============================

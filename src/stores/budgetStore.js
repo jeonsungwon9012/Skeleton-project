@@ -1,15 +1,35 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { fetchAllDashboardData } from '../api/budget';
+import { templateApi } from '../api/template';
+import { useUserStore } from './userStore';
+import axios from 'axios';
 
 export const useTransactionStore = defineStore('transaction', () => {
+  const userStore = useUserStore();
   const budgetList = ref([]);
   const categories = ref([]);
+  const templates = ref([]);
+
+  const currentUid = computed(() => userStore.user?.id);
+
+  // 💡 [추가] 로그인한 유저의 내역만 필터링하는 반응형 객체
+  const myBudgets = computed(() => {
+    return budgetList.value.filter(
+      (b) => String(b.uid) === String(currentUid.value),
+    );
+  });
 
   // 데이터 불러오기
   const loadData = async () => {
+    const uid = currentUid.value;
+    if (!uid) return;
+
     try {
-      const data = await fetchAllDashboardData();
+      const [data, tData] = await Promise.all([
+        fetchAllDashboardData(uid),
+        templateApi.getTemplates(uid),
+      ]);
 
       const categoryNameMap = new Map();
       const categoryImgMap = new Map();
@@ -32,6 +52,7 @@ export const useTransactionStore = defineStore('transaction', () => {
           categoryColor: categoryColorMap.get(cidKey) || '#000000',
         };
       });
+      templates.value = tData.data || [];
     } catch (err) {
       console.error('데이터 로딩 실패:', err);
     }
@@ -39,17 +60,21 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   // 필터링: 카테고리 + 검색
   const filteredByCategory = (selectedCategory, search) =>
-    computed(() =>
-      budgetList.value.filter((item) => {
+    computed(() => {
+      const cats = selectedCategory?.value || [];
+      const searchVal = search?.value || '';
+
+      return myBudgets.value.filter((item) => {
         const matchCategory =
-          selectedCategory.value.includes('전체') ||
-          selectedCategory.value.includes(item.categoryName); // 배열로 체크
+          cats.length === 0 ||
+          cats.includes('전체') ||
+          cats.includes(item.categoryName);
         const matchSearch =
-          item.detail.includes(search.value) ||
-          item.memo.includes(search.value);
+          item.detail.includes(searchVal) ||
+          (item.memo && item.memo.includes(searchVal));
         return matchCategory && matchSearch;
-      }),
-    );
+      });
+    });
 
   // 필터링: 월
   const filteredByMonth = (list, currentMonth) =>
@@ -89,7 +114,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return budgetList.value
+    return myBudgets.value
       .filter(
         (item) => item.isRecurring === true && new Date(item.date) > today,
       )
@@ -98,7 +123,7 @@ export const useTransactionStore = defineStore('transaction', () => {
   });
 
   const getMonthlySummary = (month) => {
-    const monthlyList = budgetList.value.filter(
+    const monthlyList = myBudgets.value.filter(
       (item) => parseInt(item.date.split('-')[1], 10) === month,
     );
 
@@ -117,9 +142,44 @@ export const useTransactionStore = defineStore('transaction', () => {
     };
   };
 
+  // 💡 [추가] 유저별 템플릿 개수 확인
+  const getTemplateCountByUser = (uid = currentUid.value) =>
+    templates.value.filter((t) => String(t.uid) === String(uid)).length;
+
+  // 💡 [추가] 거래 내역 추가
+  const addBudget = async (payload) => {
+    const response = await axios.post('/api/BUDGET', {
+      ...payload,
+      uid: Number(currentUid.value),
+    });
+    budgetList.value.push(response.data);
+    return response.data;
+  };
+
+  // 💡 [추가] 거래 내역 수정
+  const editBudget = async (id, payload) => {
+    const response = await axios.put(`/api/BUDGET/${id}`, payload);
+    const index = budgetList.value.findIndex(
+      (b) => String(b.id) === String(id),
+    );
+    if (index !== -1) budgetList.value[index] = response.data;
+    return response.data;
+  };
+
+  // 💡 [추가] 템플릿 추가
+  const addTemplate = async (payload) => {
+    const response = await axios.post('/api/TEMPLATE', {
+      ...payload,
+      uid: Number(currentUid.value),
+    });
+    templates.value.push(response.data);
+    return response.data;
+  };
+
   return {
     budgetList,
     categories,
+    templates,
     loadData,
     filteredByCategory,
     filteredByMonth,
@@ -127,5 +187,9 @@ export const useTransactionStore = defineStore('transaction', () => {
     filteredByToday,
     upcomingList,
     getMonthlySummary,
+    getTemplateCountByUser,
+    addBudget,
+    editBudget,
+    addTemplate,
   };
 });
