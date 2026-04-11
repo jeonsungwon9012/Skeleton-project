@@ -50,7 +50,7 @@ const router = createRouter({
         {
           path: '', // URL이 '/profile'일 때 기본으로 보여줄 곳
           name: 'profile-view',
-          component: () => import('@/components/profile/ProfileForm.vue'),
+          component: () => import('@/components/profile/ViewProfile.vue'),
         },
         {
           path: 'edit', // URL이 '/profile/edit'일 때 보여줄 곳

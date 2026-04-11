@@ -1,11 +1,11 @@
 <template>
   <section class="add-transactions-page">
-    <Rigister />
+    <addTransaction />
   </section>
 </template>
 
 <script setup>
-import Rigister from '../addTransaction/Register.vue';
+import addTransaction from '../addTransaction/addTransaction.vue';
 </script>
 
 <style scoped>

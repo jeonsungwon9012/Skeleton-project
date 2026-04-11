@@ -98,7 +98,7 @@
 import { onMounted, ref, computed, watch } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { useRouter } from 'vue-router';
-import SuccessModal from '@/components/addTransaction/RegisterModal.vue';
+import SuccessModal from '@/components/common/CompleteModal.vue';
 
 const router = useRouter();
 const store = useUserStore();

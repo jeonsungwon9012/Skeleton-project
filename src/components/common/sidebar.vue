@@ -151,7 +151,7 @@ import { useCategoryStore } from '@/stores/category';
 import { useTemplateStore } from '@/stores/template';
 import { useUserStore } from '@/stores/user';
 import { useReactionStore } from '@/stores/reaction';
-import SuccessModal from '@/components/addTransaction/RegisterModal.vue';
+import SuccessModal from '@/components/common/CompleteModal.vue';
 
 const userStore = useUserStore();
 const categoryStore = useCategoryStore();
