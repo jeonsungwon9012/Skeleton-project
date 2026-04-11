@@ -64,7 +64,6 @@ const router = createRouter({
 
 /**
  * 🚩 네비게이션 가드 (출입 통제 로직)
- */
 router.beforeEach((to, from, next) => {
   // 💡 가드 안에서 스토어를 선언해야 안전하게 상태를 가져올 수 있음
   const userStore = useUserStore();
@@ -85,5 +84,5 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
-
+*/
 export default router;
