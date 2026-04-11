@@ -4,7 +4,11 @@ import { RouterView } from 'vue-router';
 </script>
 
 <template>
-  <div class="app-layout">
+  <div class="app full-layout" v-if="$route.meta.isFullPage">
+    <router-view />
+  </div>
+
+  <div class="app app-layout" v-else>
     <Sidebar />
     <div class="main-content">
       <RouterView />

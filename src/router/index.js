@@ -1,14 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router';
-//스토어 임포트 필요
+import { useUserStore } from '@/stores/userStore'; // 💡 로그인 Pinia 스토어를 IMPORT
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/onboarding',
+      name: 'onboarding',
+      component: () => import('@/components/views/Onboarding.vue'),
+      meta: { isFullPage: true }, // 전체 화면 모드
+    },
+    {
       path: '/',
       name: 'dashboard',
       component: () => import('@/components/views/Dashboard.vue'),
-      // 전체화면이 아닌 네비게이션이 있는 페이지 isFullPage를 false로 설정
       meta: { isFullPage: false },
     },
 
@@ -24,19 +29,12 @@ const router = createRouter({
       component: () => import('@/components/views/TransactionList.vue'),
       meta: { isFullPage: false },
     },
-    /*{
-      path: '/onboarding',
-      name: 'onboarding',
-      component: () => import('@/components/views/Onboarding.vue'),
-      meta: { isFullPage: true },
-      // 온보딩 페이지는 전체 화면으로 표시하도록 메타 정보 추가
-    },
     {
       path: '/calendar',
       name: 'calendar',
       component: () => import('@/components/views/Calendar.vue'),
       meta: { isFullPage: false },
-    },*/
+    },
     {
       path: '/api/transactionList',
       name: 'transactionList',
@@ -64,22 +62,25 @@ const router = createRouter({
   ],
 });
 
-/* 🚩 네비게이션 가드 (출입 통제) */
+/**
+ * 🚩 네비게이션 가드 (출입 통제 로직)
+ */
 router.beforeEach((to, from, next) => {
-  //pinia 스토어에서 로그인 상태 가져오기 필요
-  // 임시 로그인 상태(true) 실제로 pinia 스토어로 교체필요
-  const isLoggedIn = true;
+  // 💡 가드 안에서 스토어를 선언해야 안전하게 상태를 가져올 수 있음
+  const userStore = useUserStore();
 
-  //로그인 안된 상태에서 다른 페이지 가려고 하면
+  // 스토어에 저장된 uid가 있으면 로그인된 것으로 판단함 (예시)
+  const isLoggedIn = userStore.isLoggedIn;
+
+  // 1. 로그인 안 된 사용자가 온보딩 외의 페이지로 가려 할 때
   if (!isLoggedIn && to.name !== 'onboarding') {
     next({ name: 'onboarding' });
-  } // 온보딩 페이지로 리다이렉트
-
-  // 로그인된 상태에서 온보딩 페이지로 가려고 하면
-  else if (isLoggedIn && to.name === 'onboarding') {
-    next({ name: 'calendar' });
   }
-  // 그 외의 경우는 정상적으로 이동
+  // 2. 이미 로그인된 사용자가 온보딩 페이지로 되돌아가려 할 때
+  else if (isLoggedIn && to.name === 'onboarding') {
+    next({ name: 'calendar' }); // 메인인 달력 페이지로 보냄
+  }
+  // 3. 그 외에는 자유롭게 통과
   else {
     next();
   }
