@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { fetchBudgetData } from '../../api/budgetApi';
+import { fetchAllDashboardData } from '../api/budgetApi';
 
 export const useTransactionStore = defineStore('transaction', () => {
   const budgetList = ref([]);
@@ -9,25 +9,29 @@ export const useTransactionStore = defineStore('transaction', () => {
   // 데이터 불러오기
   const loadData = async () => {
     try {
-      const data = await fetchBudgetData();
+      const data = await fetchAllDashboardData();
 
       const categoryNameMap = new Map();
       const categoryImgMap = new Map();
       const categoryColorMap = new Map();
 
       data.CATEGORY.forEach((cate) => {
-        categoryNameMap.set(cate.id, cate.name);
-        categoryImgMap.set(cate.id, cate.img);
-        categoryColorMap.set(cate.id, cate.color);
+        const cid = String(cate.id);
+        categoryNameMap.set(cid, cate.name);
+        categoryImgMap.set(cid, cate.img);
+        categoryColorMap.set(cid, cate.color);
       });
 
       categories.value = data.CATEGORY;
-      budgetList.value = data.BUDGET.map((budget) => ({
-        ...budget,
-        categoryName: categoryNameMap.get(budget.cid) || '알 수 없음',
-        categoryImg: categoryImgMap.get(budget.cid) || '❓',
-        categoryColor: categoryColorMap.get(budget.cid) || '#000000',
-      }));
+      budgetList.value = data.BUDGET.map((budget) => {
+        const cidKey = String(budget.cid);
+        return {
+          ...budget,
+          categoryName: categoryNameMap.get(cidKey) || '알 수 없음',
+          categoryImg: categoryImgMap.get(cidKey) || '❓',
+          categoryColor: categoryColorMap.get(cidKey) || '#000000',
+        };
+      });
     } catch (err) {
       console.error('데이터 로딩 실패:', err);
     }
