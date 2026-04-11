@@ -1474,18 +1474,6 @@
       "isRecurring": false,
       "cycle": null,
       "id": "SU3IxqhyiTY"
-    },
-    {
-      "date": "2026-04-11",
-      "type": "expense",
-      "amount": 3000,
-      "detail": "아메리카노",
-      "memo": "나의 피 수혈",
-      "uid": 1,
-      "cid": 2,
-      "isRecurring": false,
-      "cycle": null,
-      "id": "SkcuRUCb6tU"
     }
   ],
   "TEMPLATE": [
