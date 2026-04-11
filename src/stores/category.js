@@ -8,7 +8,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { categoryApi } from '@/api/category';
-import { useDashboardStore } from '@/stores/dashboardStore';
+import { useDashboardStore } from '@/stores/dashboard';
 
 export const useCategoryStore = defineStore('category', () => {
   // 전체 카테고리 목록 (CATEGORY 테이블)

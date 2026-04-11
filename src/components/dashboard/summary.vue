@@ -1,5 +1,5 @@
 <script setup>
-import { useDashboardStore } from '@/stores/dashboardStore';
+import { useDashboardStore } from '@/stores/dashboard';
 
 const dashboard = useDashboardStore();
 </script>

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { fetchAllDashboardData } from '../api/budgetApi';
+import { fetchAllDashboardData } from '../api/budget';
 
 export const useTransactionStore = defineStore('transaction', () => {
   const budgetList = ref([]);

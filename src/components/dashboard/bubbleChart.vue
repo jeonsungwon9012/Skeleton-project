@@ -144,7 +144,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue';
 import { useCategoryStore } from '@/stores/category';
-import { useDashboardStore } from '@/stores/dashboardStore';
+import { useDashboardStore } from '@/stores/dashboard';
 
 const store = useCategoryStore();
 const dashboard = useDashboardStore();

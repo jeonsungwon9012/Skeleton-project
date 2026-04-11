@@ -21,7 +21,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useTransactionStore } from '@/stores/budgetStore';
-import { useDashboardStore } from '@/stores/dashboardStore';
+import { useDashboardStore } from '@/stores/dashboard';
 
 const store = useTransactionStore();
 const dashboard = useDashboardStore();
