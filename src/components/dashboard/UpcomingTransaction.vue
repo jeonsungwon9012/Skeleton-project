@@ -23,14 +23,24 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
 import { useTransactionStore } from '@/stores/budgetStore';
+import { useDashboardStore } from '@/stores/dashboardStore';
+import { computed } from 'vue';
 
 const store = useTransactionStore();
-const { upcomingList } = storeToRefs(store);
+const dashboard = useDashboardStore();
 
-onMounted(async () => {
-  await store.loadData();
+onMounted(() => store.loadData());
+
+// 선택한 월의 반복 거래만 필터
+const upcomingList = computed(() => {
+  const year = dashboard.currentYear;
+  const month = String(dashboard.currentMonth).padStart(2, '0');
+  const prefix = `${year}-${month}`;
+
+  return store.budgetList.filter(
+    (item) => item.isRecurring && item.date.startsWith(prefix),
+  );
 });
 </script>
 

@@ -13,117 +13,129 @@
         }}
       </h2>
 
-      <div class="content">
-        <!-- SVG 버블 차트 -->
-        <div class="bubble-wrap" ref="bubbleWrapRef">
-          <!-- 툴팁 -->
-          <div
-            v-if="tooltip.visible"
-            class="bubble-tooltip"
-            :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
-          >
-            <span class="tooltip-icon">{{ tooltip.data?.img }}</span>
-            <div class="tooltip-body">
-              <p class="tooltip-name">{{ tooltip.data?.name }}</p>
-              <p class="tooltip-amount">
-                {{ tooltip.data?.amount.toLocaleString() }}원
-              </p>
-              <p class="tooltip-count">
-                {{ store.expenseCountByCategory[tooltip.data?.id] }}회 지출
-              </p>
-              <p class="tooltip-ratio">전체의 {{ tooltip.data?.ratio }}%</p>
-            </div>
-          </div>
-
-          <svg
-            :viewBox="`0 0 ${svgSize} ${svgSize}`"
-            :width="svgSize"
-            :height="svgSize"
-            style="display: block; width: 100%; height: auto; overflow: visible"
-          >
-            <g
-              v-for="(bubble, i) in bubbles"
-              :key="bubble.id"
-              class="bubble-group"
-              @mouseenter="(e) => showTooltip(e, bubble)"
-              @mousemove="(e) => moveTooltip(e)"
-              @mouseleave="hideTooltip"
+      <template v-if="store.chartData.length > 0">
+        <div class="content">
+          <!-- SVG 버블 차트 -->
+          <div class="bubble-wrap" ref="bubbleWrapRef">
+            <!-- 툴팁 -->
+            <div
+              v-if="tooltip.visible"
+              class="bubble-tooltip"
+              :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
             >
-              <circle
-                :cx="bubble.cx"
-                :cy="bubble.cy"
-                :r="0"
-                :fill="bubble.color + 'AA'"
-                :stroke="bubble.color"
-                stroke-width="1"
-                class="bubble-circle"
-                :style="{
-                  animationDelay: `${i * 80}ms`,
-                  '--target-r': bubble.r + 'px',
-                }"
-              />
-              <text
-                :x="bubble.cx"
-                :y="bubble.cy"
-                text-anchor="middle"
-                dominant-baseline="middle"
-                :font-size="Math.max(11, Math.round(bubble.r * 0.28))"
-                font-weight="500"
-                fill="#444"
-                class="bubble-label"
-                :style="{ animationDelay: `${i * 80 + 300}ms` }"
-                style="pointer-events: none"
-              >
-                {{ bubble.ratio }}%
-              </text>
-            </g>
-          </svg>
-        </div>
-
-        <!-- 카테고리 리스트 -->
-        <div class="category-list">
-          <div
-            v-for="(item, i) in store.chartData"
-            :key="item.id"
-            class="category-item"
-            :style="{ animationDelay: `${i * 60}ms` }"
-          >
-            <div class="category-row">
-              <span class="category-icon">{{ item.img }}</span>
-              <span class="category-name">{{ item.name }}</span>
-              <span class="category-amount"
-                >{{ item.amount.toLocaleString() }}원</span
-              >
+              <span class="tooltip-icon">{{ tooltip.data?.img }}</span>
+              <div class="tooltip-body">
+                <p class="tooltip-name">{{ tooltip.data?.name }}</p>
+                <p class="tooltip-amount">
+                  {{ tooltip.data?.amount.toLocaleString() }}원
+                </p>
+                <p class="tooltip-count">
+                  {{ store.expenseCountByCategory[tooltip.data?.id] }}회 지출
+                </p>
+                <p class="tooltip-ratio">전체의 {{ tooltip.data?.ratio }}%</p>
+              </div>
             </div>
 
-            <template v-if="item.goalAmount">
-              <div class="progress-bar-wrap">
-                <div
-                  class="progress-bar-fill"
+            <svg
+              :viewBox="`0 0 ${svgSize} ${svgSize}`"
+              :width="svgSize"
+              :height="svgSize"
+              style="
+                display: block;
+                width: 100%;
+                height: auto;
+                overflow: visible;
+              "
+            >
+              <g
+                v-for="(bubble, i) in bubbles"
+                :key="bubble.id"
+                class="bubble-group"
+                @mouseenter="(e) => showTooltip(e, bubble)"
+                @mousemove="(e) => moveTooltip(e)"
+                @mouseleave="hideTooltip"
+              >
+                <circle
+                  :cx="bubble.cx"
+                  :cy="bubble.cy"
+                  :r="0"
+                  :fill="bubble.color + 'AA'"
+                  :stroke="bubble.color"
+                  stroke-width="1"
+                  class="bubble-circle"
                   :style="{
-                    '--fill-width':
-                      Math.min(
-                        Math.round((item.amount / item.goalAmount) * 100),
-                        100,
-                      ) + '%',
-                    backgroundColor: item.color,
-                    animationDelay: `${i * 60 + 200}ms`,
+                    animationDelay: `${i * 80}ms`,
+                    '--target-r': bubble.r + 'px',
                   }"
-                ></div>
-              </div>
-              <span class="progress-pct" :style="{ color: item.color }">
-                {{
-                  Math.min(
-                    Math.round((item.amount / item.goalAmount) * 100),
-                    100,
-                  )
-                }}%
-              </span>
-            </template>
+                />
+                <text
+                  :x="bubble.cx"
+                  :y="bubble.cy"
+                  text-anchor="middle"
+                  dominant-baseline="middle"
+                  :font-size="Math.max(11, Math.round(bubble.r * 0.28))"
+                  font-weight="500"
+                  fill="#444"
+                  class="bubble-label"
+                  :style="{ animationDelay: `${i * 80 + 300}ms` }"
+                  style="pointer-events: none"
+                >
+                  {{ bubble.ratio }}%
+                </text>
+              </g>
+            </svg>
+          </div>
 
-            <p v-else class="no-budget">설정된 목표 예산이 없어요</p>
+          <!-- 카테고리 리스트 -->
+          <div class="category-list">
+            <div
+              v-for="(item, i) in store.chartData"
+              :key="item.id"
+              class="category-item"
+              :style="{ animationDelay: `${i * 60}ms` }"
+            >
+              <div class="category-row">
+                <span class="category-icon">{{ item.img }}</span>
+                <span class="category-name">{{ item.name }}</span>
+                <span class="category-amount"
+                  >{{ item.amount.toLocaleString() }}원</span
+                >
+              </div>
+
+              <template v-if="item.goalAmount">
+                <div class="progress-bar-wrap">
+                  <div
+                    class="progress-bar-fill"
+                    :style="{
+                      '--fill-width':
+                        Math.min(
+                          Math.round((item.amount / item.goalAmount) * 100),
+                          100,
+                        ) + '%',
+                      backgroundColor: item.color,
+                      animationDelay: `${i * 60 + 200}ms`,
+                    }"
+                  ></div>
+                </div>
+                <span class="progress-pct" :style="{ color: item.color }">
+                  {{
+                    Math.min(
+                      Math.round((item.amount / item.goalAmount) * 100),
+                      100,
+                    )
+                  }}%
+                </span>
+              </template>
+
+              <p v-else class="no-budget">설정된 목표 예산이 없어요</p>
+            </div>
           </div>
         </div>
+      </template>
+
+      <div v-else class="empty-state">
+        <p class="empty-icon">📭</p>
+        <p class="empty-text">이번 달 지출 내역이 없어요</p>
       </div>
     </template>
   </div>
@@ -132,8 +144,11 @@
 <script setup>
 import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue';
 import { useCategoryStore } from '@/stores/category';
+import { useDashboardStore } from '@/stores/dashboardStore';
 
 const store = useCategoryStore();
+const dashboard = useDashboardStore();
+
 const bubbleWrapRef = ref(null);
 const svgSize = 300;
 
@@ -200,7 +215,9 @@ onMounted(async () => {
   refreshBubbles();
 });
 
+// chartData가 바뀌면 버블 재배치 (기존 watch 유지)
 watch(() => store.chartData, refreshBubbles, { deep: true });
+
 onUnmounted(() => {});
 </script>
 

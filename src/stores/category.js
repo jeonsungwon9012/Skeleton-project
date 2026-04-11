@@ -8,6 +8,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { categoryApi } from '@/api/category';
+import { useDashboardStore } from '@/stores/dashboardStore';
 
 export const useCategoryStore = defineStore('category', () => {
   // 전체 카테고리 목록 (CATEGORY 테이블)
@@ -19,11 +20,12 @@ export const useCategoryStore = defineStore('category', () => {
   // API 호출 중 여부 (로딩 UI 제어용)
   const isLoading = ref(false);
 
+  const dashboardStore = useDashboardStore();
+
   // 이번 달 지출 내역만 필터링 (type === 'expense' && 날짜가 이번 달)
   const currentMonthBudgets = computed(() => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = dashboardStore.currentYear;
+    const month = String(dashboardStore.currentMonth).padStart(2, '0');
     return budgets.value.filter((b) => {
       return b.type === 'expense' && b.date.startsWith(`${year}-${month}`);
     });

@@ -24,21 +24,22 @@
 <script setup>
 import { onMounted, computed } from 'vue';
 import { useTransactionStore } from '@/stores/budgetStore';
+import { useDashboardStore } from '@/stores/dashboardStore';
 
 const store = useTransactionStore();
+const dashboard = useDashboardStore();
 
-onMounted(async () => {
-  await store.loadData();
-});
+onMounted(() => store.loadData());
 
 const recentList = computed(() => {
-  const today = new Date();
-  today.setHours(23, 59, 59, 999);
+  const year = dashboard.currentYear;
+  const month = String(dashboard.currentMonth).padStart(2, '0');
+  const prefix = `${year}-${month}`;
 
   return store.budgetList
-    .filter((item) => new Date(item.date) <= today)
-    .sort((a, b) => new Date(b.date) - new Date(a.date)) // 최신순
-    .slice(0, 5); // ✅ 5개만
+    .filter((item) => item.date.startsWith(prefix))
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5);
 });
 </script>
 
