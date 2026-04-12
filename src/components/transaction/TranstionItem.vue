@@ -129,121 +129,123 @@
     </div>
 
     <!-- 테이블 -->
-    <table class="table">
-      <thead>
-        <tr>
-          <th width="40px">
-            <input
-              type="checkbox"
-              :checked="isAllSelected"
-              @change="toggleAll"
-            />
-          </th>
-          <th width="50px" class="item-index">No.</th>
-          <th>날짜</th>
-          <th>거래 내역</th>
-          <th>금액</th>
-          <th>카테고리</th>
-          <th>메모</th>
-          <th width="100px">
-            <button v-if="selectedIds.length > 0" @click="deleteSelected">
-              삭제
-            </button>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="(item, index) in filteredMCT"
-          :key="item.id"
-          class="btn_hover"
-          :class="{
-            upcoming: item.isRecurring && new Date(item.date) > new Date(),
-          }"
-          v-show="
-            !(item.isRecurring && new Date(item.date) > new Date()) ||
-            showUpcoming
-          "
-        >
-          <td>
-            <input
-              type="checkbox"
-              :value="item.id"
-              v-model="selectedIds"
-              :disabled="item.isRecurring && new Date(item.date) > new Date()"
-            />
-          </td>
-          <td class="item-index">{{ index + 1 }}</td>
-          <td>{{ item.date }}</td>
-          <td>{{ item.detail }}</td>
-          <td>
-            <span :class="item.type === 'expense' ? 'negative' : 'positive'">
-              {{ item.type === 'expense' ? '-' : '+'
-              }}{{ Number(item.amount).toLocaleString() }}원
-            </span>
-          </td>
-          <td>
-            <span
-              :style="{ background: item.categoryColor }"
-              class="categoryImg"
-            >
-              {{ item.categoryImg }}
-            </span>
-            {{ item.categoryName }}
-          </td>
-          <td>{{ item.memo }}</td>
-          <td>
-            <div class="button_hover">
-              <!-- 수정 아이콘 -->
-              <svg
-                class="pencil_icon"
-                width="24px"
-                height="24px"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                @click="handleEdit(item)"
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th width="40px">
+              <input
+                type="checkbox"
+                :checked="isAllSelected"
+                @change="toggleAll"
+              />
+            </th>
+            <th width="50px" class="item-index">No.</th>
+            <th>날짜</th>
+            <th>거래 내역</th>
+            <th>금액</th>
+            <th>카테고리</th>
+            <th>메모</th>
+            <th width="100px">
+              <button v-if="selectedIds.length > 0" @click="deleteSelected">
+                삭제
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(item, index) in filteredMCT"
+            :key="item.id"
+            class="btn_hover"
+            :class="{
+              upcoming: item.isRecurring && new Date(item.date) > new Date(),
+            }"
+            v-show="
+              !(item.isRecurring && new Date(item.date) > new Date()) ||
+              showUpcoming
+            "
+          >
+            <td>
+              <input
+                type="checkbox"
+                :value="item.id"
+                v-model="selectedIds"
+                :disabled="item.isRecurring && new Date(item.date) > new Date()"
+              />
+            </td>
+            <td class="item-index">{{ index + 1 }}</td>
+            <td>{{ item.date }}</td>
+            <td>{{ item.detail }}</td>
+            <td>
+              <span :class="item.type === 'expense' ? 'negative' : 'positive'">
+                {{ item.type === 'expense' ? '-' : '+'
+                }}{{ Number(item.amount).toLocaleString() }}원
+              </span>
+            </td>
+            <td>
+              <span
+                :style="{ background: item.categoryColor }"
+                class="categoryImg"
               >
-                <path
-                  d="M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942"
-                  stroke="#000000"
+                {{ item.categoryImg }}
+              </span>
+              {{ item.categoryName }}
+            </td>
+            <td>{{ item.memo }}</td>
+            <td>
+              <div class="button_hover">
+                <!-- 수정 아이콘 -->
+                <svg
+                  class="pencil_icon"
+                  width="24px"
+                  height="24px"
+                  viewBox="0 0 24 24"
                   stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <!-- 삭제 아이콘 -->
-              <svg
-                class="trash_icon"
-                width="24px"
-                height="24px"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                stroke-width="1.5"
-                @click="handleDelete(item.id)"
-              >
-                <path
-                  d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z"
-                  stroke="#000000"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  @click="handleEdit(item)"
+                >
+                  <path
+                    d="M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942"
+                    stroke="#000000"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                <!-- 삭제 아이콘 -->
+                <svg
+                  class="trash_icon"
+                  width="24px"
+                  height="24px"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
                   stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375"
-                  stroke="#000000"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+                  @click="handleDelete(item.id)"
+                >
+                  <path
+                    d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z"
+                    stroke="#000000"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375"
+                    stroke="#000000"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- 수정 모달 -->
     <EditModal
@@ -332,6 +334,18 @@ onMounted(async () => {
     const x = e.pageX - slider.offsetLeft;
     slider.scrollLeft = scrollLeft - (x - startX) * 2;
   });
+
+  // 💡 마우스 휠로 가로 스크롤 기능 추가
+  slider.addEventListener(
+    'wheel',
+    (e) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault(); // 페이지 전체의 세로 스크롤을 막음
+        slider.scrollLeft += e.deltaY; // 휠 움직임만큼 가로로 스크롤
+      }
+    },
+    { passive: false },
+  );
 });
 
 // 필터링 (store의 헬퍼 활용)
@@ -529,10 +543,16 @@ const executeDelete = async () => {
 }
 
 .button_hover {
-  display: none; /* 기본 숨김 */
+  visibility: hidden; /* 공간은 차지하지만 보이지 않음 */
+  display: flex;
+  align-items: center;
+  height: 24px; /* 아이콘 높이와 동일하게 고정 */
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 .btn_hover:hover .button_hover {
-  display: block;
+  visibility: visible;
+  opacity: 1;
 }
 
 .pencil_icon {
@@ -544,9 +564,6 @@ const executeDelete = async () => {
 
 .trash_icon:hover {
   transform: scale(1.2);
-}
-td {
-  height: 30px;
 }
 
 .filter_bar {
@@ -715,6 +732,26 @@ td {
 .positive {
   color: #2ecc71;
   font-weight: 500;
+}
+
+.table-container {
+  height: 550px; /* 10개 항목 + 헤더 기준 고정 높이 */
+  overflow-y: auto;
+  border-radius: 12px;
+  background-color: #fff;
+  margin-top: 10px;
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #fff;
+  box-shadow: inset 0 -1px 0 #eee;
+}
+
+td {
+  height: 52px; /* 행 높이를 명시적으로 고정하여 데이터 유무와 상관없이 일정하게 유지 */
 }
 
 .item-index {

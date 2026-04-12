@@ -1880,6 +1880,54 @@
       "isRecurring": true,
       "cycle": "weekly",
       "id": "nzvGok2QGno"
+    },
+    {
+      "date": "2026-04-12",
+      "type": "expense",
+      "amount": 5500,
+      "detail": "카페라떼",
+      "memo": "카공",
+      "uid": 2,
+      "cid": 2,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "Qv9ZnVH01lw"
+    },
+    {
+      "date": "2026-04-12",
+      "type": "expense",
+      "amount": 5500,
+      "detail": "카페라떼",
+      "memo": "카공",
+      "uid": 2,
+      "cid": 2,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "phDlAlMH5RE"
+    },
+    {
+      "date": "2026-04-12",
+      "type": "expense",
+      "amount": 5500,
+      "detail": "카페라떼",
+      "memo": "카공",
+      "uid": 2,
+      "cid": 2,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "kgz_6j7M2NE"
+    },
+    {
+      "date": "2026-04-12",
+      "type": "expense",
+      "amount": 5500,
+      "detail": "카페라떼",
+      "memo": "카공",
+      "uid": 2,
+      "cid": 2,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "IjGa1ZRlnNA"
     }
   ],
   "TEMPLATE": [
