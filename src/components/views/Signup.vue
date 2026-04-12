@@ -14,6 +14,8 @@ const form = ref({
   gender: '', // 'male' 또는 'female'
 });
 
+const ageOptions = [10, 20, 30, 40, 50, 60, 70, 80];
+
 /**
  * 가입 버튼 클릭 핸들러
  */
@@ -28,12 +30,25 @@ const handleSignup = async () => {
     return;
   }
 
-  // 가입 로직 (실제 API 연동 시 userStore에서 처리)
-  console.log('Signup Data:', form.value);
+  try {
+    // 1. 이메일 중복 체크 (DB 조회를 통해 이미 가입된 이메일인지 확인)
+    const isDuplicate = await userStore.isEmailDuplicate(form.value.email);
+    if (isDuplicate) {
+      alert('이미 가입된 이메일입니다. 다른 이메일을 사용해주세요.');
+      return;
+    }
 
-  // 성공 시 로그인 처리 후 캘린더 화면으로 이동
-  await userStore.login(form.value.email);
-  router.push('/dashboard');
+    // 2. 회원가입 실행 (axios.post를 통해 db.json의 USER 테이블에 실제 저장)
+    // signup 액션 내부에서 유저 정보를 저장하고 user 상태를 업데이트합니다.
+    await userStore.signup(form.value);
+
+    // 3. 가입 완료 후 대시보드로 이동
+    alert('똑딱 가계부에 오신 것을 환영합니다!');
+    router.push('/dashboard');
+  } catch (error) {
+    console.error('Signup Failure:', error);
+    alert('회원가입 중 문제가 발생했습니다. 서버 상태를 확인해주세요.');
+  }
 };
 
 const goBack = () => {
@@ -88,26 +103,23 @@ const goBack = () => {
           <!-- 나이 입력 -->
           <div class="form-item age-item">
             <label>나이</label>
-            <input
-              v-model.number="form.age"
-              type="number"
-              placeholder="나이"
-              required
-              min="1"
-            />
+            <select v-model="form.age" class="form-select" required>
+              <option :value="null" disabled>선택</option>
+              <option v-for="age in ageOptions" :key="age" :value="age">
+                {{ age }}{{ age === 80 ? '대 이상' : '대' }}
+              </option>
+            </select>
           </div>
 
           <!-- 성별 선택 -->
           <div class="form-item gender-item">
             <label>성별</label>
-            <div class="gender-group">
-              <label :class="{ active: form.gender === 'male' }">
-                <input type="radio" v-model="form.gender" value="male" /> 남
-              </label>
-              <label :class="{ active: form.gender === 'female' }">
-                <input type="radio" v-model="form.gender" value="female" /> 여
-              </label>
-            </div>
+            <select v-model="form.gender" class="form-select" required>
+              <option value="" disabled>선택</option>
+              <option value="male">남성</option>
+              <option value="female">여성</option>
+              <option value="other">기타</option>
+            </select>
           </div>
         </div>
 
@@ -181,23 +193,32 @@ const goBack = () => {
 .form-item label {
   font-size: 14px;
   font-weight: 600;
-  color: #444;
+  color: #888;
 }
 
-.form-item input {
+.form-item input,
+.form-item .form-select {
+  width: 100%;
   padding: 14px;
-  border: 1.5px solid #eee;
+  border: 1.5px solid #f1f1f1;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
   outline: none;
   transition: border-color 0.2s;
+  background-color: #fcfcfc;
+  box-sizing: border-box;
 }
 
-.form-item input:focus {
+.form-item input:focus,
+.form-item .form-select:focus {
   border-color: var(--color-primary);
+  background-color: #fff;
 }
 
 .form-row {
+  width: 100%;
   display: flex;
   gap: 16px;
 }
@@ -206,35 +227,7 @@ const goBack = () => {
   flex: 1;
 }
 .gender-item {
-  flex: 1.5;
-}
-
-.gender-group {
-  display: flex;
-  gap: 8px;
-}
-
-.gender-group label {
   flex: 1;
-  padding: 12px;
-  border: 1.5px solid #eee;
-  border-radius: 12px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 500;
-  color: #888;
-  transition: all 0.2s;
-}
-
-.gender-group input {
-  display: none;
-}
-
-.gender-group label.active {
-  background-color: var(--color-primary-10, #e8f5e9);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
 }
 
 .submit-btn {

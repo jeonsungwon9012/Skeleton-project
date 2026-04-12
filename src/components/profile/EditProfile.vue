@@ -6,79 +6,77 @@
       <div class="user-img">
         <img src="../../assets/icons/profile.svg" alt="프로필 아이콘" />
       </div>
-      <table>
-        <tr>
-          <td>닉네임</td>
-          <td>
-            <input
-              v-model="editForm.nickname"
-              type="text"
-              placeholder="2~6글자"
-              minlength="2"
-              maxlength="6"
-              required
-            />
-            <span
-              v-if="
-                editForm.nickname.length > 0 &&
-                (editForm.nickname.length < 2 || editForm.nickname.length > 6)
-              "
-              class="error-msg"
-            >
-              (!) 2~6글자 사이로 입력해주세요
-            </span>
-          </td>
-        </tr>
-        <tr>
-          <td>이메일</td>
-          <td>
-            <input
-              v-model="editForm.email"
-              type="email"
-              placeholder="example@email.com"
-              required
-            />
-            <span
-              v-if="editForm.email && !validateEmail(editForm.email)"
-              class="error-msg"
-            >
-              (!) 올바른 이메일 형식이 아닙니다.
-            </span>
-          </td>
-        </tr>
-        <tr>
-          <td>연령대</td>
-          <td>
-            <select v-model="editForm.age">
+      <div class="info-list">
+        <div class="info-item">
+          <label>닉네임</label>
+          <input
+            v-model="editForm.nickname"
+            type="text"
+            placeholder="2~6글자"
+            minlength="2"
+            maxlength="6"
+            required
+          />
+          <span
+            v-if="
+              editForm.nickname.length > 0 &&
+              (editForm.nickname.length < 2 || editForm.nickname.length > 6)
+            "
+            class="error-msg"
+          >
+            (!) 2~6글자 사이로 입력해주세요
+          </span>
+        </div>
+
+        <div class="info-item">
+          <label>이메일</label>
+          <input
+            v-model="editForm.email"
+            type="email"
+            placeholder="example@email.com"
+            required
+          />
+          <span
+            v-if="editForm.email && !validateEmail(editForm.email)"
+            class="error-msg"
+          >
+            (!) 올바른 이메일 형식이 아닙니다.
+          </span>
+        </div>
+
+        <div class="info-row">
+          <div class="info-item">
+            <label>연령대</label>
+            <select v-model="editForm.age" class="form-select">
               <option :value="null" disabled>연령대를 선택하세요</option>
               <option v-for="age in ageOptions" :key="age" :value="age">
                 {{ age }}{{ age === 80 ? '대 이상' : '대' }}
               </option>
             </select>
-          </td>
-        </tr>
-        <tr>
-          <td>성별</td>
-          <td class="radio-group">
-            <label
-              ><input type="radio" v-model="editForm.gender" value="male" />
-              남성</label
-            >
-            <label
-              ><input type="radio" v-model="editForm.gender" value="female" />
-              여성</label
-            >
-            <label
-              ><input type="radio" v-model="editForm.gender" value="other" />
-              기타</label
-            >
-          </td>
-        </tr>
-      </table>
+          </div>
+
+          <div class="info-item">
+            <label>성별</label>
+            <select v-model="editForm.gender" class="form-select">
+              <option value="" disabled>선택</option>
+              <option value="male">남성</option>
+              <option value="female">여성</option>
+              <option value="other">기타</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
       <div class="edit-button">
-        <button type="button" @click="goToProfile">취소</button>
-        <button type="submit" :disabled="!isFormValid" @click="handleSave">
+        <button type="button" class="btn-cancel" @click="goToProfile">
+          취소
+        </button>
+        <button
+          type="submit"
+          class="btn-save"
+          :disabled="!isFormValid"
+          @click="handleSave"
+        >
           저장
         </button>
       </div>
@@ -102,7 +100,6 @@ import SuccessModal from '@/components/common/CompleteModal.vue';
 
 const router = useRouter();
 const store = useUserStore();
-const userId = localStorage.getItem('userId');
 
 const editForm = ref({
   nickname: '',
@@ -134,6 +131,7 @@ watch(
 const ageOptions = [10, 20, 30, 40, 50, 60, 70, 80];
 
 onMounted(() => {
+  const userId = store.user?.id || localStorage.getItem('userId');
   if (userId && !store.user) {
     store.fetchUser(userId);
   }
@@ -157,6 +155,8 @@ const isFormValid = computed(() => {
 });
 
 const handleSave = async () => {
+  // 💡 스토어에 저장된 유저 ID를 최우선으로 사용
+  const userId = store.user?.id || localStorage.getItem('userId');
   if (!userId) {
     modal.value = {
       visible: true,
@@ -196,120 +196,114 @@ const handleModalClose = () => {
 .profile {
   display: flex;
   flex-direction: column;
-  margin: 2rem;
-  gap: 0.5rem;
+  gap: 8px;
   width: 100%;
-  max-width: 60rem;
+  max-width: 420px;
 }
 
 .profile-header {
-  padding: 0.5rem;
-  font-weight: 500;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 8px;
 }
 
 .profile-container {
-  position: relative;
-  background-color: var(--color-deepgray-10);
-  border: 1px solid var(--color-deepgray-20);
-  border-radius: 0.5rem;
-  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1.5rem, 5vw, 4rem);
+  background-color: var(--color-white);
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: var(--drop--shadow, 0 10px 30px rgba(0, 0, 0, 0.05));
   width: 100%;
-  min-height: clamp(18rem, 40vw, 33rem);
   box-sizing: border-box;
-}
-
-input[type='text'],
-input[type='email'],
-select {
-  width: clamp(8rem, 20vw, 15rem);
-  padding: 0.6rem;
-  border: 1px solid var(--color-deepgray-20);
-  border-radius: 0.4rem;
-  font-size: clamp(0.85rem, 1.5vw, 1rem);
-  box-sizing: border-box;
-}
-
-select {
-  cursor: pointer;
-  background-color: white;
-}
-
-.radio-group {
   display: flex;
-  gap: clamp(0.8rem, 2vw, 1.5rem);
-  font-size: clamp(0.85rem, 1.5vw, 1rem);
-  height: 100%;
-  padding: clamp(0.5rem, 1vw, 1rem);
-  flex-wrap: wrap;
-}
-
-.radio-group label {
-  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
-  cursor: pointer;
-}
-
-.radio-group input[type='radio'] {
-  width: 1.2rem;
-  height: 1.2rem;
-  cursor: pointer;
-}
-
-.edit-button {
-  position: absolute;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  display: flex;
-  gap: 0.7rem;
-}
-
-.edit-button button {
-  font-size: clamp(0.9rem, 1.5vw, 1.2rem);
-  padding: 0.5rem clamp(0.8rem, 2vw, 1.3rem);
-  border: none;
-  border-radius: 1.7rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.edit-button button:disabled {
-  background-color: #ccc !important;
-  cursor: not-allowed;
-}
-
-.edit-button button:nth-child(1) {
-  background-color: var(--color-deepgray-30);
-}
-.edit-button button:nth-child(2) {
-  background-color: var(--color-primary-80);
-  color: white;
-}
-
-.edit-button button:nth-child(1):hover {
-  background-color: var(--color-deepgray-40);
-}
-.edit-button button:nth-child(2):hover:not(:disabled) {
-  background-color: var(--color-primary);
 }
 
 .user-img img {
-  width: clamp(6rem, 12vw, 10rem);
-  height: clamp(6rem, 12vw, 10rem);
-  margin-bottom: clamp(1rem, 2vw, 1.5rem);
+  width: 100px;
+  height: 100px;
+  margin-bottom: 32px;
 }
 
-table {
-  font-size: clamp(1rem, 2vw, 1.5rem);
+.info-list {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
-table td {
-  padding: clamp(0.3rem, 0.5vw, 0.5rem) 0.5rem;
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  flex: 1;
 }
 
-tr td:nth-child(2) {
-  padding-left: clamp(1.5rem, 4vw, 5rem);
+.info-item label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #888;
+}
+
+.info-item input,
+.info-item .form-select {
+  width: 100%;
+  padding: 14px;
+  border: 1.5px solid #f1f1f1;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s;
+  background-color: #fcfcfc;
+  box-sizing: border-box;
+}
+
+.info-item input:focus,
+.info-item .form-select:focus {
+  border-color: var(--color-primary);
+  background-color: #fff;
+}
+
+.info-row {
+  width: 100%;
+  display: flex;
+  gap: 16px;
+}
+
+.edit-button {
+  width: 100%;
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 32px;
+}
+
+.edit-button button {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  background-color: var(--color-deepgray-30);
+  color: var(--color-deepgray-100);
+}
+.btn-save {
+  background-color: var(--color-primary);
+  color: white;
+}
+.btn-save:disabled {
+  background-color: #ccc !important;
+  cursor: not-allowed;
 }
 
 .error-msg {
@@ -317,18 +311,5 @@ tr td:nth-child(2) {
   color: #ff4d4f;
   font-size: 0.8rem;
   margin-top: 0.2rem;
-}
-
-@media (max-width: 900px) {
-  .edit-button {
-    position: static;
-    margin-top: 1rem;
-    justify-content: flex-end;
-  }
-
-  .profile-container {
-    display: flex;
-    flex-direction: column;
-  }
 }
 </style>

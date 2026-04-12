@@ -11,57 +11,158 @@ export const useTransactionStore = defineStore('transaction', () => {
   const budgetList = ref([]);
   const categories = ref([]);
   const templates = ref([]);
+  const users = ref([]);
 
+  // --- [공통 상태] ---
   const currentUid = computed(() => userStore.user?.id);
+  const currentMonth = ref(new Date()); // Date 객체 (캘린더용)
+  const currentMonthNum = ref(new Date().getMonth() + 1); // 숫자 (리스트용)
 
-  // 💡 [추가] 로그인한 유저의 내역만 필터링하는 반응형 객체
+  // --- [필터 상태] ---
+  const selectedDates = ref([]); // 캘린더 선택 날짜
+  const selectedCategories = ref([]); // 카테고리 ID 배열 (Number)
+  const selectedType = ref('전체'); // '전체', 'income', 'expense'
+  const searchQuery = ref(''); // 검색어
+  const isScheduledOnly = ref(false); // 예정 내역 필터
+
+  // --- [Getters] ---
+
   const myBudgets = computed(() => {
     return budgetList.value.filter(
-      (b) => String(b.uid) === String(currentUid.value),
+      (b) => Number(b.uid) === Number(currentUid.value),
+    );
+  });
+
+  const categoryMap = computed(() => {
+    return categories.value.reduce((acc, cat) => {
+      acc[String(cat.id)] = cat;
+      return acc;
+    }, {});
+  });
+
+  // 캘린더용 점(Dots) 데이터
+  const calendarDots = computed(() => {
+    return myBudgets.value.filter((item) => {
+      const matchCat =
+        selectedCategories.value.length === 0 ||
+        selectedCategories.value.includes(Number(item.cid));
+      const matchType =
+        selectedType.value === '전체' || item.type === selectedType.value;
+      return matchCat && matchType;
+    });
+  });
+
+  // 캘린더 선택 날짜/카테고리 기반 상세 내역
+  const rangeBudgets = computed(() => {
+    return myBudgets.value.filter((item) => {
+      const matchDate =
+        selectedDates.value.length === 0 ||
+        selectedDates.value.includes(item.date);
+      const matchCat =
+        selectedCategories.value.length === 0 ||
+        selectedCategories.value.includes(Number(item.cid));
+      const matchType =
+        selectedType.value === '전체' || item.type === selectedType.value;
+      const isFuture = new Date(item.date) > new Date();
+      const matchScheduled = !isScheduledOnly.value || isFuture;
+      const matchSearch =
+        !searchQuery.value ||
+        item.detail.includes(searchQuery.value) ||
+        (item.memo && item.memo.includes(searchQuery.value));
+
+      return (
+        matchDate && matchCat && matchType && matchScheduled && matchSearch
+      );
+    });
+  });
+
+  const selectedTotal = computed(() => {
+    return rangeBudgets.value.reduce(
+      (acc, cur) => {
+        if (cur.type === 'income') acc.income += cur.amount;
+        else acc.expense += cur.amount;
+        return acc;
+      },
+      { income: 0, expense: 0 },
     );
   });
 
   // 데이터 불러오기
-  const loadData = async () => {
-    const uid = currentUid.value;
+  const loadData = async (uid = currentUid.value) => {
     if (!uid) return;
 
     try {
-      const [data, tData] = await Promise.all([
-        fetchAllDashboardData(uid),
+      const [budgetRes, categoryRes, templateRes, userRes] = await Promise.all([
+        axios.get(`/api/BUDGET?uid=${uid}`),
+        categoryApi.getCategories(),
         templateApi.getTemplates(uid),
+        axios.get('/api/USER'),
       ]);
 
-      const categoryNameMap = new Map();
-      const categoryImgMap = new Map();
-      const categoryColorMap = new Map();
-
-      data.CATEGORY.forEach((cate) => {
-        const cid = String(cate.id);
-        categoryNameMap.set(cid, cate.name);
-        categoryImgMap.set(cid, cate.img);
-        categoryColorMap.set(cid, cate.color);
-      });
-
-      // 💡 기본 카테고리이거나 현재 접속한 유저의 카테고리만 필터링
-      categories.value = data.CATEGORY.filter(
-        (cate) => cate.isBasic === true || String(cate.uid) === String(uid),
+      const rawCategories = categoryRes.data || [];
+      categories.value = rawCategories.filter(
+        (c) => c.isBasic || String(c.uid) === String(uid),
       );
 
-      budgetList.value = data.BUDGET.map((budget) => {
-        const cidKey = String(budget.cid);
+      budgetList.value = budgetRes.data.map((budget) => {
+        const cat = categoryMap.value[String(budget.cid)];
         return {
           ...budget,
-          categoryName: categoryNameMap.get(cidKey) || '알 수 없음',
-          categoryImg: categoryImgMap.get(cidKey) || '❓',
-          categoryColor: categoryColorMap.get(cidKey) || '#000000',
+          categoryName: cat?.name || '알 수 없음',
+          categoryImg: cat?.img || '❓',
+          categoryColor: cat?.color || '#000000',
         };
       });
-      templates.value = tData.data || [];
+      templates.value = templateRes.data || [];
+      users.value = userRes.data || [];
     } catch (err) {
       console.error('데이터 로딩 실패:', err);
     }
   };
+
+  // fetchData는 loadData의 별칭으로 유지 (캘린더 호환성)
+  const fetchData = loadData;
+
+  // --- [캘린더 전용 Actions] ---
+  function changeMonth(diff) {
+    const next = new Date(currentMonth.value);
+    next.setMonth(next.getMonth() + diff);
+    currentMonth.value = next;
+    currentMonthNum.value = next.getMonth() + 1;
+    resetFilters();
+  }
+
+  function toggleDate(date, isShiftPressed = false) {
+    if (isShiftPressed) {
+      const index = selectedDates.value.indexOf(date);
+      if (index > -1) selectedDates.value.splice(index, 1);
+      else selectedDates.value.push(date);
+    } else {
+      selectedDates.value =
+        selectedDates.value[0] === date && selectedDates.value.length === 1
+          ? []
+          : [date];
+    }
+    selectedCategories.value = [];
+    isScheduledOnly.value = false;
+  }
+
+  function toggleCategory(cid) {
+    const numCid = Number(cid);
+    const index = selectedCategories.value.indexOf(numCid);
+    if (index > -1) selectedCategories.value.splice(index, 1);
+    else selectedCategories.value.push(numCid);
+    selectedDates.value = [];
+    isScheduledOnly.value = false;
+  }
+
+  function resetFilters() {
+    selectedType.value = '전체';
+    selectedCategories.value = [];
+    isScheduledOnly.value = false;
+    selectedDates.value = [];
+    searchQuery.value = '';
+  }
 
   // 필터링: 카테고리 + 검색
   const filteredByCategory = (selectedCategory, search) =>
@@ -81,13 +182,14 @@ export const useTransactionStore = defineStore('transaction', () => {
       });
     });
 
-  // 필터링: 월
-  const filteredByMonth = (list, currentMonth) =>
-    computed(() =>
-      list.value.filter(
-        (item) => parseInt(item.date.split('-')[1], 10) === currentMonth.value,
-      ),
-    );
+  // 필터링: 월 (currentMonthNum이 숫자이므로 안전하게 비교)
+  const filteredByMonth = (list, monthNum) =>
+    computed(() => {
+      const target = monthNum?.value || monthNum;
+      return list.value.filter(
+        (item) => parseInt(item.date.split('-')[1], 10) === Number(target),
+      );
+    });
 
   // 필터링: 타입
   const filteredByType = (list, selectedType) =>
@@ -97,6 +199,15 @@ export const useTransactionStore = defineStore('transaction', () => {
           selectedType.value === '전체' || selectedType.value === item.type,
       ),
     );
+
+  function setTransactionType(type) {
+    selectedType.value = type;
+  }
+
+  function toggleScheduled() {
+    isScheduledOnly.value = !isScheduledOnly.value;
+  }
+
   const filteredByToday = (list) =>
     computed(() => {
       const today = new Date();
@@ -127,33 +238,45 @@ export const useTransactionStore = defineStore('transaction', () => {
       .slice(0, 5);
   });
 
-  const getMonthlySummary = (month) => {
-    const monthlyList = myBudgets.value.filter(
-      (item) => parseInt(item.date.split('-')[1], 10) === month,
-    );
-
-    const expense = monthlyList
-      .filter((item) => item.type === 'expense')
-      .reduce((sum, item) => sum + item.amount, 0);
-
-    const income = monthlyList
-      .filter((item) => item.type === 'income')
-      .reduce((sum, item) => sum + item.amount, 0);
-
+  // 💡 더 유연한 요약 함수 (연도 대응)
+  const getMonthlySummary = (yearOrMonth, month) => {
+    let targetMonth;
+    if (month === undefined) {
+      const now = new Date();
+      targetMonth = `${now.getFullYear()}-${String(yearOrMonth).padStart(2, '0')}`;
+    } else {
+      targetMonth = `${yearOrMonth}-${String(month).padStart(2, '0')}`;
+    }
+    const summary = myBudgets.value
+      .filter((b) => b.date.startsWith(targetMonth))
+      .reduce(
+        (acc, cur) => {
+          const amount = Number(cur.amount) || 0;
+          if (cur.type === 'income') acc.income += amount;
+          else acc.expense += amount;
+          return acc;
+        },
+        { income: 0, expense: 0 },
+      );
     return {
-      expense,
-      income,
-      net: income - expense,
+      ...summary,
+      net: summary.income - summary.expense,
+      total: summary.income - summary.expense,
     };
   };
 
   // 💡 [추가] 유저별 템플릿 개수 확인
   const getTemplateCountByUser = (uid = currentUid.value) =>
-    templates.value.filter((t) => String(t.uid) === String(uid)).length;
+    templates.value.filter((t) => Number(t.uid) === Number(uid)).length;
 
   // 💡 [추가] 거래 내역 추가
   const addBudget = async (payload) => {
+    // 💡 현재 목록에서 가장 큰 ID + 1 (숫자 형식)
+    const nextId =
+      Math.max(...budgetList.value.map((b) => Number(b.id)), 0) + 1;
+
     const response = await axios.post('/api/BUDGET', {
+      id: nextId,
       ...payload,
       uid: Number(currentUid.value),
     });
@@ -165,7 +288,7 @@ export const useTransactionStore = defineStore('transaction', () => {
   const editBudget = async (id, payload) => {
     const response = await axios.put(`/api/BUDGET/${id}`, payload);
     const index = budgetList.value.findIndex(
-      (b) => String(b.id) === String(id),
+      (b) => Number(b.id) === Number(id),
     );
     if (index !== -1) budgetList.value[index] = response.data;
     return response.data;
@@ -173,11 +296,13 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   // 💡 [추가] 카테고리 추가
   const addCategory = async (payload) => {
-    const response = await categoryApi.createCategory(payload);
-    categories.value.push({
-      ...response.data,
-      id: String(response.data.id),
+    const nextId =
+      Math.max(...categories.value.map((c) => Number(c.id)), 0) + 1;
+    const response = await categoryApi.createCategory({
+      id: nextId,
+      ...payload,
     });
+    categories.value.push(response.data);
     return response.data;
   };
 
@@ -186,14 +311,17 @@ export const useTransactionStore = defineStore('transaction', () => {
     await axios.delete(`/api/BUDGET/${id}`);
     // 로컬 상태 업데이트
     budgetList.value = budgetList.value.filter(
-      (b) => String(b.id) !== String(id),
+      (b) => Number(b.id) !== Number(id),
     );
     return true;
   };
 
   // 💡 [추가] 템플릿 추가
   const addTemplate = async (payload) => {
+    const nextId = Math.max(...templates.value.map((t) => Number(t.id)), 0) + 1;
+
     const response = await axios.post('/api/TEMPLATE', {
+      id: nextId,
       ...payload,
       uid: Number(currentUid.value),
     });
@@ -203,10 +331,23 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   return {
     budgetList,
+    budgets: budgetList, // 하위 호환성을 위한 별칭 추가
     myBudgets,
     categories,
+    categoryMap,
     templates,
+    currentMonth,
+    currentMonthNum,
+    selectedDates,
+    selectedCategories,
+    selectedType,
+    searchQuery,
+    isScheduledOnly,
+    calendarDots,
+    rangeBudgets,
+    selectedTotal,
     loadData,
+    fetchData,
     filteredByCategory,
     filteredByMonth,
     filteredByType,
@@ -219,5 +360,11 @@ export const useTransactionStore = defineStore('transaction', () => {
     editBudget,
     deleteBudget,
     addTemplate,
+    changeMonth,
+    toggleDate,
+    toggleCategory,
+    setTransactionType,
+    toggleScheduled,
+    resetFilters,
   };
 });

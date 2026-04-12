@@ -262,11 +262,8 @@ const handleApplyTemplate = async (tmpl) => {
   try {
     await templateStore.applyTemplate(tmpl, uid);
 
-    // 💡 캘린더용 데이터 갱신 (budgetStore2)
-    await budgetStore.fetchData();
-
-    // 💡 거래내역 리스트용 데이터 갱신 (budgetStore)
-    await transactionStore.loadData();
+    // 💡 통합된 스토어 데이터 한 번만 갱신
+    await budgetStore.loadData(uid);
 
     // 카테고리 스토어 갱신 (횟수 반영)
     await categoryStore.fetchAll(uid);
@@ -278,7 +275,7 @@ const handleApplyTemplate = async (tmpl) => {
     const cid = tmpl.cid ?? 10;
     const count = categoryStore.expenseCountByCategory[cid] ?? 1;
     const category = categoryStore.categories.find(
-      (c) => String(c.id) === String(cid),
+      (c) => Number(c.id) === Number(cid),
     );
     const categoryName = category
       ? `${category.img} ${category.name}`

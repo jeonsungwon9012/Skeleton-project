@@ -65,7 +65,9 @@ export const useCategoryStore = defineStore('category', () => {
   const topCountCategory = computed(() => {
     const map = expenseCountByCategory.value;
     const topCid = Object.keys(map).sort((a, b) => map[b] - map[a])[0];
-    return categories.value.find((c) => c.id === String(topCid)) || null;
+    return (
+      categories.value.find((c) => Number(c.id) === Number(topCid)) || null
+    );
   });
 
   // 버블 차트 및 카테고리 리스트용 데이터
@@ -82,7 +84,7 @@ export const useCategoryStore = defineStore('category', () => {
         amount: map[c.id],
         ratio: total > 0 ? Math.round((map[c.id] / total) * 100) : 0,
         goalAmount:
-          categoryBudgets.value.find((b) => String(b.cid) === String(c.id))
+          categoryBudgets.value.find((b) => Number(b.cid) === Number(c.id))
             ?.amount || null,
       }))
       .sort((a, b) => b.amount - a.amount);
@@ -98,7 +100,7 @@ export const useCategoryStore = defineStore('category', () => {
         categoryApi.getCategoryBudgets(uid),
         categoryApi.getBudgets(uid),
       ]);
-      categories.value = catRes.data.map((c) => ({ ...c, id: String(c.id) }));
+      categories.value = catRes.data;
       categoryBudgets.value = budgetRes.data;
       budgets.value = expenseRes.data;
     } finally {
@@ -134,7 +136,7 @@ export const useCategoryStore = defineStore('category', () => {
           (a, b) => counts[b] - counts[a],
         )[0];
         const category = categories.value.find(
-          (c) => String(c.id) === String(topCid),
+          (c) => Number(c.id) === Number(topCid),
         );
 
         return {
