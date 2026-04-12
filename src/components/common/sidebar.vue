@@ -94,16 +94,12 @@
                 </div>
                 <!-- 수정 / 삭제 버튼 -->
                 <div class="tmpl-actions">
-                  <RouterLink
-                    :to="{
-                      path: '/addTransaction',
-                      query: { templateId: tmpl.id },
-                    }"
+                  <button
                     class="tmpl-btn"
-                    @click="closeAll"
+                    @click.stop="handleEditTemplate(tmpl)"
                   >
-                    <img :src="editPencil" />
-                  </RouterLink>
+                    <img :src="editPencil" alt="수정" />
+                  </button>
                   <img
                     class="tmpl-btn tmpl-delete-img"
                     :src="trash"
@@ -114,14 +110,13 @@
             </template>
 
             <!-- 템플릿이 3개 미만이면 추가 버튼 표시 -->
-            <RouterLink
+            <button
               v-if="templateStore.templates.length < 3"
-              to="/addTransaction"
               class="template-item add"
-              @click="closeAll"
+              @click="showAddTemplateModal = true"
             >
               템플릿 추가하기
-            </RouterLink>
+            </button>
           </div>
         </div>
 
@@ -153,6 +148,13 @@
         :description="modal.description"
         @close="modal.visible = false"
       />
+
+      <!-- 템플릿 추가 모달 -->
+      <AddTemplateModal
+        :visible="showAddTemplateModal"
+        :item="selectedTemplate"
+        @close="showAddTemplateModal = false"
+      />
     </div>
   </div>
 </template>
@@ -164,7 +166,7 @@ import placeholder from '@/assets/icons/placeholder.svg';
 import coinIcon from '@/assets/icons/money.svg';
 import editPencil from '@/assets/icons/edit-pencil.svg';
 import trash from '@/assets/icons/trash.svg';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCategoryStore } from '@/stores/category';
 import { useTransactionStore } from '@/stores/budgetStore';
@@ -173,6 +175,7 @@ import { useTemplateStore } from '@/stores/template';
 import { useUserStore } from '@/stores/user';
 import { useReactionStore } from '@/stores/reaction';
 import SuccessModal from '@/components/common/CompleteModal.vue';
+import AddTemplateModal from '@/components/common/AddTemplateModal.vue';
 
 const userStore = useUserStore();
 const categoryStore = useCategoryStore();
@@ -235,6 +238,8 @@ onMounted(async () => {
 const isCollapsed = ref(false); // 버튼 접힘
 const showMenu = ref(false); // 위 버튼 표시
 const showTemplates = ref(false); // 템플릿 하위 메뉴
+const showAddTemplateModal = ref(false); // 템플릿 추가 모달
+const selectedTemplate = ref(null); // 수정용 선택 데이터
 
 const toggleMain = () => {
   isCollapsed.value = !isCollapsed.value;
@@ -249,6 +254,13 @@ const closeAll = () => {
   isCollapsed.value = false;
   showMenu.value = false;
   showTemplates.value = false;
+  selectedTemplate.value = null;
+};
+
+// 💡 템플릿 수정 버튼 핸들러
+const handleEditTemplate = (tmpl) => {
+  selectedTemplate.value = tmpl;
+  showAddTemplateModal.value = true;
 };
 
 // 모달 상태
@@ -298,6 +310,11 @@ const handleApplyTemplate = async (tmpl) => {
     alert('추가에 실패했어요. 다시 시도해주세요.');
   }
 };
+
+// 💡 추가 모달이 닫힐 때 선택된 데이터 초기화 (watch 등을 위해)
+watch(showAddTemplateModal, (val) => {
+  if (!val) selectedTemplate.value = null;
+});
 
 // 템플릿 삭제
 const handleDeleteTemplate = async (tmpl) => {
@@ -588,6 +605,9 @@ const handleDeleteTemplate = async (tmpl) => {
 /* 템플릿 추가하기 버튼 */
 .template-item.add {
   justify-content: flex-start;
+  background: none;
+  border: none;
+  width: 100%;
   color: #aaa;
   font-size: 0.85rem;
   border-top: 1px solid #f0f0f0;

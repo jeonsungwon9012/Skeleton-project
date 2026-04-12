@@ -329,6 +329,14 @@ export const useTransactionStore = defineStore('transaction', () => {
     return response.data;
   };
 
+  // 💡 [추가] 템플릿 수정
+  const editTemplate = async (id, payload) => {
+    const response = await axios.put(`/api/TEMPLATE/${id}`, payload);
+    const index = templates.value.findIndex((t) => Number(t.id) === Number(id));
+    if (index !== -1) templates.value[index] = response.data;
+    return response.data;
+  };
+
   return {
     budgetList,
     budgets: budgetList, // 하위 호환성을 위한 별칭 추가
@@ -360,6 +368,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     editBudget,
     deleteBudget,
     addTemplate,
+    editTemplate,
     changeMonth,
     toggleDate,
     toggleCategory,

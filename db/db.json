@@ -1959,6 +1959,18 @@
       "isRecurring": false,
       "cycle": null,
       "id": "153"
+    },
+    {
+      "date": "2026-04-12",
+      "type": "expense",
+      "amount": 15000,
+      "detail": "점심값",
+      "memo": "밥값 너무 많이 나가",
+      "uid": 3,
+      "cid": 1,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "dcgCWKqkl7s"
     }
   ],
   "TEMPLATE": [
@@ -1996,6 +2008,15 @@
       "memo": "자주 먹을듯?",
       "cid": 1,
       "id": "4"
+    },
+    {
+      "id": "UStPucxX4uw",
+      "uid": 3,
+      "type": "expense",
+      "detail": "점심값",
+      "amount": 15000,
+      "cid": 1,
+      "memo": "밥값 너무 많이 나가"
     }
   ],
   "CATEGORY_BUDGET": [
