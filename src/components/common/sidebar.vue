@@ -185,12 +185,11 @@ const router = useRouter();
 const handleLogout = () => {
   if (confirm('로그아웃 하시겠습니까?')) {
     userStore.logout();
-    router.push('/'); // 온보딩 페이지로 이동
+    router.push({ name: 'onboarding' }); // 온보딩 페이지로 이동
   }
 };
 
 const userName = computed(() => userStore.user?.nickname || '');
-const uid = localStorage.getItem('userId') || '1';
 
 const navItems = [
   { name: '대시보드', icon: '📊', path: '/' },
@@ -224,6 +223,9 @@ const getBadgeTitle = (row, col) =>
   badges.value[getBadgeIndex(row, col)]?.title ?? '';
 
 onMounted(async () => {
+  const uid = userStore.user?.id;
+  if (!uid) return; // 로그인 정보가 없으면 데이터를 불러오지 않음
+
   if (!categoryStore.chartData.length) await categoryStore.fetchAll(uid);
   await userStore.fetchUser(uid);
   await templateStore.fetchTemplates(uid);
@@ -254,6 +256,9 @@ const modal = ref({ visible: false, icon: '', title: '', description: '' });
 
 // 템플릿으로 즉시 거래 추가
 const handleApplyTemplate = async (tmpl) => {
+  const uid = userStore.user?.id;
+  if (!uid) return;
+
   try {
     await templateStore.applyTemplate(tmpl, uid);
 
@@ -299,6 +304,9 @@ const handleApplyTemplate = async (tmpl) => {
 
 // 템플릿 삭제
 const handleDeleteTemplate = async (tmpl) => {
+  const uid = userStore.user?.id;
+  if (!uid) return;
+
   const confirmed = confirm(`"${tmpl.detail}" 템플릿을 삭제하시겠습니까?`);
   if (!confirmed) return;
   try {

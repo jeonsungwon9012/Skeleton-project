@@ -271,7 +271,7 @@ const weekdays = [
 
 const form = reactive({
   id: null,
-  uid: userStore.user?.id || 1,
+  uid: userStore.user?.id || null,
   type: 'expense',
   detail: '',
   amount: '',
@@ -335,7 +335,7 @@ const handleCancel = () => {
 
 const resetForm = () => {
   form.id = null;
-  form.uid = userStore.user?.id || 1;
+  form.uid = userStore.user?.id || null;
   form.type = 'expense';
   form.detail = '';
   form.amount = '';
@@ -589,27 +589,73 @@ const submitTransaction = async () => {
         // 💡 사이드바 템플릿 목록 즉시 갱신
         await templateStore.fetchTemplates(form.uid);
       } else {
-        const calculatedDate = form.isRecurring
-          ? getCalculatedRecurringDate()
-          : form.date;
-        if (!calculatedDate) {
-          // validateForm에서 이미 처리되지만, 혹시 모를 경우를 대비한 방어 코드
-          errorMessage.value = '날짜를 선택해주세요.';
-          isSubmitting.value = false;
-          return;
+        if (form.isRecurring) {
+          // 💡 정기결제: 설정된 기간만큼 여러 건 저장
+          const initialDateStr = getCalculatedRecurringDate();
+          if (!initialDateStr) return;
+
+          const today = new Date();
+          const endDate = new Date(today);
+
+          // 주기별 저장 기간 설정
+          if (form.cycle === 'daily') endDate.setMonth(today.getMonth() + 1);
+          else if (form.cycle === 'weekly')
+            endDate.setMonth(today.getMonth() + 3);
+          else if (form.cycle === 'monthly')
+            endDate.setMonth(today.getMonth() + 6);
+
+          let current = new Date(initialDateStr);
+
+          // 서버 부하를 고려하여 순차적으로 저장 (비동기 루프)
+          while (current <= endDate) {
+            const payload = {
+              uid: form.uid,
+              date: formatDate(current),
+              type: form.type,
+              amount: Number(form.amount),
+              cid: Number(form.cid),
+              detail: form.detail.trim(),
+              memo: form.memo.trim(),
+              isRecurring: true,
+              cycle: form.cycle,
+            };
+            await transactionStore.addBudget(payload);
+
+            // 다음 날짜 계산
+            if (form.cycle === 'daily') {
+              current.setDate(current.getDate() + 1);
+            } else if (form.cycle === 'weekly') {
+              current.setDate(current.getDate() + 7);
+            } else if (form.cycle === 'monthly') {
+              const nextMonth = new Date(
+                current.getFullYear(),
+                current.getMonth() + 1,
+                1,
+              );
+              const lastDay = new Date(
+                nextMonth.getFullYear(),
+                nextMonth.getMonth() + 1,
+                0,
+              ).getDate();
+              nextMonth.setDate(Math.min(Number(form.recurringValue), lastDay));
+              current = nextMonth;
+            }
+          }
+        } else {
+          // 💡 일반 지출/수입: 단건 저장
+          const payload = {
+            uid: form.uid,
+            date: form.date,
+            type: form.type,
+            amount: Number(form.amount),
+            cid: Number(form.cid),
+            detail: form.detail.trim(),
+            memo: form.memo.trim(),
+            isRecurring: false,
+            cycle: null,
+          };
+          await transactionStore.addBudget(payload);
         }
-        const payload = {
-          uid: form.uid,
-          date: calculatedDate,
-          type: form.type,
-          amount: Number(form.amount),
-          cid: Number(form.cid),
-          detail: form.detail.trim(),
-          memo: form.memo.trim(),
-          isRecurring: form.isRecurring,
-          cycle: form.isRecurring ? form.cycle : null,
-        };
-        await transactionStore.addBudget(payload);
       }
     }
 
@@ -620,6 +666,7 @@ const submitTransaction = async () => {
 
     openSuccessModal(modalDescription, successCategory?.img || '*');
     resetForm();
+    router.push('/transactionList');
   } catch (error) {
     console.error('처리 실패:', error);
     errorMessage.value = '처리에 실패했습니다.';

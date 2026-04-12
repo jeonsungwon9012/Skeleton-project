@@ -36,7 +36,7 @@ const recentList = computed(() => {
   const month = String(dashboard.currentMonth).padStart(2, '0');
   const prefix = `${year}-${month}`;
 
-  return store.budgetList
+  return store.myBudgets
     .filter((item) => item.date.startsWith(prefix))
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);

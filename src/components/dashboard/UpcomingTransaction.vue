@@ -38,7 +38,7 @@ const upcomingList = computed(() => {
   const month = String(dashboard.currentMonth).padStart(2, '0');
   const prefix = `${year}-${month}`;
 
-  return store.budgetList.filter(
+  return store.myBudgets.filter(
     (item) => item.isRecurring && item.date.startsWith(prefix),
   );
 });

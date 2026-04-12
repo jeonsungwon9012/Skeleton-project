@@ -178,6 +178,7 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   return {
     budgetList,
+    myBudgets,
     categories,
     templates,
     loadData,
