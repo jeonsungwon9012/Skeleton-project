@@ -166,6 +166,16 @@ export const useTransactionStore = defineStore('transaction', () => {
     return response.data;
   };
 
+  // 💡 [추가] 거래 내역 삭제
+  const deleteBudget = async (id) => {
+    await axios.delete(`/api/BUDGET/${id}`);
+    // 로컬 상태 업데이트
+    budgetList.value = budgetList.value.filter(
+      (b) => String(b.id) !== String(id),
+    );
+    return true;
+  };
+
   // 💡 [추가] 템플릿 추가
   const addTemplate = async (payload) => {
     const response = await axios.post('/api/TEMPLATE', {
@@ -191,6 +201,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     getTemplateCountByUser,
     addBudget,
     editBudget,
+    deleteBudget,
     addTemplate,
   };
 });

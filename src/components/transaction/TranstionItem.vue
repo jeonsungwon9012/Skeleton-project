@@ -221,6 +221,7 @@
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 stroke-width="1.5"
+                @click="handleDelete(item.id)"
               >
                 <path
                   d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z"
@@ -242,14 +243,41 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- 삭제 확인 모달 -->
+    <ConfirmModal
+      :visible="deleteModal.visible"
+      icon="🗑️"
+      title="내역 삭제"
+      description="이 거래 내역을 정말 삭제하시겠습니까?"
+      confirmText="삭제하기"
+      @confirm="executeDelete"
+      @close="deleteModal.visible = false"
+    />
+
+    <!-- 삭제 완료 알림 (기존 등록 성공 모달 재사용) -->
+    <SuccessModal
+      :visible="successModal.visible"
+      icon="✅"
+      title="삭제 완료"
+      description="내역이 안전하게 삭제되었습니다."
+      @close="successModal.visible = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, reactive } from 'vue';
 import { useTransactionStore } from '@/stores/budgetStore';
+import { useCategoryStore } from '@/stores/category';
+import { useBudgetStore } from '@/stores/budgetStore2';
+import ConfirmModal from '../common/ConfirmModal.vue';
+import SuccessModal from '../common/CompleteModal.vue';
+
 const showUpcoming = ref(false); // 기본값 false (안보임)
 const store = useTransactionStore();
+const categoryStore = useCategoryStore();
+const calendarStore = useBudgetStore();
 
 // 필터 상태
 const currentMonth = ref(new Date().getMonth() + 1);
@@ -260,6 +288,10 @@ const selectedIds = ref([]);
 const showAllCategories = ref(false);
 const visibleCount = 5;
 const filtersRef = ref(null);
+
+// 모달 제어 상태
+const deleteModal = reactive({ visible: false, targetId: null });
+const successModal = reactive({ visible: false });
 
 // 데이터 로드
 onMounted(async () => {
@@ -364,6 +396,28 @@ const prevMonth = () => {
 };
 const nextMonth = () => {
   currentMonth.value = currentMonth.value === 12 ? 1 : currentMonth.value + 1;
+};
+
+// 💡 개별 삭제 로직
+const handleDelete = (id) => {
+  deleteModal.targetId = id;
+  deleteModal.visible = true;
+};
+
+const executeDelete = async () => {
+  try {
+    const uid = store.myBudgets[0]?.uid; // 현재 유저 ID 확보
+    await store.deleteBudget(deleteModal.targetId);
+
+    // 관련된 다른 스토어들도 즉시 동기화
+    if (uid) await categoryStore.fetchAll(uid); // 뱃지용 횟수 갱신
+    await calendarStore.fetchData(); // 캘린더 점 갱신
+
+    deleteModal.visible = false;
+    successModal.visible = true; // 삭제 완료 모달 표시
+  } catch (err) {
+    alert('삭제 중 오류가 발생했습니다.');
+  }
 };
 </script>
 

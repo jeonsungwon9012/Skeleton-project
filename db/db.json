@@ -1340,30 +1340,6 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "lA0B7abLqqU"
-    },
-    {
-      "date": "2026-04-11",
-      "type": "expense",
-      "amount": 5500,
-      "detail": "카페라떼",
-      "memo": "카공",
-      "uid": 2,
-      "cid": 2,
-      "isRecurring": false,
-      "cycle": null,
-      "id": "gqoCVmLEaHY"
-    },
-    {
-      "date": "2026-04-11",
-      "type": "expense",
-      "amount": 5500,
-      "detail": "카페라떼",
-      "memo": "카공",
-      "uid": 2,
-      "cid": 2,
-      "isRecurring": false,
-      "cycle": null,
       "id": "Bz8ejInpttU"
     },
     {
