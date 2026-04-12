@@ -243,7 +243,7 @@ import { useRouter } from 'vue-router';
 import AddCategory from './addCategory.vue';
 import { useUserStore } from '@/stores/userStore';
 import { useTemplateStore } from '@/stores/template';
-import { useTransactionStore } from '@/stores/budgetStores';
+import { useTransactionStore } from '@/stores/budgetStore';
 import RegisterModal from '../common/CompleteModal.vue';
 
 const transactionStore = useTransactionStore();
@@ -397,8 +397,10 @@ const selectCategory = (category) => {
   errorMessage.value = '';
 };
 
-const handleCategoryCreated = (createdCategory) => {
+const handleCategoryCreated = async (createdCategory) => {
   form.cid = createdCategory.id;
+  // 다른 스토어들에게 데이터가 변했음을 알림 (필요 시 전체 로드)
+  await transactionStore.loadData(form.uid);
   errorMessage.value = '';
   showAddCategoryModal.value = false;
 };

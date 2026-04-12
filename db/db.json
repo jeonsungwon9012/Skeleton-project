@@ -27,70 +27,88 @@
       "name": "식비/외식",
       "img": "🍚",
       "isBasic": true,
-      "color": "#FF7676"
+      "color": "#FF7676",
+      "uid": null
     },
     {
       "id": "2",
       "name": "간식/카페",
       "img": "☕",
       "isBasic": true,
-      "color": "#FFB347"
+      "color": "#FFB347",
+      "uid": null
     },
     {
       "id": "3",
       "name": "생활/마트",
       "img": "🛒",
       "isBasic": true,
-      "color": "#FDE16D"
+      "color": "#FDE16D",
+      "uid": null
     },
     {
       "id": "4",
       "name": "저축/고정지출",
       "img": "🏦",
       "isBasic": true,
-      "color": "#67EA76"
+      "color": "#67EA76",
+      "uid": null
     },
     {
       "id": "5",
       "name": "교통/차량",
       "img": "🚌",
       "isBasic": true,
-      "color": "#4DD0E1"
+      "color": "#4DD0E1",
+      "uid": null
     },
     {
       "id": "6",
       "name": "주거/통신",
       "img": "🏠",
       "isBasic": true,
-      "color": "#64B5F6"
+      "color": "#64B5F6",
+      "uid": null
     },
     {
       "id": "7",
       "name": "문화/취미",
       "img": "🎬",
       "isBasic": true,
-      "color": "#9575CD"
+      "color": "#9575CD",
+      "uid": null
     },
     {
       "id": "8",
       "name": "패션/미용",
       "img": "💄",
       "isBasic": true,
-      "color": "#F06292"
+      "color": "#F06292",
+      "uid": null
     },
     {
       "id": "9",
       "name": "교육/자기계발",
       "img": "📚",
       "isBasic": true,
-      "color": "#A1887F"
+      "color": "#A1887F",
+      "uid": null
     },
     {
       "id": "10",
       "name": "기타/예비비",
       "img": "🎸",
       "isBasic": true,
-      "color": "#90A4AE"
+      "color": "#90A4AE",
+      "uid": null
+    },
+    {
+      "name": "주식 배당금",
+      "img": "💵",
+      "color": "#67EA76",
+      "isBasic": false,
+      "uid": "2",
+      "id": "JAWXahbuCYw"
     }
   ],
   "BUDGET": [

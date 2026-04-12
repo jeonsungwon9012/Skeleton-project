@@ -34,7 +34,10 @@ export const useTransactionStore = defineStore('transaction', () => {
           templateApi.getTemplates(uid),
         ]);
 
-      categories.value = sanitizeCategories(categoryResponse.data ?? []);
+      const allCategories = categoryResponse.data ?? [];
+      categories.value = sanitizeCategories(
+        allCategories.filter((c) => c.isBasic || String(c.uid) === String(uid)),
+      );
       budgets.value = budgetResponse.data ?? [];
       templates.value = templateResponse.data ?? [];
     } finally {

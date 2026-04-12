@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { fetchAllDashboardData } from '../api/budget';
 import { templateApi } from '../api/template';
+import { categoryApi } from '../api/category';
 import { useUserStore } from './userStore';
 import axios from 'axios';
 
@@ -42,7 +43,11 @@ export const useTransactionStore = defineStore('transaction', () => {
         categoryColorMap.set(cid, cate.color);
       });
 
-      categories.value = data.CATEGORY;
+      // 💡 기본 카테고리이거나 현재 접속한 유저의 카테고리만 필터링
+      categories.value = data.CATEGORY.filter(
+        (cate) => cate.isBasic === true || String(cate.uid) === String(uid),
+      );
+
       budgetList.value = data.BUDGET.map((budget) => {
         const cidKey = String(budget.cid);
         return {
@@ -166,6 +171,16 @@ export const useTransactionStore = defineStore('transaction', () => {
     return response.data;
   };
 
+  // 💡 [추가] 카테고리 추가
+  const addCategory = async (payload) => {
+    const response = await categoryApi.createCategory(payload);
+    categories.value.push({
+      ...response.data,
+      id: String(response.data.id),
+    });
+    return response.data;
+  };
+
   // 💡 [추가] 거래 내역 삭제
   const deleteBudget = async (id) => {
     await axios.delete(`/api/BUDGET/${id}`);
@@ -200,6 +215,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     getMonthlySummary,
     getTemplateCountByUser,
     addBudget,
+    addCategory,
     editBudget,
     deleteBudget,
     addTemplate,

@@ -1,0 +1,31 @@
+{
+  "CATEGORY": [
+    {
+      "id": "1",
+      "name": "식비",
+      "img": "🍔",
+      "color": "#FF7676",
+      "isBasic": true,
+      "uid": null
+    },
+    {
+      "id": "2",
+      "name": "카페",
+      "img": "☕",
+      "color": "#FFB347",
+      "isBasic": true,
+      "uid": null
+    },
+    {
+      "id": "11",
+      "name": "나만의 운동",
+      "img": "🏃",
+      "color": "#67EA76",
+      "isBasic": false,
+      "uid": 1
+    }
+  ],
+  "BUDGET": [],
+  "TEMPLATE": [],
+  "USER": []
+}

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue';
-import { useTransactionStore } from '@/stores/budgetStores';
+import { useUserStore } from '@/stores/userStore';
+import { useTransactionStore } from '@/stores/budgetStore';
 
 const props = defineProps({
   visible: {
@@ -15,6 +16,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'created']);
 const transactionStore = useTransactionStore();
+const userStore = useUserStore();
 
 const isSubmitting = ref(false);
 const errorMessage = ref('');
@@ -70,7 +72,8 @@ const handleSubmit = async () => {
   }
 
   const duplicated = props.categories.some(
-    (category) => category.name?.trim().toLowerCase() === form.name.trim().toLowerCase(),
+    (category) =>
+      category.name?.trim().toLowerCase() === form.name.trim().toLowerCase(),
   );
 
   if (duplicated) {
@@ -87,6 +90,7 @@ const handleSubmit = async () => {
       img: form.img.trim(),
       color: form.color,
       isBasic: false,
+      uid: userStore.user?.id, // 💡 생성한 유저의 ID 추가
     });
 
     emit('created', createdCategory);
@@ -104,27 +108,48 @@ const handleSubmit = async () => {
     <div class="category-modal" @click.stop>
       <div class="category-modal-header">
         <h3 class="category-modal-title">카테고리 추가</h3>
-        <button type="button" class="category-close-button" @click="handleClose">닫기</button>
+        <button
+          type="button"
+          class="category-close-button"
+          @click="handleClose"
+        >
+          닫기
+        </button>
       </div>
 
       <div class="category-preview">
-        <div class="category-preview-icon" :style="{ backgroundColor: form.color }">
+        <div
+          class="category-preview-icon"
+          :style="{ backgroundColor: form.color }"
+        >
           {{ form.img || '+' }}
         </div>
         <div class="category-preview-text">
-          <div class="category-preview-name">{{ form.name || '새 카테고리' }}</div>
+          <div class="category-preview-name">
+            {{ form.name || '새 카테고리' }}
+          </div>
           <div class="category-preview-color">{{ selectedColorName }}</div>
         </div>
       </div>
 
       <label class="category-field">
         <span class="category-label">이름</span>
-        <input v-model="form.name" type="text" class="category-input" placeholder="예: 운동" />
+        <input
+          v-model="form.name"
+          type="text"
+          class="category-input"
+          placeholder="예: 운동"
+        />
       </label>
 
       <label class="category-field">
         <span class="category-label">아이콘</span>
-        <input v-model="form.img" type="text" class="category-input" placeholder="예: 🏃" />
+        <input
+          v-model="form.img"
+          type="text"
+          class="category-input"
+          placeholder="예: 🏃"
+        />
       </label>
 
       <div class="category-field">
@@ -143,11 +168,23 @@ const handleSubmit = async () => {
         </div>
       </div>
 
-      <p v-if="errorMessage" class="category-error-message">{{ errorMessage }}</p>
+      <p v-if="errorMessage" class="category-error-message">
+        {{ errorMessage }}
+      </p>
 
       <div class="category-actions">
-        <button type="button" class="category-secondary-button" @click="handleClose">취소</button>
-        <button type="button" class="category-primary-button" @click="handleSubmit">
+        <button
+          type="button"
+          class="category-secondary-button"
+          @click="handleClose"
+        >
+          취소
+        </button>
+        <button
+          type="button"
+          class="category-primary-button"
+          @click="handleSubmit"
+        >
           {{ isSubmitting ? '추가 중...' : '추가하기' }}
         </button>
       </div>
