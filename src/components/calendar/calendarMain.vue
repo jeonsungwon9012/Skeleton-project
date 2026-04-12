@@ -5,7 +5,7 @@
  * - 하위 컴포넌트들에게 Props로 데이터를 전달하며
  * - 발생한 이벤트들을 스토어 액션으로 연결함
  */
-import { onMounted } from 'vue';
+import { onMounted, ref, reactive } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // 💡 전역 상태 관리(Pinia) 및 컴포넌트 임포트
@@ -15,6 +15,9 @@ import CategoryFilter from '@/components/common/CategoryFilter.vue';
 import CalendarBoard from '@/components/calendar/calendarBoard.vue';
 import DailyList from '@/components/calendar/dailyList.vue';
 import MonthlyRecentTransactions from '@/components/calendar/MonthlyRecentTransactions.vue';
+import EditModal from '@/components/common/EditModal.vue';
+import ConfirmModal from '@/components/common/ConfirmModal.vue';
+import SuccessModal from '@/components/common/CompleteModal.vue';
 
 // 1. 스토어 사용 선언
 const budgetStore = useBudgetStore();
@@ -49,6 +52,97 @@ const {
   toggleScheduled, // 예정 내역 필터 토글
   resetFilters, // 모든 필터 초기화 (전체 버튼)
 } = budgetStore;
+
+// 💡 가계부 추가 모달 상태 관리
+const isAddModalOpen = ref(false);
+const addTargetItem = ref(null);
+const modalTitle = ref('가계부 추가');
+
+// 삭제 및 성공 모달 상태
+const deleteModal = reactive({ visible: false, targetId: null });
+const successModal = reactive({ visible: false, title: '', description: '' });
+
+const openAddModal = (date) => {
+  addTargetItem.value = {
+    date,
+    type: 'expense',
+    amount: 0,
+    detail: '',
+    cid: '',
+    memo: '',
+  };
+  modalTitle.value = '가계부 추가';
+  isAddModalOpen.value = true;
+};
+
+/**
+ * 💡 수정 모달 열기
+ */
+const openEditModal = (item) => {
+  addTargetItem.value = { ...item };
+  modalTitle.value = '거래 내역 수정';
+  isAddModalOpen.value = true;
+};
+
+/**
+ * 💡 저장 핸들러 (추가/수정 통합)
+ */
+const handleSave = async (submittedData) => {
+  try {
+    if (submittedData.id) {
+      // 💡 [수정] 기존 데이터(uid 등)와 수정한 데이터를 합쳐서 보냅니다 (유실 방지)
+      const payload = { ...addTargetItem.value, ...submittedData };
+      await budgetStore.editBudget(submittedData.id, payload);
+    } else {
+      // 💡 [추가] ID가 없는 경우에만 신규 생성
+      await handleBulkSave(submittedData);
+    }
+    isAddModalOpen.value = false;
+
+    // 성공 모달 표시
+    successModal.title = submittedData.id ? '수정 완료' : '추가 완료';
+    successModal.description = '내역이 성공적으로 반영되었습니다.';
+    successModal.visible = true;
+
+    // 데이터 갱신
+    await budgetStore.fetchData();
+  } catch (error) {
+    console.error('저장 실패:', error);
+  }
+};
+
+/**
+ * 💡 [추가] 다중 선택된 모든 날짜에 가계부 내역 저장
+ */
+const handleBulkSave = async (formData) => {
+  const savePromises = selectedDates.value.map((date) => {
+    return budgetStore.addBudget({ ...formData, date });
+  });
+  await Promise.all(savePromises);
+};
+
+/**
+ * 💡 삭제 로직
+ */
+const handleDelete = (id) => {
+  deleteModal.targetId = id;
+  deleteModal.visible = true;
+};
+
+const executeDelete = async () => {
+  try {
+    await budgetStore.deleteBudget(deleteModal.targetId);
+    deleteModal.visible = false;
+
+    successModal.title = '삭제 완료';
+    successModal.description = '내역이 안전하게 삭제되었습니다.';
+    successModal.visible = true;
+
+    await budgetStore.fetchData();
+  } catch (error) {
+    console.error('삭제 실패:', error);
+  }
+};
 
 /**
  * 4. 라이프사이클 훅
@@ -91,6 +185,9 @@ onMounted(() => {
           :items="rangeBudgets"
           :total="selectedTotal"
           :dates="selectedDates"
+          @add-click="openAddModal"
+          @edit-click="openEditModal"
+          @delete-click="handleDelete"
         />
 
         <MonthlyRecentTransactions
@@ -99,6 +196,36 @@ onMounted(() => {
         />
       </section>
     </main>
+
+    <!-- 💡 가계부 추가 모달 연결 -->
+    <EditModal
+      :visible="isAddModalOpen"
+      :item="addTargetItem"
+      :categories="categories"
+      :title="modalTitle"
+      @save="handleSave"
+      @close="isAddModalOpen = false"
+    />
+
+    <!-- 삭제 확인 모달 -->
+    <ConfirmModal
+      :visible="deleteModal.visible"
+      icon="🗑️"
+      title="내역 삭제"
+      description="이 거래 내역을 정말 삭제하시겠습니까?"
+      confirmText="삭제하기"
+      @confirm="executeDelete"
+      @close="deleteModal.visible = false"
+    />
+
+    <!-- 알림 모달 -->
+    <SuccessModal
+      :visible="successModal.visible"
+      icon="✅"
+      :title="successModal.title"
+      :description="successModal.description"
+      @close="successModal.visible = false"
+    />
   </div>
 </template>
 
@@ -118,6 +245,23 @@ onMounted(() => {
   flex-direction: column;
   align-items: flex-start;
   gap: 24px;
+  width: 100%;
+  position: relative;
+  z-index: 10; /* 캘린더 보드나 리스트보다 위에 오도록 설정 */
+}
+
+/* 💡 CategoryFilter 내부의 .filters 영역 가로 스크롤 처리 */
+:deep(.category-list) {
+  display: flex;
+  flex-wrap: nowrap !important; /* 줄바꿈 방지 */
+  overflow-x: auto !important; /* 가로 스크롤 활성화 */
+  scrollbar-width: none; /* Firefox 스크롤바 숨김 */
+  -ms-overflow-style: none; /* IE/Edge 스크롤바 숨김 */
+  max-width: 100%;
+}
+
+:deep(.category-list::-webkit-scrollbar) {
+  display: none; /* Chrome, Safari, 브라우저 스크롤바 숨김 */
 }
 
 /* 콘텐츠 영역: 가로 배치(flex) 및 간격 조절 */

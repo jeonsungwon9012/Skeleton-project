@@ -17,8 +17,7 @@ export const categoryApi = {
   createCategory: (payload) => axios.post(`${BASE_URL}/CATEGORY`, payload),
 
   // 유저의 카테고리별 목표 예산 조회 (uid로 필터)
-  getCategoryBudgets: (uid) =>
-    axios.get(`${BASE_URL}/CATEGORY_BUDGET?uid=${uid}`),
+  getCategoryBudgets: (uid) => axios.get(`${BASE_URL}/targetBudget?uid=${uid}`),
 
   // 유저의 전체 지출 내역 조회 (uid로 필터)
   getBudgets: (uid) => axios.get(`${BASE_URL}/BUDGET?uid=${uid}`),

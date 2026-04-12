@@ -5,13 +5,18 @@
     <template v-else>
       <p class="subtitle">카테고리 별 수입/지출</p>
       <!-- 제목 - topCategory → topCountCategory (빈도 기준) -->
-      <h2 class="title">
-        {{
-          store.topCountCategory
-            ? `${store.topCountCategory.img} ${store.topCountCategory.name}에 가장 자주 지출하고 있어요`
-            : '이번 달 지출 내역이 없어요'
-        }}
-      </h2>
+      <div class="title-area">
+        <h2 class="title">
+          {{
+            store.topCountCategory
+              ? `${store.topCountCategory.img} ${store.topCountCategory.name}에 가장 자주 지출하고 있어요`
+              : '이번 달 지출 내역이 없어요'
+          }}
+        </h2>
+        <button class="budget-btn" @click="isBudgetModalOpen = true">
+          예산 설정하기
+        </button>
+      </div>
 
       <template v-if="store.chartData.length > 0">
         <div class="content">
@@ -139,15 +144,36 @@
       </div>
     </template>
   </div>
+
+  <!-- 💡 예산 설정 모달 연결 -->
+  <SetBudgetModal
+    :current-month-display="currentMonthDisplay"
+    :visible="isBudgetModalOpen"
+    :categories="budgetStore.categories"
+    @close="isBudgetModalOpen = false"
+    @save="handleSaveBudget"
+  />
+
+  <SuccessModal
+    :visible="messageModal.visible"
+    :title="messageModal.title"
+    :description="messageModal.description"
+    :icon="messageModal.icon"
+    @close="messageModal.visible = false"
+  />
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue';
+import { onMounted, onUnmounted, ref, watch, nextTick, computed } from 'vue';
 import { useCategoryStore } from '@/stores/category';
+import { useTransactionStore } from '@/stores/budgetStore';
 import { useDashboardStore } from '@/stores/dashboard';
 import { useUserStore } from '@/stores/userStore'; // 💡 유저 스토어 추가
+import SetBudgetModal from '@/components/common/SetBudgetModal.vue';
+import SuccessModal from '@/components/common/CompleteModal.vue';
 
 const store = useCategoryStore();
+const budgetStore = useTransactionStore();
 const dashboard = useDashboardStore();
 const userStore = useUserStore(); // 💡 스토어 인스턴스 생성
 
@@ -155,6 +181,43 @@ const bubbleWrapRef = ref(null);
 const svgSize = 300;
 
 const tooltip = ref({ visible: false, x: 0, y: 0, data: null });
+const isBudgetModalOpen = ref(false);
+const messageModal = ref({
+  visible: false,
+  title: '',
+  description: '',
+  icon: '',
+});
+
+const currentMonthDisplay = computed(() => {
+  return `${dashboard.currentYear}년 ${dashboard.currentMonth}월`;
+});
+
+const handleSaveBudget = async (data) => {
+  const currentUid = userStore.user?.id;
+  // 💡 대시보드에 표시된 연-월 정보 추출
+  const month = `${dashboard.currentYear}-${String(dashboard.currentMonth).padStart(2, '0')}`;
+
+  try {
+    await budgetStore.saveTargetBudget({
+      uid: Number(currentUid),
+      month: month,
+      cid: Number(data.cid),
+      targetBudget: Number(data.amount),
+    });
+
+    isBudgetModalOpen.value = false;
+    // 저장 후 최신 통계 데이터를 다시 불러와 차트 갱신
+    await store.fetchAll(currentUid);
+  } catch (error) {
+    messageModal.value = {
+      visible: true,
+      icon: '❌',
+      title: '저장 실패',
+      description: '예산 저장 중 오류가 발생했습니다.',
+    };
+  }
+};
 
 const showTooltip = (e, bubble) => {
   tooltip.value = { visible: true, x: 0, y: 0, data: bubble };
@@ -239,13 +302,36 @@ onUnmounted(() => {});
 .subtitle {
   font-size: 0.85rem;
   color: var(--color-deepgray-50, #888);
-  margin: 0 0 0.3rem;
+  margin: 0 2rem 0.3rem;
+}
+
+.title-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 2rem 2rem;
 }
 
 .title {
   font-size: 1.4rem;
   font-weight: 600;
-  margin: 0 0 2rem;
+  margin: 0;
+}
+
+.budget-btn {
+  padding: 10px 18px;
+  border-radius: 12px;
+  background-color: var(--color-primary);
+  color: var(--color-white, #fff);
+  border: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.budget-btn:hover {
+  opacity: 0.85;
 }
 
 .content {
@@ -390,6 +476,15 @@ onUnmounted(() => {});
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-height: 300px; /* 왼쪽 SVG 차트 높이(svgSize)와 동일하게 제한 */
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+/* 스크롤바 커스텀 스타일 (프로젝트 내 다른 리스트와 통일) */
+.category-list::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
 }
 
 .category-item {

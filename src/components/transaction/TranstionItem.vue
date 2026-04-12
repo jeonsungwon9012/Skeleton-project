@@ -2,10 +2,29 @@
   <div class="container">
     <!-- 상단 헤더 -->
     <div class="header">
-      <MonthPicker
-        :current-month="currentMonthDate"
-        @change="store.changeMonth"
-      />
+      <button @click="prevMonth">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M15 18L9 12L15 6"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <h2>{{ currentMonth }}월</h2>
+      <button @click="nextMonth">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M9 6L15 12L9 18"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
       <input
         v-model="search"
         placeholder="메모 검색"
@@ -15,27 +34,37 @@
 
     <!-- 카테고리 필터 -->
     <div class="filter_bar">
-      <div class="type-dropdown">
-        <select v-model="selectedType">
-          <option value="전체">수입/지출</option>
-          <option value="income">수입</option>
-          <option value="expense">지출</option>
-        </select>
-        <svg
-          class="dropdown-arrow"
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
+      <div class="dropdown-wrapper">
+        <button
+          class="cat-item dropdown-trigger"
+          :class="{ 'active-type': selectedType !== '전체' }"
+          @click.stop="toggleTypeDropdown"
         >
-          <path
-            d="M6 9L12 15L18 9"
-            stroke="#666"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+          <div class="icon-circle gray-bg">⇅</div>
+          <span class="subtitle-s">{{ typeLabel }}</span>
+          <span class="arrow" :class="{ open: isTypeDropdownOpen }">▾</span>
+        </button>
+
+        <ul v-if="isTypeDropdownOpen" class="dropdown-menu">
+          <li
+            @click="handleTypeSelect('전체')"
+            :class="{ active: selectedType === '전체' }"
+          >
+            수입/지출
+          </li>
+          <li
+            @click="handleTypeSelect('income')"
+            :class="{ active: selectedType === 'income' }"
+          >
+            수입 내역
+          </li>
+          <li
+            @click="handleTypeSelect('expense')"
+            :class="{ active: selectedType === 'expense' }"
+          >
+            지출 내역
+          </li>
+        </ul>
       </div>
       <div class="filters" ref="filtersRef">
         <button
@@ -126,9 +155,12 @@
             <th>거래 내역</th>
             <th>금액</th>
             <th>카테고리</th>
-            <th>메모</th>
             <th width="100px">
-              <button v-if="selectedIds.length > 0" @click="deleteSelected">
+              <button
+                class="bulk-delete-btn"
+                :class="{ invisible: selectedIds.length === 0 }"
+                @click="deleteSelected"
+              >
                 삭제
               </button>
             </th>
@@ -140,20 +172,13 @@
             :key="item.id"
             class="btn_hover"
             :class="{
-              upcoming: item.isRecurring && new Date(item.date) > new Date(),
+              upcoming: isUpcoming(item.date),
             }"
-            v-show="
-              !(item.isRecurring && new Date(item.date) > new Date()) ||
-              showUpcoming
-            "
+            v-show="!isUpcoming(item.date) || showUpcoming"
+            @dblclick="handleShowDetail(item)"
           >
             <td>
-              <input
-                type="checkbox"
-                :value="item.id"
-                v-model="selectedIds"
-                :disabled="item.isRecurring && new Date(item.date) > new Date()"
-              />
+              <input type="checkbox" :value="item.id" v-model="selectedIds" />
             </td>
             <td class="item-index">{{ index + 1 }}</td>
             <td>{{ item.date }}</td>
@@ -173,7 +198,6 @@
               </span>
               {{ item.categoryName }}
             </td>
-            <td>{{ item.memo }}</td>
             <td>
               <div class="button_hover">
                 <!-- 수정 아이콘 -->
@@ -232,6 +256,8 @@
     <EditModal
       :visible="editModal.visible"
       :item="editModal.item"
+      :title="editModal.title"
+      :read-only="editModal.readOnly"
       :categories="store.categories"
       @save="executeEdit"
       @close="editModal.visible = false"
@@ -265,23 +291,41 @@ import { storeToRefs } from 'pinia';
 import { useTransactionStore } from '@/stores/budgetStore';
 import { useCategoryStore } from '@/stores/category';
 import { useBudgetStore } from '@/stores/budgetStore2';
+import { useUserStore } from '@/stores/userStore';
 import ConfirmModal from '../common/ConfirmModal.vue';
 import SuccessModal from '../common/CompleteModal.vue';
 import EditModal from '../common/EditModal.vue';
-import MonthPicker from '../common/MonthPicker.vue';
 
 const showUpcoming = ref(false); // 기본값 false (안보임)
 const store = useTransactionStore();
+const userStore = useUserStore();
 const categoryStore = useCategoryStore();
 const calendarStore = useBudgetStore();
 
 // 필터 상태
-// 💡 통합 스토어의 상태를 참조하여 페이지 간 싱크를 맞춤
-const { currentMonth: currentMonthDate, currentMonthNum: currentMonth } =
-  storeToRefs(store);
-const selectedCategory = ref(['전체']);
-const selectedType = ref('전체');
-const search = ref('');
+// 💡 스토어에서 직접 상태를 꺼내와서 전역적으로 동기화합니다.
+const {
+  currentMonthNum: currentMonth,
+  selectedCategories: selectedCategory,
+  selectedType,
+  searchQuery: search,
+} = storeToRefs(store);
+
+// 💡 수입/지출 커스텀 드롭다운 로직
+const isTypeDropdownOpen = ref(false);
+const toggleTypeDropdown = () => {
+  isTypeDropdownOpen.value = !isTypeDropdownOpen.value;
+};
+const typeLabel = computed(() => {
+  if (selectedType.value === 'income') return '수입 내역';
+  if (selectedType.value === 'expense') return '지출 내역';
+  return '수입/지출';
+});
+const handleTypeSelect = (type) => {
+  selectedType.value = type;
+  isTypeDropdownOpen.value = false;
+};
+
 const selectedIds = ref([]);
 const showAllCategories = ref(false);
 const visibleCount = 5;
@@ -289,8 +333,22 @@ const filtersRef = ref(null);
 
 // 모달 제어 상태
 const deleteModal = reactive({ visible: false, targetId: null });
-const editModal = reactive({ visible: false, item: null });
+const editModal = reactive({
+  visible: false,
+  item: null,
+  readOnly: false,
+  title: '거래 내역 수정',
+});
 const successModal = reactive({ visible: false, title: '', description: '' });
+
+/**
+ * 💡 미래 내역인지 확인 (오늘 밤 23:59:59 기준)
+ */
+const isUpcoming = (dateStr) => {
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+  return new Date(dateStr) > today;
+};
 
 // 데이터 로드
 onMounted(async () => {
@@ -331,6 +389,11 @@ onMounted(async () => {
     },
     { passive: false },
   );
+
+  // 💡 화면 클릭 시 드롭다운 닫기
+  window.addEventListener('click', () => {
+    isTypeDropdownOpen.value = false;
+  });
 });
 
 // 필터링 (store의 헬퍼 활용)
@@ -348,9 +411,7 @@ const visibleCategories = computed(() =>
 // 전체 선택 체크박스도 filteredMCT 기준이라 문제없지만
 // filteredMCT 안에서 selectedCategory 비교 부분 확인
 const isAllSelected = computed(() => {
-  const selectableItems = filteredMCT.value.filter(
-    (item) => !(item.isRecurring && new Date(item.date) > new Date()),
-  );
+  const selectableItems = filteredMCT.value;
   return (
     selectableItems.length > 0 &&
     selectedIds.value.length === selectableItems.length
@@ -359,11 +420,7 @@ const isAllSelected = computed(() => {
 
 const toggleAll = (e) => {
   selectedIds.value = e.target.checked
-    ? filteredMCT.value
-        .filter(
-          (item) => !(item.isRecurring && new Date(item.date) > new Date()),
-        )
-        .map((item) => item.id)
+    ? filteredMCT.value.map((item) => item.id)
     : [];
 };
 
@@ -401,9 +458,33 @@ const toggleCategory = (name) => {
   }
 };
 
+// 월 이동
+const prevMonth = () => {
+  currentMonth.value = currentMonth.value === 1 ? 12 : currentMonth.value - 1;
+};
+const nextMonth = () => {
+  currentMonth.value = currentMonth.value === 12 ? 1 : currentMonth.value + 1;
+};
+
+// 💡 선택 삭제 로직
+const deleteSelected = () => {
+  deleteModal.targetId = null; // targetId가 없으면 전체 삭제 모드로 간주
+  deleteModal.visible = true;
+};
+
 // 💡 수정 로직
 const handleEdit = (item) => {
-  editModal.item = { ...item }; // 원본 훼손 방지를 위해 복사본 전달
+  editModal.item = { ...item };
+  editModal.readOnly = false;
+  editModal.title = '거래 내역 수정';
+  editModal.visible = true;
+};
+
+// 💡 상세 보기 로직 (더블 클릭)
+const handleShowDetail = (item) => {
+  editModal.item = { ...item };
+  editModal.readOnly = true;
+  editModal.title = '거래 상세 내역';
   editModal.visible = true;
 };
 
@@ -435,8 +516,16 @@ const handleDelete = (id) => {
 
 const executeDelete = async () => {
   try {
-    const uid = store.myBudgets[0]?.uid; // 현재 유저 ID 확보
-    await store.deleteBudget(deleteModal.targetId);
+    const uid = userStore.user?.id;
+
+    if (deleteModal.targetId) {
+      // 개별 삭제
+      await store.deleteBudget(deleteModal.targetId);
+    } else {
+      // 선택 삭제 (Bulk Delete)
+      await Promise.all(selectedIds.value.map((id) => store.deleteBudget(id)));
+      selectedIds.value = []; // 선택 초기화
+    }
 
     // 관련된 다른 스토어들도 즉시 동기화
     if (uid) await categoryStore.fetchAll(uid); // 뱃지용 횟수 갱신
@@ -464,6 +553,39 @@ const executeDelete = async () => {
   gap: 10px;
   align-items: center;
   margin-bottom: 10px;
+}
+
+.month-picker-area {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.month-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  min-width: 60px;
+  text-align: center;
+}
+
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: background 0.2s;
+}
+
+.nav-btn:hover {
+  background-color: var(--color-primary-80);
 }
 
 .filters {
@@ -515,6 +637,20 @@ const executeDelete = async () => {
   text-align: left;
 }
 
+/* 💡 체크박스 열 중앙 정렬 및 크기 고정 */
+.table th:first-child,
+.table td:first-child {
+  text-align: center;
+}
+
+input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+  vertical-align: middle;
+}
+
 .categoryImg {
   padding: 3px;
   border-radius: 50%;
@@ -548,27 +684,90 @@ const executeDelete = async () => {
   display: flex;
   align-items: center; /* 🔥 세로 정렬 핵심 */
   gap: 10px;
+  margin-bottom: 5px;
 }
-.type-dropdown select {
-  /* appearance: auto; /* 드롭다운 화살표 유지 */
-  /* height: 34px; /* ✅ 버튼과 동일 */
-  /* padding: 0 12px;
-  border-radius: 18px;
-  border: none;
-  background: #f1f1f1;
-  font-size: 14px; */
-  /* line-height: 34px; 추가 */
-  height: 34px;
-  padding: 0 32px 0 14px; /* 오른쪽 padding 줄임 */
-  border-radius: 18px;
-  border: 1.5px solid #ccc;
-  background: #fff;
-  font-size: 13px;
+
+/* 💡 CategoryFilter 스타일 이식 */
+.dropdown-wrapper {
+  position: relative;
+}
+
+.cat-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px 6px 6px;
+  border-radius: 50px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-deepgray-10);
   cursor: pointer;
-  color: #444;
-  appearance: none; /* 기본 화살표 제거 */
-  -webkit-appearance: none;
+  transition: 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
+
+.subtitle-s {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-deepgray-100);
+}
+
+.icon-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.gray-bg {
+  background-color: var(--color-gray-10);
+}
+.primary-bg {
+  background-color: var(--color-primary-10);
+}
+
+.active-type {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-10);
+}
+.active-type span {
+  color: var(--color-primary);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 42px;
+  left: 0;
+  background-color: var(--color-white);
+  border-radius: 16px;
+  width: 140px;
+  padding: 8px;
+  z-index: 1000;
+  box-shadow: var(--drop--shadow);
+  border: 1px solid var(--color-gray-10);
+  list-style: none;
+  margin: 0;
+}
+
+.dropdown-menu li {
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #444;
+}
+.dropdown-menu li:hover {
+  background-color: var(--color-gray-10);
+}
+.dropdown-menu li.active {
+  color: var(--color-primary);
+  background-color: var(--color-primary-10);
+  font-weight: 600;
+}
+
 .toggle-btn {
   height: 34px; /* 추가 */
   line-height: 1; /* 추가 */
@@ -602,16 +801,6 @@ const executeDelete = async () => {
 }
 .upcoming-toggle:hover {
   background: #e0e0e0;
-}
-.toggle-btn,
-.upcoming-toggle {
-  margin-bottom: 5px;
-}
-
-.type-dropdown select,
-.toggle-btn,
-.upcoming-toggle {
-  height: 34px;
   padding: 0 14px;
   border-radius: 18px;
   border: 1.5px solid #ccc;
@@ -626,23 +815,21 @@ const executeDelete = async () => {
   white-space: nowrap;
   line-height: 1;
 }
-.type-dropdown {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  margin-bottom: 5px;
-}
 
-.type-dropdown select:hover,
 .toggle-btn:hover,
 .upcoming-toggle:hover {
   background: #f0f0f0;
   border-color: #aaa;
 }
-.dropdown-arrow {
-  position: absolute;
-  right: 4px; /* 화살표 위치 왼쪽으로 당김 */
-  pointer-events: none; /* 클릭 통과 */
+
+.arrow {
+  margin-left: 6px;
+  font-size: 10px;
+  color: var(--color-deepgray-40);
+  transition: 0.2s;
+}
+.arrow.open {
+  transform: rotate(180deg);
 }
 .memo_window {
   margin-left: auto; /* 오른쪽 끝으로 */
@@ -678,6 +865,31 @@ const executeDelete = async () => {
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
+.header button {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid #e0e0e0;
+  background: #f7f8fa;
+  cursor: pointer;
+  color: #555;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.header button:hover {
+  background: #4caf50;
+  border-color: #4caf50;
+  color: white;
+  transform: scale(1.1);
+}
+
+.header button:active {
+  transform: scale(0.95);
+}
 .negative {
   color: #e74c3c;
   font-weight: 500;
@@ -685,6 +897,27 @@ const executeDelete = async () => {
 .positive {
   color: #2ecc71;
   font-weight: 500;
+}
+
+.bulk-delete-btn {
+  background-color: #ff5252;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.bulk-delete-btn.invisible {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.bulk-delete-btn:hover {
+  background-color: #ff1744;
+  transform: translateY(-1px);
 }
 
 .table-container {
@@ -698,7 +931,7 @@ const executeDelete = async () => {
 .table thead th {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 0; /* 모달 Backdrop보다 뒤에 오도록 수정 */
   background-color: #fff;
   box-shadow: inset 0 -1px 0 #eee;
 }

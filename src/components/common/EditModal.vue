@@ -5,11 +5,14 @@ const props = defineProps({
   visible: { type: Boolean, default: false },
   item: { type: Object, default: () => ({}) },
   categories: { type: Array, default: () => [] },
+  title: { type: String, default: '거래 내역 수정' }, // 💡 제목 Prop 추가
+  readOnly: { type: Boolean, default: false }, // 💡 읽기 전용 모드 추가
 });
 
 const emit = defineEmits(['save', 'close']);
 
 const form = reactive({
+  id: null, // 💡 id 필드 추가
   type: 'expense',
   detail: '',
   amount: 0,
@@ -20,9 +23,10 @@ const form = reactive({
 
 // 모달이 열릴 때 선택한 아이템 데이터로 초기화
 watch(
-  () => props.visible,
-  (newVal) => {
-    if (newVal && props.item) {
+  [() => props.visible, () => props.item],
+  ([newVisible, newItem]) => {
+    if (newVisible && newItem) {
+      form.id = newItem.id || null;
       form.type = props.item.type || 'expense';
       form.detail = props.item.detail || '';
       form.amount = props.item.amount || 0;
@@ -31,9 +35,15 @@ watch(
       form.memo = props.item.memo || '';
     }
   },
+  { immediate: true },
 );
 
 const handleSave = () => {
+  if (props.readOnly) {
+    emit('close');
+    return;
+  }
+
   if (!form.detail || !form.amount || !form.cid || !form.date) {
     alert('모든 필수 항목을 입력해주세요.');
     return;
@@ -46,7 +56,7 @@ const handleSave = () => {
   <div v-if="visible" class="modal-backdrop" @click="emit('close')">
     <div class="modal-card" @click.stop>
       <div class="modal-header">
-        <h3>거래 내역 수정</h3>
+        <h3>{{ title }}</h3>
         <button class="close-x" @click="emit('close')">&times;</button>
       </div>
 
@@ -54,12 +64,14 @@ const handleSave = () => {
         <div class="type-toggle">
           <button
             :class="{ active: form.type === 'income' }"
+            :disabled="readOnly"
             @click="form.type = 'income'"
           >
             수입
           </button>
           <button
             :class="{ active: form.type === 'expense' }"
+            :disabled="readOnly"
             @click="form.type = 'expense'"
           >
             지출
@@ -72,23 +84,24 @@ const handleSave = () => {
             v-model="form.detail"
             type="text"
             placeholder="내역을 입력하세요"
+            :disabled="readOnly"
           />
         </div>
 
         <div class="row">
           <div class="input-group">
             <label>금액</label>
-            <input v-model="form.amount" type="number" />
+            <input v-model="form.amount" type="number" :disabled="readOnly" />
           </div>
           <div class="input-group">
             <label>날짜</label>
-            <input v-model="form.date" type="date" />
+            <input v-model="form.date" type="date" :disabled="readOnly" />
           </div>
         </div>
 
         <div class="input-group">
           <label>카테고리</label>
-          <select v-model="form.cid">
+          <select v-model="form.cid" :disabled="readOnly">
             <option value="" disabled>선택하세요</option>
             <option v-for="cat in categories" :key="cat.id" :value="cat.id">
               {{ cat.img }} {{ cat.name }}
@@ -101,12 +114,15 @@ const handleSave = () => {
           <textarea
             v-model="form.memo"
             placeholder="메모를 입력하세요"
+            :disabled="readOnly"
           ></textarea>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-save" @click="handleSave">저장하기</button>
+        <button class="btn-save" @click="handleSave">
+          {{ readOnly ? '확인' : '저장하기' }}
+        </button>
       </div>
     </div>
   </div>

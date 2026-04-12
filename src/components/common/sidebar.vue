@@ -141,6 +141,16 @@
         <span class="label">가계부 쓰기</span>
       </div>
 
+      <!-- 공용 확인 모달 (로그아웃, 삭제 등) -->
+      <ConfirmModal
+        :visible="confirmModal.visible"
+        :title="confirmModal.title"
+        :description="confirmModal.description"
+        :icon="confirmModal.icon"
+        @confirm="confirmModal.action"
+        @close="confirmModal.visible = false"
+      />
+
       <SuccessModal
         :visible="modal.visible"
         :icon="modal.icon"
@@ -175,6 +185,7 @@ import { useTemplateStore } from '@/stores/template';
 import { useUserStore } from '@/stores/user';
 import { useReactionStore } from '@/stores/reaction';
 import SuccessModal from '@/components/common/CompleteModal.vue';
+import ConfirmModal from '@/components/common/ConfirmModal.vue';
 import AddTemplateModal from '@/components/common/AddTemplateModal.vue';
 
 const userStore = useUserStore();
@@ -186,11 +197,27 @@ const reactionStore = useReactionStore();
 const router = useRouter();
 
 const handleLogout = () => {
-  if (confirm('로그아웃 하시겠습니까?')) {
-    userStore.logout();
-    router.push({ name: 'onboarding' }); // 온보딩 페이지로 이동
-  }
+  confirmModal.value = {
+    visible: true,
+    title: '로그아웃',
+    description: '로그아웃 하시겠습니까?',
+    icon: '👋',
+    action: () => {
+      userStore.logout();
+      confirmModal.value.visible = false;
+      router.push({ name: 'onboarding' });
+    },
+  };
 };
+
+// 컨펌 모달 상태
+const confirmModal = ref({
+  visible: false,
+  title: '',
+  description: '',
+  icon: '',
+  action: null,
+});
 
 const userName = computed(() => userStore.user?.nickname || '');
 
@@ -321,13 +348,26 @@ const handleDeleteTemplate = async (tmpl) => {
   const uid = userStore.user?.id;
   if (!uid) return;
 
-  const confirmed = confirm(`"${tmpl.detail}" 템플릿을 삭제하시겠습니까?`);
-  if (!confirmed) return;
-  try {
-    await templateStore.deleteTemplate(tmpl.id, uid);
-  } catch {
-    alert('삭제에 실패했어요. 다시 시도해주세요.');
-  }
+  confirmModal.value = {
+    visible: true,
+    title: '템플릿 삭제',
+    description: `"${tmpl.detail}" 템플릿을 삭제하시겠습니까?`,
+    icon: '🗑️',
+    action: async () => {
+      try {
+        await templateStore.deleteTemplate(tmpl.id, uid);
+        confirmModal.value.visible = false;
+      } catch {
+        confirmModal.value.visible = false;
+        modal.value = {
+          visible: true,
+          icon: '❌',
+          title: '삭제 실패',
+          description: '삭제에 실패했어요. 다시 시도해주세요.',
+        };
+      }
+    },
+  };
 };
 </script>
 
@@ -381,13 +421,14 @@ const handleDeleteTemplate = async (tmpl) => {
 }
 
 .badge-grid {
-  background-color: var(--color-gray-10);
-  padding: 1.125rem;
-  border-radius: 0.375rem;
+  background-color: var(--color-background, #f7f8fa);
+  padding: 16px;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
-  gap: 1.125rem;
+  gap: 12px;
   width: fit-content;
+  border: 1px solid var(--color-deepgray-10);
 }
 
 .grid-row {
@@ -396,15 +437,16 @@ const handleDeleteTemplate = async (tmpl) => {
 }
 
 .badge-item {
-  width: 2rem;
-  height: 2rem;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.375rem;
+  border-radius: 10px;
   background-color: var(--color-white);
   cursor: default;
   transition: transform 0.15s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 }
 .badge-item:hover {
   transform: scale(1.15);

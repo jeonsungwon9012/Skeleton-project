@@ -32,12 +32,8 @@ const dashboard = useDashboardStore();
 onMounted(() => store.loadData());
 
 const recentList = computed(() => {
-  const year = dashboard.currentYear;
-  const month = String(dashboard.currentMonth).padStart(2, '0');
-  const prefix = `${year}-${month}`;
-
+  // 💡 유저의 전체 내역(myBudgets) 중 날짜 기준 내림차순(최신순) 정렬 후 5개 추출
   return store.myBudgets
-    .filter((item) => item.date.startsWith(prefix))
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);
 });

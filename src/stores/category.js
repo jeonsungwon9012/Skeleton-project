@@ -77,6 +77,8 @@ export const useCategoryStore = defineStore('category', () => {
   const chartData = computed(() => {
     const map = expenseByCategory.value;
     const total = totalExpense.value;
+    const currentMonthStr = `${dashboardStore.currentYear}-${String(dashboardStore.currentMonth).padStart(2, '0')}`;
+
     return categories.value
       .filter((c) => map[c.id])
       .map((c) => ({
@@ -84,10 +86,20 @@ export const useCategoryStore = defineStore('category', () => {
         amount: map[c.id],
         ratio: total > 0 ? Math.round((map[c.id] / total) * 100) : 0,
         goalAmount:
-          categoryBudgets.value.find((b) => Number(b.cid) === Number(c.id))
-            ?.amount || null,
+          categoryBudgets.value.find(
+            (b) =>
+              Number(b.cid) === Number(c.id) && b.month === currentMonthStr,
+          )?.targetBudget || null,
       }))
-      .sort((a, b) => b.amount - a.amount);
+      .sort((a, b) => {
+        // 1. 예산 설정 여부 우선순위 (설정됨 -> 미설정)
+        const aHasBudget = a.goalAmount !== null;
+        const bHasBudget = b.goalAmount !== null;
+        if (aHasBudget && !bHasBudget) return -1;
+        if (!aHasBudget && bHasBudget) return 1;
+        // 2. 같은 그룹 내에서는 지출 금액 내림차순
+        return b.amount - a.amount;
+      });
   });
 
   // 카테고리 목록 / 목표 예산 / 지출 내역을 병렬로 fetch
@@ -100,7 +112,12 @@ export const useCategoryStore = defineStore('category', () => {
         categoryApi.getCategoryBudgets(uid),
         categoryApi.getBudgets(uid),
       ]);
-      categories.value = catRes.data;
+
+      // 💡 유저별 카테고리 필터링 적용 (공용 + 내 카테고리)
+      categories.value = catRes.data.filter(
+        (c) => c.isBasic || Number(c.uid) === Number(uid),
+      );
+
       categoryBudgets.value = budgetRes.data;
       budgets.value = expenseRes.data;
     } finally {

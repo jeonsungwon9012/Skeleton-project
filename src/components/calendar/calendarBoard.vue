@@ -1,12 +1,12 @@
 <script setup>
 import { computed } from 'vue';
-import { useBudgetStore } from "@/stores/budgetStore2.js";
+import { useBudgetStore } from '@/stores/budgetStore2.js';
 
 const props = defineProps({
   dots: Array,
-  selectedDates: Array
-})
-const emit = defineEmits(['click-date'])
+  selectedDates: Array,
+});
+const emit = defineEmits(['click-date']);
 
 const budgetStore = useBudgetStore();
 
@@ -52,43 +52,54 @@ function formatDateObj(date) {
   return `${y}-${m}-${d}`;
 }
 
-const handleDayClick = (event, date) => emit('click-date', date, event.shiftKey)
+const handleDayClick = (event, date) => {
+  // Ctrl 키(Windows) 또는 Meta 키(Mac Command)와 Shift 키 상태를 모두 전달
+  emit('click-date', date, event.ctrlKey || event.metaKey, event.shiftKey);
+};
 
 /**
  * 🎨 카테고리 컬러 매핑
  */
 const getCategoryColor = (cid) => {
-  const category = budgetStore.categories.find(c => Number(c.id) === Number(cid));
+  const category = budgetStore.categories.find(
+    (c) => Number(c.id) === Number(cid),
+  );
   // DB에 컬러가 지정되어 있지 않다면 '기타' 카테고리 변수 사용
   return category ? category.color : 'var(--category-gray)';
-}
+};
 </script>
 
 <template>
   <div class="calendar-card">
     <div class="days-header subtitle-s">
-      <span v-for="(d, idx) in ['일','월','화','수','목','금','토']"
-            :key="d"
-            :class="{ 'sun': idx === 0 }">{{ d }}</span>
+      <span
+        v-for="(d, idx) in ['일', '월', '화', '수', '목', '금', '토']"
+        :key="d"
+        :class="{ sun: idx === 0 }"
+        >{{ d }}</span
+      >
     </div>
 
     <div class="grid">
-      <div v-for="(day, index) in calendarDays" :key="index"
-           class="cell"
-           :class="{
-             'other-month': !day.isCurrent,
-             'is-selected': selectedDates.includes(day.date)
-           }"
-           @click="handleDayClick($event, day.date)">
-
+      <div
+        v-for="(day, index) in calendarDays"
+        :key="index"
+        class="cell"
+        :class="{
+          'other-month': !day.isCurrent,
+          'is-selected': selectedDates.includes(day.date),
+        }"
+        @click="handleDayClick($event, day.date)"
+      >
         <span class="date-num body-m">{{ day.num }}</span>
 
         <div class="dots-container">
-          <div v-for="dot in dots.filter(d => d.date === day.date)"
-               :key="dot.id"
-               class="dot"
-               :style="{ backgroundColor: getCategoryColor(dot.cid) }">
-          </div>
+          <div
+            v-for="dot in dots.filter((d) => d.date === day.date)"
+            :key="dot.id"
+            class="dot"
+            :style="{ backgroundColor: getCategoryColor(dot.cid) }"
+          ></div>
         </div>
       </div>
     </div>
@@ -132,7 +143,9 @@ const getCategoryColor = (cid) => {
   transition: background-color 0.2s ease;
 }
 
-.cell:nth-child(7n) { border-right: none; }
+.cell:nth-child(7n) {
+  border-right: none;
+}
 
 /* 💡 [영역 선택] Primary-10 컬러 반영 */
 .cell.is-selected {
@@ -163,7 +176,9 @@ const getCategoryColor = (cid) => {
 }
 
 /* 일요일: Category Red 반영 */
-.sun { color: var(--category-red); }
+.sun {
+  color: var(--category-red);
+}
 
 .dots-container {
   display: flex;

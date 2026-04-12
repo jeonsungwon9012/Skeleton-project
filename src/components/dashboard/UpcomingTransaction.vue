@@ -32,15 +32,15 @@ const dashboard = useDashboardStore();
 
 onMounted(() => store.loadData());
 
-// 선택한 월의 반복 거래만 필터
 const upcomingList = computed(() => {
-  const year = dashboard.currentYear;
-  const month = String(dashboard.currentMonth).padStart(2, '0');
-  const prefix = `${year}-${month}`;
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // 오늘 자정 이후부터 체크
 
-  return store.myBudgets.filter(
-    (item) => item.isRecurring && item.date.startsWith(prefix),
-  );
+  // 💡 오늘 이후의 데이터만 필터링 -> 날짜 오름차순(가까운 순) 정렬 -> 5개 추출
+  return store.myBudgets
+    .filter((item) => new Date(item.date) > today)
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(0, 5);
 });
 </script>
 

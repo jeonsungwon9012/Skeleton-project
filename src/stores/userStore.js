@@ -3,7 +3,9 @@ import { ref, computed } from 'vue';
 import axios from 'axios';
 
 export const useUserStore = defineStore('user', () => {
-  const user = ref(null);
+  // 💡 초기화 시 localStorage에서 유저 정보를 복구합니다.
+  const savedUser = localStorage.getItem('user');
+  const user = ref(savedUser ? JSON.parse(savedUser) : null);
 
   const isLoggedIn = computed(() => !!user.value);
 
@@ -28,7 +30,8 @@ export const useUserStore = defineStore('user', () => {
 
       // 회원가입 성공 시 해당 유저로 자동 로그인 처리
       user.value = response.data;
-      localStorage.setItem('userId', String(response.data.id));
+      // 💡 로그인 유지를 위해 localStorage에 저장
+      localStorage.setItem('user', JSON.stringify(response.data));
       console.log('회원가입 및 DB 저장 성공! 👤');
       return response.data;
     } catch (error) {
@@ -52,7 +55,8 @@ export const useUserStore = defineStore('user', () => {
       const res = await axios.get(`/api/USER?email=${email}`);
       if (res.data && res.data.length > 0) {
         user.value = res.data[0];
-        localStorage.setItem('userId', String(user.value.id));
+        // 💡 로그인 성공 시 localStorage에 저장
+        localStorage.setItem('user', JSON.stringify(user.value));
         return user.value;
       }
       throw new Error('사용자를 찾을 수 없습니다.');
@@ -64,18 +68,23 @@ export const useUserStore = defineStore('user', () => {
 
   const logout = () => {
     user.value = null;
-    localStorage.removeItem('userId');
+    // 💡 로그아웃 시 저장된 유저 정보 삭제
+    localStorage.removeItem('user');
   };
 
   const fetchUser = async (id) => {
     const res = await axios.get(`/api/USER/${id}`);
     user.value = res.data;
+    // 💡 최신 정보 동기화
+    localStorage.setItem('user', JSON.stringify(user.value));
   };
 
   // 💡 [추가] 유저 정보 업데이트
   const updateUser = async (id, userData) => {
     const response = await axios.put(`/api/USER/${id}`, userData);
     user.value = response.data;
+    // 💡 수정된 정보 동기화
+    localStorage.setItem('user', JSON.stringify(user.value));
     return response.data;
   };
 

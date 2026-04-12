@@ -4,7 +4,7 @@
       "id": "1",
       "nickname": "김지훈",
       "email": "jihoon@example.com",
-      "age": 28,
+      "age": 20,
       "gender": "male",
       "count": 0,
       "cid": 2,
@@ -31,11 +31,21 @@
       "id": "3"
     },
     {
-      "id": "x8RdGpGnDbw",
+      "id": "4",
       "nickname": "test1",
       "email": "test1@test1.com",
       "age": 30,
       "gender": "male",
+      "count": 0,
+      "cid": 1,
+      "budgetCount": 0
+    },
+    {
+      "id": "IfZiFOQi5UA",
+      "nickname": "test2",
+      "email": "test2@test.com",
+      "age": 30,
+      "gender": "female",
       "count": 0,
       "cid": 1,
       "budgetCount": 0
@@ -1465,14 +1475,17 @@
       "uid": 1,
       "date": "2026-04-12",
       "type": "expense",
-      "amount": 2000,
+      "amount": 2999,
       "cid": 5,
       "detail": "교통비",
       "memo": "버스비 너무 비싸 ㅠㅠ",
       "isRecurring": false,
       "cycle": null,
       "isTemplate": true,
-      "id": "112"
+      "id": "112",
+      "categoryName": "교통/차량",
+      "categoryImg": "🚌",
+      "categoryColor": "#4DD0E1"
     },
     {
       "date": "2026-04-11",
@@ -1971,7 +1984,7 @@
       "id": "153"
     },
     {
-      "date": "2026-04-08",
+      "date": "2026-04-12",
       "type": "expense",
       "amount": 15000,
       "detail": "점심값",
@@ -1980,7 +1993,294 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "dcgCWKqkl7s",
+      "id": "154"
+    },
+    {
+      "date": "2026-04-12",
+      "type": "expense",
+      "amount": 15000,
+      "detail": "점심값",
+      "memo": "밥값 너무 많이 나가",
+      "uid": 3,
+      "cid": 1,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "155"
+    },
+    {
+      "date": "2026-04-12",
+      "type": "expense",
+      "amount": 2500,
+      "detail": "아메리카노",
+      "memo": "아메리카노 수혈",
+      "uid": 1,
+      "cid": 2,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "xr6u_9KlPsE"
+    },
+    {
+      "id": "BqCGGivBZfw",
+      "type": "expense",
+      "detail": "밥값",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-08",
+      "memo": "학식",
+      "uid": 1
+    },
+    {
+      "id": "LL4Ii0jHE28",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-01",
+      "memo": "밀린 학식 저장",
+      "uid": 1
+    },
+    {
+      "id": "X6LSF3d6TgE",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-02",
+      "memo": "밀린 학식 저장",
+      "uid": 1
+    },
+    {
+      "id": "1EawVBKUTlg",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-09",
+      "memo": "밀린 학식 저장",
+      "uid": 1
+    },
+    {
+      "id": "fYoxwoVay8Y",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-10",
+      "memo": "밀린 학식 저장",
+      "uid": 1
+    },
+    {
+      "id": "iEoDFdFd6uo",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-03",
+      "memo": "밀린 학식 저장",
+      "uid": 1
+    },
+    {
+      "id": "Z5Zu84X_kWw",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-07",
+      "memo": "밀린 학식 저장",
+      "uid": 1
+    },
+    {
+      "id": "TIt0vOw4AgM",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-06",
+      "memo": "밀린 학식 저장",
+      "uid": 1
+    },
+    {
+      "id": "hXcLrgUSAEs",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-05",
+      "memo": "밀린 학식 저장",
+      "uid": 1
+    },
+    {
+      "id": "CU2JtN5AUaU",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 6000,
+      "cid": 1,
+      "date": "2026-04-04",
+      "memo": "이날은 다른걸 먹었나...?",
+      "uid": 1,
+      "categoryName": "식비/외식",
+      "categoryImg": "🍚",
+      "categoryColor": "#FF7676"
+    },
+    {
+      "id": "L2shgT1T8CY",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-13",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "6QzWvGCC334",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-14",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "H2dhD0NOY5Y",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-15",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "8KZmgy96Qpc",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-16",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "9ClRj3FxFEU",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 5000,
+      "cid": 1,
+      "date": "2026-04-17",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "8ZHkNvZsULc",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 4000,
+      "cid": 1,
+      "date": "2026-04-13",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "6lE3a1idX6I",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 4000,
+      "cid": 1,
+      "date": "2026-04-14",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "9QCeR3R_p-w",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 4000,
+      "cid": 1,
+      "date": "2026-04-15",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "0KtOzs0ob0w",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 4000,
+      "cid": 1,
+      "date": "2026-04-16",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "p2X7EEq_tQk",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 4000,
+      "cid": 1,
+      "date": "2026-04-17",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "zQ7l-BmKOYM",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 3000,
+      "cid": 1,
+      "date": "2026-04-13",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "8ZLAi72RR9g",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 3000,
+      "cid": 1,
+      "date": "2026-04-14",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "WNctuJPi-38",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 3000,
+      "cid": 1,
+      "date": "2026-04-15",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "s0Bj__1Wk6w",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 3000,
+      "cid": 1,
+      "date": "2026-04-16",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "QE-0if95S68",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 3000,
+      "cid": 1,
+      "date": "2026-04-17",
+      "memo": "이때도 학식먹음",
+      "uid": 1
+    },
+    {
+      "id": "dr1KaFdoAh4",
+      "type": "expense",
+      "detail": "학식",
+      "amount": 3500,
+      "cid": 1,
+      "date": "2026-04-18",
+      "memo": "이때도 학식먹음",
+      "uid": 1,
       "categoryName": "식비/외식",
       "categoryImg": "🍚",
       "categoryColor": "#FF7676"
@@ -1995,14 +2295,6 @@
       "detail": "카페라떼",
       "memo": "카공",
       "cid": 2
-    },
-    {
-      "uid": 1,
-      "amount": 2000,
-      "type": "expense",
-      "detail": "교통비",
-      "memo": "버스비 너무 비싸 ㅠㅠ",
-      "id": "2"
     },
     {
       "uid": 1,
@@ -2023,7 +2315,7 @@
       "id": "4"
     },
     {
-      "id": "UStPucxX4uw",
+      "id": "5",
       "uid": 3,
       "type": "expense",
       "detail": "점심값",
@@ -2032,7 +2324,7 @@
       "memo": "밥값 너무 많이 나가"
     },
     {
-      "id": "B42CuszENGE",
+      "id": "6",
       "uid": null,
       "type": "income",
       "detail": "월급",
@@ -2041,7 +2333,7 @@
       "memo": "와 월급이다!"
     },
     {
-      "id": "BPqNq_N0j1o",
+      "id": "7",
       "uid": null,
       "type": "expense",
       "detail": "커피",
@@ -2050,7 +2342,7 @@
       "memo": "커! 피수형"
     },
     {
-      "id": "_nzy8asHXO4",
+      "id": "8",
       "uid": null,
       "type": "expense",
       "detail": "점심",
@@ -2059,7 +2351,7 @@
       "memo": "밥값 너무 비싸"
     }
   ],
-  "CATEGORY_BUDGET": [
+  "targetBudget": [
     {
       "id": "1",
       "uid": 1,
@@ -2115,6 +2407,55 @@
       "cid": 8,
       "targetBudget": 80000,
       "month": "2026-04"
+    },
+    {
+      "uid": 1,
+      "month": "2026-04",
+      "cid": 10,
+      "targetBudget": 40000,
+      "id": "ECI_N3GcmFg"
+    },
+    {
+      "uid": null,
+      "month": "2026-04",
+      "cid": 1,
+      "targetBudget": 500000,
+      "id": "FQm1Wsw8cV8"
+    },
+    {
+      "uid": 2,
+      "month": "2026-05",
+      "cid": 4,
+      "targetBudget": 500000,
+      "id": "vLuVc0UwkfU"
+    },
+    {
+      "uid": 2,
+      "month": "2026-05",
+      "cid": 8,
+      "targetBudget": 200000,
+      "id": "rdtGVAdSQlA"
+    },
+    {
+      "uid": 2,
+      "month": "2026-05",
+      "cid": 6,
+      "targetBudget": 50000,
+      "id": "tbawj7iLKx0"
+    },
+    {
+      "uid": 2,
+      "month": "2026-05",
+      "cid": 10,
+      "targetBudget": 100000,
+      "id": "Wwp-5HIbJYI"
+    },
+    {
+      "uid": 2,
+      "month": "2026-05",
+      "cid": 11,
+      "targetBudget": 300000,
+      "id": "INHn3bRc_qc"
     }
   ],
   "reactionCount": [
@@ -2166,7 +2507,7 @@
       "id": "1",
       "cid": 1,
       "bid": 1,
-      "message": "📊 이번 달 식비가 저번 달보다 15% 줄었어요! 절약왕!"
+      "message": "📊 이번 달은 외식이 많네요"
     },
     {
       "id": "2",
@@ -2178,7 +2519,7 @@
       "id": "3",
       "cid": 3,
       "bid": 3,
-      "message": "🛍️ 쇼핑 지출이 예산의 80%에 도달했습니다! 조심하세요!"
+      "message": "🛍️ 쇼핑 지출이 많이 늘었습니다! 조심하세요!"
     },
     {
       "id": "4",

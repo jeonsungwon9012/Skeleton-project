@@ -4,6 +4,7 @@ import { fetchAllDashboardData } from '../api/budget';
 import { templateApi } from '../api/template';
 import { categoryApi } from '../api/category';
 import { useUserStore } from './userStore';
+import { useDashboardStore } from './dashboard';
 import axios from 'axios';
 
 export const useTransactionStore = defineStore('transaction', () => {
@@ -11,6 +12,7 @@ export const useTransactionStore = defineStore('transaction', () => {
   const budgetList = ref([]);
   const categories = ref([]);
   const templates = ref([]);
+  const monthlySummaryMessages = ref([]);
   const users = ref([]);
 
   // --- [공통 상태] ---
@@ -92,12 +94,14 @@ export const useTransactionStore = defineStore('transaction', () => {
     if (!uid) return;
 
     try {
-      const [budgetRes, categoryRes, templateRes, userRes] = await Promise.all([
-        axios.get(`/api/BUDGET?uid=${uid}`),
-        categoryApi.getCategories(),
-        templateApi.getTemplates(uid),
-        axios.get('/api/USER'),
-      ]);
+      const [budgetRes, categoryRes, templateRes, userRes, summaryMsgRes] =
+        await Promise.all([
+          axios.get(`/api/BUDGET?uid=${uid}`),
+          categoryApi.getCategories(),
+          templateApi.getTemplates(uid),
+          axios.get('/api/USER'),
+          axios.get('/api/monthlySummaryMessages'),
+        ]);
 
       const rawCategories = categoryRes.data || [];
       categories.value = rawCategories.filter(
@@ -115,6 +119,7 @@ export const useTransactionStore = defineStore('transaction', () => {
       });
       templates.value = templateRes.data || [];
       users.value = userRes.data || [];
+      monthlySummaryMessages.value = summaryMsgRes.data || [];
     } catch (err) {
       console.error('데이터 로딩 실패:', err);
     }
@@ -132,17 +137,44 @@ export const useTransactionStore = defineStore('transaction', () => {
     resetFilters();
   }
 
-  function toggleDate(date, isShiftPressed = false) {
-    if (isShiftPressed) {
+  function toggleDate(date, isCtrlPressed = false, isShiftPressed = false) {
+    // 1. Shift + 클릭: 범위 선택
+    if (isShiftPressed && selectedDates.value.length > 0) {
+      const startStr = selectedDates.value[selectedDates.value.length - 1];
+      const endStr = date;
+
+      const start = new Date(startStr);
+      const end = new Date(endStr);
+      const dateList = [];
+
+      const startTime = Math.min(start, end);
+      const endTime = Math.max(start, end);
+
+      for (
+        let d = new Date(startTime);
+        d <= new Date(endTime);
+        d.setDate(d.getDate() + 1)
+      ) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        dateList.push(`${y}-${m}-${day}`);
+      }
+
+      // 기존 선택에 추가하는 것이 아니라 새로운 범위로 교체 (일반적인 OS 동작 방식)
+      selectedDates.value = dateList;
+    }
+    // 2. Ctrl(또는 Command) + 클릭: 개별 토글 다중 선택
+    else if (isCtrlPressed) {
       const index = selectedDates.value.indexOf(date);
       if (index > -1) selectedDates.value.splice(index, 1);
       else selectedDates.value.push(date);
-    } else {
-      selectedDates.value =
-        selectedDates.value[0] === date && selectedDates.value.length === 1
-          ? []
-          : [date];
     }
+    // 3. 일반 클릭: 단일 선택
+    else {
+      selectedDates.value = [date];
+    }
+
     selectedCategories.value = [];
     isScheduledOnly.value = false;
   }
@@ -174,7 +206,7 @@ export const useTransactionStore = defineStore('transaction', () => {
         const matchCategory =
           cats.length === 0 ||
           cats.includes('전체') ||
-          cats.includes(item.categoryName);
+          cats.includes(Number(item.cid));
         const matchSearch =
           item.detail.includes(searchVal) ||
           (item.memo && item.memo.includes(searchVal));
@@ -218,10 +250,8 @@ export const useTransactionStore = defineStore('transaction', () => {
         .sort((a, b) => new Date(b.date) - new Date(a.date)); // 이전 날짜 내림차순
 
       const future = list.value
-        .filter(
-          (item) => new Date(item.date) > today && item.isRecurring === true,
-        )
-        .sort((a, b) => new Date(a.date) - new Date(b.date)); // 이후 날짜 오름차순
+        .filter((item) => new Date(item.date) > today)
+        .sort((a, b) => new Date(a.date) - new Date(b.date)); // 미래 날짜는 가까운 순서대로
 
       return [...past, ...future]; // 이전 날짜 먼저, 이후 날짜 아래
     });
@@ -265,6 +295,47 @@ export const useTransactionStore = defineStore('transaction', () => {
     };
   };
 
+  // 💡 [추가] 이번 달 최다 빈도 카테고리(ID 1~5) 기반 요약 메시지 계산
+  const topMonthlyMessage = computed(() => {
+    const dashboardStore = useDashboardStore();
+    const year = dashboardStore.currentYear;
+    const month = String(dashboardStore.currentMonth).padStart(2, '0');
+    const prefix = `${year}-${month}`;
+
+    // 1. 이번달 내역 중 cid 1~5인 것 필터링
+    const targetBudgets = myBudgets.value.filter((b) => {
+      const cid = Number(b.cid);
+      return b.date.startsWith(prefix) && cid >= 1 && cid <= 5;
+    });
+
+    if (targetBudgets.length === 0)
+      return `${dashboardStore.currentMonth}월은 아직 조용하네요! 똑딱과 함께 가계부를 써보세요.`;
+
+    // 2. 빈도 계산
+    const counts = {};
+    targetBudgets.forEach((b) => {
+      counts[b.cid] = (counts[b.cid] || 0) + 1;
+    });
+
+    // 3. 최다 빈도 cid 찾기
+    let maxCid = null;
+    let maxCount = -1;
+    for (const cid in counts) {
+      if (counts[cid] > maxCount) {
+        maxCount = counts[cid];
+        maxCid = Number(cid);
+      }
+    }
+
+    // 4. 메시지 매칭
+    const msgObj = monthlySummaryMessages.value.find(
+      (m) => Number(m.cid) === maxCid,
+    );
+    return msgObj
+      ? msgObj.message
+      : '오늘도 똑딱과 함께 스마트한 소비를 시작해요!';
+  });
+
   // 💡 [추가] 유저별 템플릿 개수 확인
   const getTemplateCountByUser = (uid = currentUid.value) =>
     templates.value.filter((t) => Number(t.uid) === Number(uid)).length;
@@ -291,7 +362,7 @@ export const useTransactionStore = defineStore('transaction', () => {
   const editBudget = async (id, payload) => {
     const response = await axios.put(`/api/BUDGET/${id}`, payload);
     const index = budgetList.value.findIndex(
-      (b) => Number(b.id) === Number(id),
+      (b) => String(b.id) === String(id),
     );
     if (index !== -1) budgetList.value[index] = response.data;
     return response.data;
@@ -344,6 +415,38 @@ export const useTransactionStore = defineStore('transaction', () => {
     return response.data;
   };
 
+  // 💡 [추가] 목표 예산 저장/수정
+  const saveTargetBudget = async (payload) => {
+    try {
+      const { uid, month, cid } = payload;
+      // 1. 해당 유저/월/카테고리에 이미 예산이 설정되어 있는지 확인
+      const res = await axios.get(
+        `/api/targetBudget?uid=${uid}&month=${month}&cid=${cid}`,
+      );
+
+      if (res.data.length > 0) {
+        // 2. 이미 있으면 업데이트 (PUT)
+        const existing = res.data[0];
+        await axios.put(`/api/targetBudget/${existing.id}`, {
+          ...payload,
+          id: Number(existing.id),
+        });
+      } else {
+        // 3. 없으면 새로 생성 (POST)
+        const allRes = await axios.get('/api/targetBudget');
+        const nextId =
+          Math.max(
+            0,
+            ...allRes.data.map((t) => parseInt(t.id)).filter((n) => !isNaN(n)),
+          ) + 1;
+        await axios.post('/api/targetBudget', { ...payload, id: nextId });
+      }
+    } catch (err) {
+      console.error('예산 저장 실패:', err);
+      throw err;
+    }
+  };
+
   return {
     budgetList,
     budgets: budgetList, // 하위 호환성을 위한 별칭 추가
@@ -360,6 +463,8 @@ export const useTransactionStore = defineStore('transaction', () => {
     isScheduledOnly,
     calendarDots,
     rangeBudgets,
+    topMonthlyMessage,
+    monthlySummaryMessages,
     selectedTotal,
     loadData,
     fetchData,
@@ -376,6 +481,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     deleteBudget,
     addTemplate,
     editTemplate,
+    saveTargetBudget,
     changeMonth,
     toggleDate,
     toggleCategory,

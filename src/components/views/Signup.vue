@@ -1,7 +1,8 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
+import SuccessModal from '@/components/common/CompleteModal.vue';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -12,6 +13,13 @@ const form = ref({
   email: '',
   age: null,
   gender: '', // 'male' 또는 'female'
+});
+
+const modal = reactive({
+  visible: false,
+  icon: '🎉',
+  title: '가입을 축하합니다!',
+  description: '',
 });
 
 const ageOptions = [10, 20, 30, 40, 50, 60, 70, 80];
@@ -26,7 +34,10 @@ const handleSignup = async () => {
     !form.value.age ||
     !form.value.gender
   ) {
-    alert('모든 항목을 입력해주세요.');
+    modal.icon = '⚠️';
+    modal.title = '입력 확인';
+    modal.description = '모든 항목을 입력해주세요.';
+    modal.visible = true;
     return;
   }
 
@@ -34,7 +45,11 @@ const handleSignup = async () => {
     // 1. 이메일 중복 체크 (DB 조회를 통해 이미 가입된 이메일인지 확인)
     const isDuplicate = await userStore.isEmailDuplicate(form.value.email);
     if (isDuplicate) {
-      alert('이미 가입된 이메일입니다. 다른 이메일을 사용해주세요.');
+      modal.icon = '📧';
+      modal.title = '중복된 이메일';
+      modal.description =
+        '이미 가입된 이메일입니다.\n다른 이메일을 사용해주세요.';
+      modal.visible = true;
       return;
     }
 
@@ -42,12 +57,25 @@ const handleSignup = async () => {
     // signup 액션 내부에서 유저 정보를 저장하고 user 상태를 업데이트합니다.
     await userStore.signup(form.value);
 
-    // 3. 가입 완료 후 대시보드로 이동
-    alert('똑딱 가계부에 오신 것을 환영합니다!');
-    router.push('/dashboard');
+    // 3. 성공 모달 표시
+    modal.icon = '🎉';
+    modal.title = '가입 완료!';
+    modal.description = '똑딱 가계부에 오신 것을 환영합니다!';
+    modal.visible = true;
   } catch (error) {
     console.error('Signup Failure:', error);
-    alert('회원가입 중 문제가 발생했습니다. 서버 상태를 확인해주세요.');
+    modal.icon = '❌';
+    modal.title = '가입 오류';
+    modal.description =
+      '회원가입 중 문제가 발생했습니다.\n서버 상태를 확인해주세요.';
+    modal.visible = true;
+  }
+};
+
+const handleModalClose = () => {
+  modal.visible = false;
+  if (modal.icon === '🎉') {
+    router.push('/dashboard');
   }
 };
 
@@ -126,6 +154,15 @@ const goBack = () => {
         <button type="submit" class="submit-btn">가입 완료</button>
       </form>
     </div>
+
+    <!-- 가입 완료 모달 -->
+    <SuccessModal
+      :visible="modal.visible"
+      :icon="modal.icon"
+      :title="modal.title"
+      :description="modal.description"
+      @close="handleModalClose"
+    />
   </div>
 </template>
 

@@ -1,7 +1,15 @@
 <script setup>
+import { onMounted } from 'vue';
 import { useDashboardStore } from '@/stores/dashboard';
+import { useTransactionStore } from '@/stores/budgetStore';
 
 const dashboard = useDashboardStore();
+const transactionStore = useTransactionStore();
+
+onMounted(() => {
+  // 컴포넌트 마운트 시 최신 데이터 로드 확인
+  transactionStore.loadData();
+});
 </script>
 
 <template>
@@ -34,7 +42,7 @@ const dashboard = useDashboardStore();
         </button>
       </div>
       <div class="monthly-message">
-        ☕ {{ dashboard.currentMonth }}월의 나는 커피 마니아!
+        {{ transactionStore.topMonthlyMessage }}
       </div>
     </div>
   </div>
