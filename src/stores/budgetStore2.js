@@ -103,9 +103,13 @@ export const useBudgetStore = defineStore('budget', () => {
 
   // 🚩 [중요] 경로 앞에 /api를 붙여서 Vite 프록시를 타게 만듭니다.
   async function fetchData() {
+    const uid = currentUid.value;
+    if (!uid) return;
+
     try {
       const [resB, resC, resU] = await Promise.all([
         api.get('/api/BUDGET'),
+        api.get(`/api/BUDGET?uid=${uid}`),
         api.get('/api/CATEGORY'),
         api.get('/api/USER'),
       ]);
@@ -116,6 +120,16 @@ export const useBudgetStore = defineStore('budget', () => {
     } catch (error) {
       console.error('데이터 로드 실패:', error);
     }
+  }
+
+  // 💡 [추가] budgetStore.js와 맞춤: 카테고리 추가 기능
+  async function addCategory(payload) {
+    const res = await api.post('/api/CATEGORY', payload);
+    categories.value.push({
+      ...res.data,
+      id: String(res.data.id),
+    });
+    return res.data;
   }
 
   async function addBudget(payload) {
@@ -235,6 +249,7 @@ export const useBudgetStore = defineStore('budget', () => {
     upcomingList,
     fetchData,
     addBudget,
+    addCategory,
     toggleDate,
     toggleCategory,
     setTransactionType,
