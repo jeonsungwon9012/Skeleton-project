@@ -29,6 +29,16 @@
       "cid": 1,
       "budgetCount": 0,
       "id": "3"
+    },
+    {
+      "id": "x8RdGpGnDbw",
+      "nickname": "test1",
+      "email": "test1@test1.com",
+      "age": 30,
+      "gender": "male",
+      "count": 0,
+      "cid": 1,
+      "budgetCount": 0
     }
   ],
   "CATEGORY": [
@@ -2017,6 +2027,33 @@
       "amount": 15000,
       "cid": 1,
       "memo": "밥값 너무 많이 나가"
+    },
+    {
+      "id": "B42CuszENGE",
+      "uid": null,
+      "type": "income",
+      "detail": "월급",
+      "amount": 2500000,
+      "cid": 4,
+      "memo": "와 월급이다!"
+    },
+    {
+      "id": "BPqNq_N0j1o",
+      "uid": null,
+      "type": "expense",
+      "detail": "커피",
+      "amount": 2500,
+      "cid": 2,
+      "memo": "커! 피수형"
+    },
+    {
+      "id": "_nzy8asHXO4",
+      "uid": null,
+      "type": "expense",
+      "detail": "점심",
+      "amount": 10000,
+      "cid": 1,
+      "memo": "밥값 너무 비싸"
     }
   ],
   "CATEGORY_BUDGET": [

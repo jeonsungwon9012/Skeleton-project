@@ -86,7 +86,7 @@ const handleSubmit = async () => {
 
   isSubmitting.value = true;
   try {
-    const uid = userStore.user?.id;
+    const uid = Number(userStore.user?.id);
     const payload = {
       uid: uid,
       type: form.type,
@@ -97,8 +97,12 @@ const handleSubmit = async () => {
     };
 
     if (props.item?.id) {
-      // 💡 수정 모드
-      await transactionStore.editTemplate(props.item.id, payload);
+      // 💡 수정 모드: 기존 ID를 포함하여 PUT 요청의 무결성 보장
+      const editPayload = {
+        ...payload,
+        id: props.item.id,
+      };
+      await transactionStore.editTemplate(props.item.id, editPayload);
     } else {
       // 💡 신규 등록 모드
       await transactionStore.addTemplate(payload);

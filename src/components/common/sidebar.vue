@@ -339,6 +339,7 @@ const handleDeleteTemplate = async (tmpl) => {
   flex-direction: column;
   gap: 20px;
   background-color: var(--color-white);
+  z-index: 1;
 }
 
 .sidebar-logo img {

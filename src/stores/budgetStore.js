@@ -273,7 +273,10 @@ export const useTransactionStore = defineStore('transaction', () => {
   const addBudget = async (payload) => {
     // 💡 현재 목록에서 가장 큰 ID + 1 (숫자 형식)
     const nextId =
-      Math.max(...budgetList.value.map((b) => Number(b.id)), 0) + 1;
+      Math.max(
+        0,
+        ...budgetList.value.map((b) => parseInt(b.id)).filter((n) => !isNaN(n)),
+      ) + 1;
 
     const response = await axios.post('/api/BUDGET', {
       id: nextId,
@@ -318,7 +321,11 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   // 💡 [추가] 템플릿 추가
   const addTemplate = async (payload) => {
-    const nextId = Math.max(...templates.value.map((t) => Number(t.id)), 0) + 1;
+    const nextId =
+      Math.max(
+        0,
+        ...templates.value.map((t) => parseInt(t.id)).filter((n) => !isNaN(n)),
+      ) + 1;
 
     const response = await axios.post('/api/TEMPLATE', {
       id: nextId,
@@ -332,7 +339,7 @@ export const useTransactionStore = defineStore('transaction', () => {
   // 💡 [추가] 템플릿 수정
   const editTemplate = async (id, payload) => {
     const response = await axios.put(`/api/TEMPLATE/${id}`, payload);
-    const index = templates.value.findIndex((t) => Number(t.id) === Number(id));
+    const index = templates.value.findIndex((t) => String(t.id) === String(id));
     if (index !== -1) templates.value[index] = response.data;
     return response.data;
   };
