@@ -1971,7 +1971,7 @@
       "id": "153"
     },
     {
-      "date": "2026-04-12",
+      "date": "2026-04-08",
       "type": "expense",
       "amount": 15000,
       "detail": "점심값",
@@ -1980,7 +1980,10 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "dcgCWKqkl7s"
+      "id": "dcgCWKqkl7s",
+      "categoryName": "식비/외식",
+      "categoryImg": "🍚",
+      "categoryColor": "#FF7676"
     }
   ],
   "TEMPLATE": [

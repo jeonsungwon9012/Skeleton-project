@@ -2,29 +2,10 @@
   <div class="container">
     <!-- 상단 헤더 -->
     <div class="header">
-      <button @click="prevMonth">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M15 18L9 12L15 6"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-      <h2>{{ currentMonth }}월</h2>
-      <button @click="nextMonth">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M9 6L15 12L9 18"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
+      <MonthPicker
+        :current-month="currentMonthDate"
+        @change="store.changeMonth"
+      />
       <input
         v-model="search"
         placeholder="메모 검색"
@@ -280,12 +261,14 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, reactive } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useTransactionStore } from '@/stores/budgetStore';
 import { useCategoryStore } from '@/stores/category';
 import { useBudgetStore } from '@/stores/budgetStore2';
 import ConfirmModal from '../common/ConfirmModal.vue';
 import SuccessModal from '../common/CompleteModal.vue';
 import EditModal from '../common/EditModal.vue';
+import MonthPicker from '../common/MonthPicker.vue';
 
 const showUpcoming = ref(false); // 기본값 false (안보임)
 const store = useTransactionStore();
@@ -293,7 +276,9 @@ const categoryStore = useCategoryStore();
 const calendarStore = useBudgetStore();
 
 // 필터 상태
-const currentMonth = ref(new Date().getMonth() + 1);
+// 💡 통합 스토어의 상태를 참조하여 페이지 간 싱크를 맞춤
+const { currentMonth: currentMonthDate, currentMonthNum: currentMonth } =
+  storeToRefs(store);
 const selectedCategory = ref(['전체']);
 const selectedType = ref('전체');
 const search = ref('');
@@ -416,14 +401,6 @@ const toggleCategory = (name) => {
   }
 };
 
-// 월 이동
-const prevMonth = () => {
-  currentMonth.value = currentMonth.value === 1 ? 12 : currentMonth.value - 1;
-};
-const nextMonth = () => {
-  currentMonth.value = currentMonth.value === 12 ? 1 : currentMonth.value + 1;
-};
-
 // 💡 수정 로직
 const handleEdit = (item) => {
   editModal.item = { ...item }; // 원본 훼손 방지를 위해 복사본 전달
@@ -486,6 +463,7 @@ const executeDelete = async () => {
   display: flex;
   gap: 10px;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 .filters {
@@ -700,31 +678,6 @@ const executeDelete = async () => {
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
-.header button {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 1.5px solid #e0e0e0;
-  background: #f7f8fa;
-  cursor: pointer;
-  color: #555;
-  font-size: 12px;
-  transition: all 0.2s ease;
-}
-
-.header button:hover {
-  background: #4caf50;
-  border-color: #4caf50;
-  color: white;
-  transform: scale(1.1);
-}
-
-.header button:active {
-  transform: scale(0.95);
-}
 .negative {
   color: #e74c3c;
   font-weight: 500;
