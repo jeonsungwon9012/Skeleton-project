@@ -1884,14 +1884,17 @@
     {
       "date": "2026-04-12",
       "type": "expense",
-      "amount": 5500,
+      "amount": 4500,
       "detail": "카페라떼",
       "memo": "카공",
       "uid": 2,
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "Qv9ZnVH01lw"
+      "id": "Qv9ZnVH01lw",
+      "categoryName": "간식/카페",
+      "categoryImg": "☕",
+      "categoryColor": "#FFB347"
     },
     {
       "date": "2026-04-12",
@@ -1965,6 +1968,15 @@
       "memo": "아메리카노 수혈",
       "cid": 2,
       "id": "42v3gAl2pPw"
+    },
+    {
+      "uid": 2,
+      "amount": 9999,
+      "type": "expense",
+      "detail": "마라마라탕",
+      "memo": "자주 먹을듯?",
+      "cid": 1,
+      "id": "gwxezcCMQBw"
     }
   ],
   "CATEGORY_BUDGET": [
