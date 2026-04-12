@@ -99,7 +99,12 @@
           </div>
         </div>
 
-        <div class="form-group template-save-group">
+        <div
+          class="form-group template-save-group"
+          :class="{
+            'invisible-layer': form.type !== 'expense' || form.isRecurring,
+          }"
+        >
           <label class="form-label">템플릿 등록</label>
           <div class="checkbox-box">
             <input
@@ -354,6 +359,7 @@ const selectType = (type) => {
   form.isRecurring = false;
   form.cycle = null;
   form.recurringValue = null;
+  if (type === 'income') form.isTemplate = false;
 };
 
 const selectRecurring = () => {
@@ -361,6 +367,7 @@ const selectRecurring = () => {
   form.isRecurring = true;
   form.cycle = 'daily';
   form.recurringValue = null;
+  form.isTemplate = false;
 };
 
 watch(
@@ -802,6 +809,11 @@ const submitTransaction = async () => {
 .form-textarea {
   min-height: 120px;
   resize: vertical;
+}
+
+.template-save-group.invisible-layer {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .template-save-group {

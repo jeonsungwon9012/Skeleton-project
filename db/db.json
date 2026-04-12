@@ -1880,6 +1880,18 @@
       "isRecurring": true,
       "cycle": "weekly",
       "id": "nzvGok2QGno"
+    },
+    {
+      "uid": 2,
+      "date": "2026-04-17",
+      "type": "income",
+      "amount": 500000,
+      "cid": 10,
+      "detail": "용돈",
+      "memo": "용돈이다!",
+      "isRecurring": false,
+      "cycle": null,
+      "id": "EFPylvRfA3s"
     }
   ],
   "TEMPLATE": [
