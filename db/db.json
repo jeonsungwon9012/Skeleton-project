@@ -1331,40 +1331,37 @@
       "id": "TmcGkiq4xbI"
     },
     {
-      "date": "2026-04-11",
       "type": "expense",
-      "amount": 5500,
       "detail": "카페라떼",
-      "memo": "카공",
-      "uid": 2,
+      "amount": 4500,
       "cid": 2,
-      "isRecurring": false,
-      "cycle": null,
+      "date": "2026-04-11",
+      "memo": "카공",
       "id": "Bz8ejInpttU"
     },
     {
-      "date": "2026-04-11",
       "type": "expense",
-      "amount": 5500,
       "detail": "카페라떼",
-      "memo": "카공",
-      "uid": 2,
+      "amount": 4500,
       "cid": 2,
-      "isRecurring": false,
-      "cycle": null,
+      "date": "2026-04-11",
+      "memo": "카공",
       "id": "QvzMWjFdqFk"
     },
     {
       "date": "2026-04-11",
       "type": "expense",
-      "amount": 5500,
+      "amount": 4599,
       "detail": "카페라떼",
       "memo": "카공",
       "uid": 2,
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "3SXrC7U2SUQ"
+      "id": "3SXrC7U2SUQ",
+      "categoryName": "간식/카페",
+      "categoryImg": "☕",
+      "categoryColor": "#FFB347"
     },
     {
       "date": "2026-04-11",
@@ -1732,10 +1729,13 @@
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
-      "memo": "월요일에 힘내라고 나를 위한 선물",
+      "memo": "이날은 안탈거 같은데 삭제할까?",
       "isRecurring": true,
       "cycle": "weekly",
-      "id": "EWpGbYZZ_9U"
+      "id": "EWpGbYZZ_9U",
+      "categoryName": "주거/통신",
+      "categoryImg": "🏠",
+      "categoryColor": "#64B5F6"
     },
     {
       "uid": 2,

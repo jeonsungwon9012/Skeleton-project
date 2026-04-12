@@ -203,6 +203,7 @@
                 stroke-width="1.5"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                @click="handleEdit(item)"
               >
                 <path
                   d="M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942"
@@ -244,6 +245,15 @@
       </tbody>
     </table>
 
+    <!-- 수정 모달 -->
+    <EditModal
+      :visible="editModal.visible"
+      :item="editModal.item"
+      :categories="store.categories"
+      @save="executeEdit"
+      @close="editModal.visible = false"
+    />
+
     <!-- 삭제 확인 모달 -->
     <ConfirmModal
       :visible="deleteModal.visible"
@@ -259,8 +269,8 @@
     <SuccessModal
       :visible="successModal.visible"
       icon="✅"
-      title="삭제 완료"
-      description="내역이 안전하게 삭제되었습니다."
+      :title="successModal.title"
+      :description="successModal.description"
       @close="successModal.visible = false"
     />
   </div>
@@ -273,6 +283,7 @@ import { useCategoryStore } from '@/stores/category';
 import { useBudgetStore } from '@/stores/budgetStore2';
 import ConfirmModal from '../common/ConfirmModal.vue';
 import SuccessModal from '../common/CompleteModal.vue';
+import EditModal from '../common/EditModal.vue';
 
 const showUpcoming = ref(false); // 기본값 false (안보임)
 const store = useTransactionStore();
@@ -291,7 +302,8 @@ const filtersRef = ref(null);
 
 // 모달 제어 상태
 const deleteModal = reactive({ visible: false, targetId: null });
-const successModal = reactive({ visible: false });
+const editModal = reactive({ visible: false, item: null });
+const successModal = reactive({ visible: false, title: '', description: '' });
 
 // 데이터 로드
 onMounted(async () => {
@@ -398,6 +410,32 @@ const nextMonth = () => {
   currentMonth.value = currentMonth.value === 12 ? 1 : currentMonth.value + 1;
 };
 
+// 💡 수정 로직
+const handleEdit = (item) => {
+  editModal.item = { ...item }; // 원본 훼손 방지를 위해 복사본 전달
+  editModal.visible = true;
+};
+
+const executeEdit = async (updatedData) => {
+  try {
+    const uid = store.myBudgets[0]?.uid;
+    // 💡 기존 데이터(uid 등)와 수정한 데이터를 합쳐서 보냅니다 (유실 방지)
+    const payload = { ...editModal.item, ...updatedData };
+    await store.editBudget(editModal.item.id, payload);
+
+    // 관련 데이터 동기화
+    if (uid) await categoryStore.fetchAll(uid);
+    await calendarStore.fetchData();
+
+    editModal.visible = false;
+    successModal.title = '수정 완료';
+    successModal.description = '내역이 성공적으로 수정되었습니다.';
+    successModal.visible = true;
+  } catch (err) {
+    alert('수정 중 오류가 발생했습니다.');
+  }
+};
+
 // 💡 개별 삭제 로직
 const handleDelete = (id) => {
   deleteModal.targetId = id;
@@ -414,6 +452,8 @@ const executeDelete = async () => {
     await calendarStore.fetchData(); // 캘린더 점 갱신
 
     deleteModal.visible = false;
+    successModal.title = '삭제 완료';
+    successModal.description = '내역이 안전하게 삭제되었습니다.';
     successModal.visible = true; // 삭제 완료 모달 표시
   } catch (err) {
     alert('삭제 중 오류가 발생했습니다.');
