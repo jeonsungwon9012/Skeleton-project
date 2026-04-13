@@ -1,96 +1,101 @@
 <template>
   <div class="container">
-    <!-- 상단 헤더 -->
+    <div class="mobile-page-title mobile-only">거래내역</div>
+
     <div class="header">
-      <button @click="prevMonth">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M15 18L9 12L15 6"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-      <h2>{{ currentMonth }}월</h2>
-      <button @click="nextMonth">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M9 6L15 12L9 18"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
+      <div class="month-picker-area">
+        <button class="nav-btn" type="button" @click="prevMonth">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M15 18L9 12L15 6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <h2 class="month-title">{{ currentMonth }}월</h2>
+        <button class="nav-btn" type="button" @click="nextMonth">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M9 6L15 12L9 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
       <input
         v-model="search"
         placeholder="메모 검색"
         class="memo_window search-input"
       />
+
+      <button class="mobile-search-btn mobile-only" type="button" aria-label="Search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
+          <path d="M20 20L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </button>
     </div>
 
-    <!-- 카테고리 필터 -->
-    <div class="filter_bar">
+    <div class="filter-bar">
       <div class="dropdown-wrapper">
         <button
           class="cat-item dropdown-trigger"
-          :class="{ 'active-type': selectedType !== '전체' }"
+          :class="{ 'active-type': selectedType !== 'all' }"
+          type="button"
           @click.stop="toggleTypeDropdown"
         >
-          <div class="icon-circle gray-bg">⇅</div>
+          <div class="icon-circle gray-bg">⇵</div>
           <span class="subtitle-s">{{ typeLabel }}</span>
-          <span class="arrow" :class="{ open: isTypeDropdownOpen }">▾</span>
+          <span class="arrow" :class="{ open: isTypeDropdownOpen }">⌄</span>
         </button>
 
         <ul v-if="isTypeDropdownOpen" class="dropdown-menu">
-          <li
-            @click="handleTypeSelect('전체')"
-            :class="{ active: selectedType === '전체' }"
-          >
+          <li @click="handleTypeSelect('all')" :class="{ active: selectedType === 'all' }">
             수입/지출
           </li>
-          <li
-            @click="handleTypeSelect('income')"
-            :class="{ active: selectedType === 'income' }"
-          >
+          <li @click="handleTypeSelect('income')" :class="{ active: selectedType === 'income' }">
             수입 내역
           </li>
-          <li
-            @click="handleTypeSelect('expense')"
-            :class="{ active: selectedType === 'expense' }"
-          >
+          <li @click="handleTypeSelect('expense')" :class="{ active: selectedType === 'expense' }">
             지출 내역
           </li>
         </ul>
       </div>
+
       <div class="filters" ref="filtersRef">
         <button
-          :class="{ active: selectedCategory.includes('전체') }"
-          @click="selectedCategory = '전체'"
+          :class="{ active: isAllCategorySelected }"
+          type="button"
+          @click="selectAllCategory"
         >
           전체
         </button>
         <button
           v-for="category in visibleCategories"
           :key="category.id"
-          :class="{ active: selectedCategory.includes(category.name) }"
+          type="button"
+          :class="{ active: selectedCategory.includes(Number(category.id)) }"
           :style="{
-            background: selectedCategory.includes(category.name)
-              ? category.color
-              : '',
+            background: selectedCategory.includes(Number(category.id)) ? category.color : '',
             borderColor: category.color,
           }"
-          @click="toggleCategory(category.name)"
+          @click="toggleCategory(category.id)"
         >
           {{ category.img }} {{ category.name }}
         </button>
       </div>
+
       <button
         v-if="store.categories.length > visibleCount"
         class="toggle-btn"
+        type="button"
         @click="showAllCategories = !showAllCategories"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -103,7 +108,8 @@
           />
         </svg>
       </button>
-      <button class="upcoming-toggle" @click="showUpcoming = !showUpcoming">
+
+      <button class="upcoming-toggle" type="button" @click="showUpcoming = !showUpcoming">
         <svg
           v-if="showUpcoming"
           width="22"
@@ -138,8 +144,7 @@
       </button>
     </div>
 
-    <!-- 테이블 -->
-    <div class="table-container">
+    <div class="table-container desktop-only">
       <table class="table">
         <thead>
           <tr>
@@ -159,6 +164,7 @@
               <button
                 class="bulk-delete-btn"
                 :class="{ invisible: selectedIds.length === 0 }"
+                type="button"
                 @click="deleteSelected"
               >
                 삭제
@@ -170,10 +176,8 @@
           <tr
             v-for="(item, index) in filteredMCT"
             :key="item.id"
-            class="btn_hover"
-            :class="{
-              upcoming: isUpcoming(item.date),
-            }"
+            class="btn-hover"
+            :class="{ upcoming: isUpcoming(item.date) }"
             v-show="!isUpcoming(item.date) || showUpcoming"
             @dblclick="handleShowDetail(item)"
           >
@@ -185,26 +189,21 @@
             <td>{{ item.detail }}</td>
             <td>
               <span :class="item.type === 'expense' ? 'negative' : 'positive'">
-                {{ item.type === 'expense' ? '-' : '+'
-                }}{{ Number(item.amount).toLocaleString() }}원
+                {{ item.type === 'expense' ? '-' : '+' }}{{ Number(item.amount).toLocaleString() }}원
               </span>
             </td>
             <td>
-              <span
-                :style="{ background: item.categoryColor }"
-                class="categoryImg"
-              >
+              <span :style="{ background: item.categoryColor }" class="category-img">
                 {{ item.categoryImg }}
               </span>
               {{ item.categoryName }}
             </td>
             <td>
-              <div class="button_hover">
-                <!-- 수정 아이콘 -->
+              <div class="button-hover">
                 <svg
-                  class="pencil_icon"
-                  width="24px"
-                  height="24px"
+                  class="pencil-icon"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                   stroke-width="1.5"
                   fill="none"
@@ -219,11 +218,10 @@
                     stroke-linejoin="round"
                   />
                 </svg>
-                <!-- 삭제 아이콘 -->
                 <svg
-                  class="trash_icon"
-                  width="24px"
-                  height="24px"
+                  class="trash-icon"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -252,7 +250,72 @@
       </table>
     </div>
 
-    <!-- 수정 모달 -->
+    <div class="mobile-list mobile-only">
+      <section
+        v-for="group in mobileGroupedItems"
+        :key="group.date"
+        class="mobile-date-group"
+      >
+        <h3 class="mobile-group-title">{{ formatMobileDate(group.date) }}</h3>
+
+        <article
+          v-for="item in group.items"
+          :key="item.id"
+          class="mobile-card"
+          :class="{ upcoming: isUpcoming(item.date) }"
+        >
+          <div class="mobile-card-main">
+            <div class="mobile-card-left">
+              <span :style="{ background: item.categoryColor }" class="mobile-icon-circle">
+                {{ item.categoryImg }}
+              </span>
+              <div class="mobile-texts">
+                <p class="mobile-detail">{{ item.detail }}</p>
+                <p v-if="item.memo" class="mobile-memo">{{ item.memo }}</p>
+              </div>
+            </div>
+
+            <div class="mobile-card-right">
+              <span :class="item.type === 'expense' ? 'negative' : 'positive'" class="mobile-amount">
+                {{ item.type === 'expense' ? '-' : '+' }}{{ Number(item.amount).toLocaleString() }}
+              </span>
+              <div class="mobile-inline-actions">
+                <button class="icon-action" type="button" @click="handleEdit(item)" aria-label="Edit">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </button>
+                <button class="icon-action" type="button" @click="handleDelete(item.id)" aria-label="Delete">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M21 6H15.375M3 6H8.625M8.625 6V4C8.625 2.89543 9.52043 2 10.625 2H13.375C14.4796 2 15.375 2.89543 15.375 4V6M8.625 6H15.375"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </div>
+
     <EditModal
       :visible="editModal.visible"
       :item="editModal.item"
@@ -263,7 +326,6 @@
       @close="editModal.visible = false"
     />
 
-    <!-- 삭제 확인 모달 -->
     <ConfirmModal
       :visible="deleteModal.visible"
       icon="🗑️"
@@ -274,7 +336,6 @@
       @close="deleteModal.visible = false"
     />
 
-    <!-- 삭제 완료 알림 (기존 등록 성공 모달 재사용) -->
     <SuccessModal
       :visible="successModal.visible"
       icon="✅"
@@ -286,7 +347,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, reactive } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useTransactionStore } from '@/stores/budgetStore';
 import { useCategoryStore } from '@/stores/category';
@@ -296,14 +357,12 @@ import ConfirmModal from '../common/ConfirmModal.vue';
 import SuccessModal from '../common/CompleteModal.vue';
 import EditModal from '../common/EditModal.vue';
 
-const showUpcoming = ref(false); // 기본값 false (안보임)
+const showUpcoming = ref(false);
 const store = useTransactionStore();
 const userStore = useUserStore();
 const categoryStore = useCategoryStore();
 const calendarStore = useBudgetStore();
 
-// 필터 상태
-// 💡 스토어에서 직접 상태를 꺼내와서 전역적으로 동기화합니다.
 const {
   currentMonthNum: currentMonth,
   selectedCategories: selectedCategory,
@@ -311,27 +370,12 @@ const {
   searchQuery: search,
 } = storeToRefs(store);
 
-// 💡 수입/지출 커스텀 드롭다운 로직
 const isTypeDropdownOpen = ref(false);
-const toggleTypeDropdown = () => {
-  isTypeDropdownOpen.value = !isTypeDropdownOpen.value;
-};
-const typeLabel = computed(() => {
-  if (selectedType.value === 'income') return '수입 내역';
-  if (selectedType.value === 'expense') return '지출 내역';
-  return '수입/지출';
-});
-const handleTypeSelect = (type) => {
-  selectedType.value = type;
-  isTypeDropdownOpen.value = false;
-};
-
 const selectedIds = ref([]);
 const showAllCategories = ref(false);
 const visibleCount = 5;
 const filtersRef = ref(null);
 
-// 모달 제어 상태
 const deleteModal = reactive({ visible: false, targetId: null });
 const editModal = reactive({
   visible: false,
@@ -341,75 +385,103 @@ const editModal = reactive({
 });
 const successModal = reactive({ visible: false, title: '', description: '' });
 
-/**
- * 💡 미래 내역인지 확인 (오늘 밤 23:59:59 기준)
- */
+const toggleTypeDropdown = () => {
+  isTypeDropdownOpen.value = !isTypeDropdownOpen.value;
+};
+
+const typeLabel = computed(() => {
+  if (selectedType.value === 'income') return '수입 내역';
+  if (selectedType.value === 'expense') return '지출 내역';
+  return '수입/지출';
+});
+
+const handleTypeSelect = (type) => {
+  selectedType.value = type;
+  isTypeDropdownOpen.value = false;
+};
+
 const isUpcoming = (dateStr) => {
   const today = new Date();
   today.setHours(23, 59, 59, 999);
   return new Date(dateStr) > today;
 };
 
-// 데이터 로드
 onMounted(async () => {
   await store.loadData();
 
-  // 마우스 드래그 스크롤
   const slider = filtersRef.value;
-  let isDown = false,
-    startX,
-    scrollLeft;
+  if (slider) {
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
 
-  slider.addEventListener('mousedown', (e) => {
-    isDown = true;
-    startX = e.pageX - slider.offsetLeft;
-    scrollLeft = slider.scrollLeft;
-  });
-  slider.addEventListener('mouseleave', () => {
-    isDown = false;
-  });
-  slider.addEventListener('mouseup', () => {
-    isDown = false;
-  });
-  slider.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - slider.offsetLeft;
-    slider.scrollLeft = scrollLeft - (x - startX) * 2;
-  });
+    slider.addEventListener('mousedown', (e) => {
+      isDown = true;
+      startX = e.pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    });
+    slider.addEventListener('mouseleave', () => {
+      isDown = false;
+    });
+    slider.addEventListener('mouseup', () => {
+      isDown = false;
+    });
+    slider.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - slider.offsetLeft;
+      slider.scrollLeft = scrollLeft - (x - startX) * 2;
+    });
+    slider.addEventListener(
+      'wheel',
+      (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          slider.scrollLeft += e.deltaY;
+        }
+      },
+      { passive: false },
+    );
+  }
 
-  // 💡 마우스 휠로 가로 스크롤 기능 추가
-  slider.addEventListener(
-    'wheel',
-    (e) => {
-      if (e.deltaY !== 0) {
-        e.preventDefault(); // 페이지 전체의 세로 스크롤을 막음
-        slider.scrollLeft += e.deltaY; // 휠 움직임만큼 가로로 스크롤
-      }
-    },
-    { passive: false },
-  );
-
-  // 💡 화면 클릭 시 드롭다운 닫기
   window.addEventListener('click', () => {
     isTypeDropdownOpen.value = false;
   });
 });
 
-// 필터링 (store의 헬퍼 활용)
 const filteredByCategory = store.filteredByCategory(selectedCategory, search);
 const filteredByMonth = store.filteredByMonth(filteredByCategory, currentMonth);
 const filteredByType = store.filteredByType(filteredByMonth, selectedType);
-const filteredMCT = store.filteredByToday(filteredByType); // ✅ 마지막에 연결
-// 보이는 카테고리
+const filteredMCT = store.filteredByToday(filteredByType);
+
 const visibleCategories = computed(() =>
   showAllCategories.value
     ? store.categories
     : store.categories.slice(0, visibleCount),
 );
 
-// 전체 선택 체크박스도 filteredMCT 기준이라 문제없지만
-// filteredMCT 안에서 selectedCategory 비교 부분 확인
+const mobileGroupedItems = computed(() => {
+  const visible = filteredMCT.value.filter(
+    (item) => !isUpcoming(item.date) || showUpcoming.value,
+  );
+
+  return visible.reduce((acc, item) => {
+    const group = acc.find((entry) => entry.date === item.date);
+    if (group) {
+      group.items.push(item);
+    } else {
+      acc.push({ date: item.date, items: [item] });
+    }
+    return acc;
+  }, []);
+});
+
+const isAllCategorySelected = computed(
+  () =>
+    Array.isArray(selectedCategory.value) &&
+    selectedCategory.value.includes('전체'),
+);
+
 const isAllSelected = computed(() => {
   const selectableItems = filteredMCT.value;
   return (
@@ -424,10 +496,10 @@ const toggleAll = (e) => {
     : [];
 };
 
-// 필터 변경 시 선택 초기화
 watch([currentMonth, selectedType, search], () => {
   selectedIds.value = [];
 });
+
 watch(
   selectedCategory,
   () => {
@@ -436,8 +508,11 @@ watch(
   { deep: true },
 );
 
+const selectAllCategory = () => {
+  selectedCategory.value = ['전체'];
+};
+
 const toggleCategory = (name) => {
-  // 혹시라도 배열이 아니면 강제로 배열로 변환
   if (!Array.isArray(selectedCategory.value)) {
     selectedCategory.value = ['전체'];
   }
@@ -447,32 +522,39 @@ const toggleCategory = (name) => {
     return;
   }
 
-  // '전체' 해제
   let current = selectedCategory.value.filter((c) => c !== '전체');
 
-  if (current.includes(name)) {
-    current = current.filter((c) => c !== name);
+  const targetId = Number(name);
+
+  if (current.includes(targetId)) {
+    current = current.filter((c) => c !== targetId);
     selectedCategory.value = current.length === 0 ? ['전체'] : current;
   } else {
-    selectedCategory.value = [...current, name];
+    selectedCategory.value = [...current, targetId];
   }
 };
 
-// 월 이동
 const prevMonth = () => {
   currentMonth.value = currentMonth.value === 1 ? 12 : currentMonth.value - 1;
 };
+
 const nextMonth = () => {
   currentMonth.value = currentMonth.value === 12 ? 1 : currentMonth.value + 1;
 };
 
-// 💡 선택 삭제 로직
+const formatMobileDate = (dateStr) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('ko-KR', {
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
 const deleteSelected = () => {
-  deleteModal.targetId = null; // targetId가 없으면 전체 삭제 모드로 간주
+  deleteModal.targetId = null;
   deleteModal.visible = true;
 };
 
-// 💡 수정 로직
 const handleEdit = (item) => {
   editModal.item = { ...item };
   editModal.readOnly = false;
@@ -480,7 +562,6 @@ const handleEdit = (item) => {
   editModal.visible = true;
 };
 
-// 💡 상세 보기 로직 (더블 클릭)
 const handleShowDetail = (item) => {
   editModal.item = { ...item };
   editModal.readOnly = true;
@@ -491,11 +572,9 @@ const handleShowDetail = (item) => {
 const executeEdit = async (updatedData) => {
   try {
     const uid = store.myBudgets[0]?.uid;
-    // 💡 기존 데이터(uid 등)와 수정한 데이터를 합쳐서 보냅니다 (유실 방지)
     const payload = { ...editModal.item, ...updatedData };
     await store.editBudget(editModal.item.id, payload);
 
-    // 관련 데이터 동기화
     if (uid) await categoryStore.fetchAll(uid);
     await calendarStore.fetchData();
 
@@ -503,12 +582,11 @@ const executeEdit = async (updatedData) => {
     successModal.title = '수정 완료';
     successModal.description = '내역이 성공적으로 수정되었습니다.';
     successModal.visible = true;
-  } catch (err) {
+  } catch {
     alert('수정 중 오류가 발생했습니다.');
   }
 };
 
-// 💡 개별 삭제 로직
 const handleDelete = (id) => {
   deleteModal.targetId = id;
   deleteModal.visible = true;
@@ -519,40 +597,41 @@ const executeDelete = async () => {
     const uid = userStore.user?.id;
 
     if (deleteModal.targetId) {
-      // 개별 삭제
       await store.deleteBudget(deleteModal.targetId);
     } else {
-      // 선택 삭제 (Bulk Delete)
       await Promise.all(selectedIds.value.map((id) => store.deleteBudget(id)));
-      selectedIds.value = []; // 선택 초기화
+      selectedIds.value = [];
     }
 
-    // 관련된 다른 스토어들도 즉시 동기화
-    if (uid) await categoryStore.fetchAll(uid); // 뱃지용 횟수 갱신
-    await calendarStore.fetchData(); // 캘린더 점 갱신
+    if (uid) await categoryStore.fetchAll(uid);
+    await calendarStore.fetchData();
 
     deleteModal.visible = false;
     successModal.title = '삭제 완료';
     successModal.description = '내역이 안전하게 삭제되었습니다.';
-    successModal.visible = true; // 삭제 완료 모달 표시
-  } catch (err) {
+    successModal.visible = true;
+  } catch {
     alert('삭제 중 오류가 발생했습니다.');
   }
 };
 </script>
 
-<!-- 기존 <style scoped> 그대로 유지 -->
 <style scoped>
 .container {
   padding: 20px;
   font-family: sans-serif;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .header {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   margin-bottom: 10px;
+  min-width: 0;
 }
 
 .month-picker-area {
@@ -588,106 +667,14 @@ const executeDelete = async () => {
   background-color: var(--color-primary-80);
 }
 
-.filters {
-  height: 34px; /* 추가 */
-  line-height: 1; /* 추가 */
-  padding: 0 12px; /* 상하 padding 제거하고 height로 통일 */
-  width: 800px;
-  margin: 15px 0;
-  display: flex;
-  gap: 8px;
-  flex-wrap: nowrap; /* ❗ 줄바꿈 금지 */
-  overflow: hidden; /* ❗ 넘치는 것 숨김 */
-  overflow-x: auto; /* 넘치면 가로 스크롤 */
-  -webkit-overflow-scrolling: touch; /* 부드러운 스크롤 (iOS) */
-  padding-bottom: 4px; /* 스크롤바 공간 확보 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
-  cursor: grab; /* 마우스로 잡을 느낌 */
-}
-.filters::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
-}
-
-.filters button {
-  flex-shrink: 0; /* ❗ 줄어들지 않게 */
-  white-space: nowrap; /* ❗ 텍스트 줄바꿈 방지 */
-  margin-right: 8px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid #ddd;
-  background: #f5f5f5;
-}
-
-.filters .active {
-  background: #4caf50;
-  color: white;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed; /* ✅ 핵심 */
-}
-
-.table th,
-.table td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  text-align: left;
-}
-
-/* 💡 체크박스 열 중앙 정렬 및 크기 고정 */
-.table th:first-child,
-.table td:first-child {
-  text-align: center;
-}
-
-input[type='checkbox'] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: var(--color-primary);
-  vertical-align: middle;
-}
-
-.categoryImg {
-  padding: 3px;
-  border-radius: 50%;
-}
-
-.button_hover {
-  visibility: hidden; /* 공간은 차지하지만 보이지 않음 */
+.filter-bar {
   display: flex;
   align-items: center;
-  height: 24px; /* 아이콘 높이와 동일하게 고정 */
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-.btn_hover:hover .button_hover {
-  visibility: visible;
-  opacity: 1;
-}
-
-.pencil_icon {
-  margin-right: 10px;
-}
-.pencil_icon:hover {
-  transform: scale(1.2);
-}
-
-.trash_icon:hover {
-  transform: scale(1.2);
-}
-
-.filter_bar {
-  display: flex;
-  align-items: center; /* 🔥 세로 정렬 핵심 */
   gap: 10px;
   margin-bottom: 5px;
+  min-width: 0;
 }
 
-/* 💡 CategoryFilter 스타일 이식 */
 .dropdown-wrapper {
   position: relative;
 }
@@ -725,14 +712,12 @@ input[type='checkbox'] {
 .gray-bg {
   background-color: var(--color-gray-10);
 }
-.primary-bg {
-  background-color: var(--color-primary-10);
-}
 
 .active-type {
   border-color: var(--color-primary);
   background-color: var(--color-primary-10);
 }
+
 .active-type span {
   color: var(--color-primary);
 }
@@ -759,67 +744,71 @@ input[type='checkbox'] {
   font-size: 13px;
   color: #444;
 }
+
 .dropdown-menu li:hover {
   background-color: var(--color-gray-10);
 }
+
 .dropdown-menu li.active {
   color: var(--color-primary);
   background-color: var(--color-primary-10);
   font-weight: 600;
 }
 
-.toggle-btn {
-  height: 34px; /* 추가 */
-  line-height: 1; /* 추가 */
-  min-width: unset; /* 기존 min-width 제거 */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ddd;
-  border: none;
+.filters {
+  height: 34px;
+  line-height: 1;
   padding: 0 12px;
-  border-radius: 20px;
-  cursor: pointer;
+  width: 800px;
+  margin: 15px 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  cursor: grab;
 }
-.upcoming {
-  opacity: 0.4;
+
+.filters::-webkit-scrollbar {
+  display: none;
 }
-.upcoming-toggle {
-  width: 50px; /* 아이콘 커진 만큼 버튼도 키움 */
-  height: 50px;
-  line-height: 1; /* 추가 */
-  min-width: unset; /* 기존 min-width 제거 */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+
+.filters button {
+  flex-shrink: 0;
   white-space: nowrap;
-  padding: 0 12px;
+  margin-right: 8px;
+  padding: 6px 12px;
   border-radius: 20px;
   border: 1px solid #ddd;
   background: #f5f5f5;
-  cursor: pointer;
-}
-.upcoming-toggle:hover {
-  background: #e0e0e0;
-  padding: 0 14px;
-  border-radius: 18px;
-  border: 1.5px solid #ccc;
-  background: #fff;
-  font-size: 13px;
-  font-family: sans-serif;
-  cursor: pointer;
-  color: #444;
-  transition:
-    background 0.2s,
-    border-color 0.2s;
-  white-space: nowrap;
-  line-height: 1;
 }
 
-.toggle-btn:hover,
-.upcoming-toggle:hover {
-  background: #f0f0f0;
-  border-color: #aaa;
+.filters .active {
+  background: #4caf50;
+  color: white;
+}
+
+.toggle-btn,
+.upcoming-toggle {
+  height: 34px;
+  min-width: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border-radius: 20px;
+  border: 1.5px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  color: #444;
+}
+
+.upcoming {
+  opacity: 0.4;
 }
 
 .arrow {
@@ -828,19 +817,18 @@ input[type='checkbox'] {
   color: var(--color-deepgray-40);
   transition: 0.2s;
 }
+
 .arrow.open {
   transform: rotate(180deg);
 }
+
 .memo_window {
-  margin-left: auto; /* 오른쪽 끝으로 */
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  margin-left: auto;
 }
 
 .search-input {
   height: 34px;
-  padding: 0 14px 0 36px; /* 왼쪽에 아이콘 공간 */
+  padding: 0 14px 0 36px;
   border-radius: 18px;
   border: 1.5px solid #e0e0e0;
   font-size: 13px;
@@ -861,39 +849,85 @@ input[type='checkbox'] {
 .search-input:focus {
   border-color: #4caf50;
   background-color: #fff;
-  width: 220px; /* 포커스 시 살짝 늘어남 */
+  width: 220px;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
-.header button {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 1.5px solid #e0e0e0;
-  background: #f7f8fa;
+.table-container {
+  height: 550px;
+  overflow-y: auto;
+  border-radius: 12px;
+  background-color: #fff;
+  margin-top: 10px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table th,
+.table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.table th:first-child,
+.table td:first-child {
+  text-align: center;
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  background-color: #fff;
+  box-shadow: inset 0 -1px 0 #eee;
+}
+
+input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  color: #555;
-  font-size: 12px;
-  transition: all 0.2s ease;
+  accent-color: var(--color-primary);
+  vertical-align: middle;
 }
 
-.header button:hover {
-  background: #4caf50;
-  border-color: #4caf50;
-  color: white;
-  transform: scale(1.1);
+.category-img {
+  padding: 3px;
+  border-radius: 50%;
 }
 
-.header button:active {
-  transform: scale(0.95);
+.button-hover {
+  visibility: hidden;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
+
+.btn-hover:hover .button-hover {
+  visibility: visible;
+  opacity: 1;
+}
+
+.pencil-icon {
+  margin-right: 10px;
+}
+
+.pencil-icon:hover,
+.trash-icon:hover {
+  transform: scale(1.2);
+}
+
 .negative {
   color: #e74c3c;
   font-weight: 500;
 }
+
 .positive {
   color: #2ecc71;
   font-weight: 500;
@@ -910,34 +944,10 @@ input[type='checkbox'] {
   cursor: pointer;
   transition: all 0.2s ease;
 }
+
 .bulk-delete-btn.invisible {
   visibility: hidden;
   pointer-events: none;
-}
-
-.bulk-delete-btn:hover {
-  background-color: #ff1744;
-  transform: translateY(-1px);
-}
-
-.table-container {
-  height: 550px; /* 10개 항목 + 헤더 기준 고정 높이 */
-  overflow-y: auto;
-  border-radius: 12px;
-  background-color: #fff;
-  margin-top: 10px;
-}
-
-.table thead th {
-  position: sticky;
-  top: 0;
-  z-index: 0; /* 모달 Backdrop보다 뒤에 오도록 수정 */
-  background-color: #fff;
-  box-shadow: inset 0 -1px 0 #eee;
-}
-
-td {
-  height: 52px; /* 행 높이를 명시적으로 고정하여 데이터 유무와 상관없이 일정하게 유지 */
 }
 
 .item-index {
@@ -945,5 +955,203 @@ td {
   padding-right: 70px !important;
   color: #888;
   font-size: 0.85rem;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 12px 20px;
+  }
+
+  .mobile-page-title {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5f6368;
+    margin-bottom: 10px;
+  }
+
+  .header {
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .month-picker-area {
+    justify-content: flex-start;
+    gap: 16px;
+    flex: 1;
+  }
+
+  .month-title {
+    font-size: 2rem;
+    min-width: auto;
+  }
+
+  .memo_window {
+    display: none;
+  }
+
+  .mobile-search-btn {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ececec;
+    border-radius: 50%;
+    background: #fff;
+    color: #b4b4b4;
+    flex-shrink: 0;
+  }
+
+  .filter-bar {
+    gap: 8px;
+    flex-wrap: nowrap;
+    align-items: center;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .filters {
+    margin: 0;
+    padding: 0;
+    width: auto;
+    order: unset;
+    flex: 0 0 auto;
+  }
+
+  .toggle-btn,
+  .upcoming-toggle,
+  .dropdown-wrapper {
+    flex-shrink: 0;
+  }
+
+  .toggle-btn {
+    display: none;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+.mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 12px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .mobile-date-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .mobile-group-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #9b9b9b;
+  }
+
+  .mobile-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 26px rgba(44, 51, 51, 0.08);
+    padding: 16px 18px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .mobile-card-main {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .mobile-card-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .mobile-icon-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .mobile-texts {
+    min-width: 0;
+  }
+
+  .mobile-card-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .mobile-amount {
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .mobile-detail {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f1f1f;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-memo {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #8a8a8a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-inline-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .icon-action {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: #b5b5b5;
+    padding: 0;
+  }
 }
 </style>
