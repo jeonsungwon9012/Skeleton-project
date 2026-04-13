@@ -2284,6 +2284,132 @@
       "categoryName": "식비/외식",
       "categoryImg": "🍚",
       "categoryColor": "#FF7676"
+    },
+    {
+      "date": "2026-04-13",
+      "type": "expense",
+      "amount": 2500,
+      "detail": "아메리카노",
+      "memo": "아메리카노 수혈",
+      "uid": 1,
+      "cid": 2,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "84Z6mrZj2YA"
+    },
+    {
+      "date": "2026-04-13",
+      "type": "expense",
+      "amount": 2500,
+      "detail": "아메리카노",
+      "memo": "아메리카노 수혈",
+      "uid": 1,
+      "cid": 2,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "RSU-688n-VM"
+    },
+    {
+      "date": "2026-04-13",
+      "type": "expense",
+      "amount": 2500,
+      "detail": "아메리카노",
+      "memo": "아메리카노 수혈",
+      "uid": 1,
+      "cid": 2,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "PmReZoWqnfo"
+    },
+    {
+      "id": "v7Xr7quB3DI",
+      "type": "expense",
+      "detail": "커피",
+      "amount": 100,
+      "cid": 5,
+      "date": "2026-04-09",
+      "memo": "11",
+      "uid": 1
+    },
+    {
+      "id": "TH0ClCI2qZo",
+      "type": "expense",
+      "detail": "커피",
+      "amount": 100,
+      "cid": 5,
+      "date": "2026-04-10",
+      "memo": "11",
+      "uid": 1
+    },
+    {
+      "id": "hzYWkkG2nig",
+      "type": "expense",
+      "detail": "커피",
+      "amount": 100,
+      "cid": 5,
+      "date": "2026-04-11",
+      "memo": "11",
+      "uid": 1
+    },
+    {
+      "id": "nBh3UolRZdk",
+      "type": "expense",
+      "detail": "커피",
+      "amount": 100,
+      "cid": 5,
+      "date": "2026-04-12",
+      "memo": "11",
+      "uid": 1
+    },
+    {
+      "id": "DYb-iviYCSE",
+      "type": "expense",
+      "detail": "커피",
+      "amount": 100,
+      "cid": 5,
+      "date": "2026-04-13",
+      "memo": "11",
+      "uid": 1
+    },
+    {
+      "id": "yMnOipy5DYU",
+      "type": "expense",
+      "detail": "커피",
+      "amount": 100,
+      "cid": 5,
+      "date": "2026-04-14",
+      "memo": "11",
+      "uid": 1
+    },
+    {
+      "id": "dJ9l_7-70qk",
+      "type": "expense",
+      "detail": "커피",
+      "amount": 100,
+      "cid": 5,
+      "date": "2026-04-15",
+      "memo": "11",
+      "uid": 1
+    },
+    {
+      "id": "eAd4nbwfnag",
+      "type": "expense",
+      "detail": "커피",
+      "amount": 100,
+      "cid": 5,
+      "date": "2026-04-16",
+      "memo": "11",
+      "uid": 1
+    },
+    {
+      "id": "Sc5Q4PeKvrc",
+      "type": "expense",
+      "detail": "커피",
+      "amount": 100,
+      "cid": 5,
+      "date": "2026-04-17",
+      "memo": "11",
+      "uid": 1
     }
   ],
   "TEMPLATE": [

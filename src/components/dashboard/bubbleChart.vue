@@ -3,13 +3,12 @@
     <div v-if="store.isLoading" class="loading">로딩중...</div>
 
     <template v-else>
-      <p class="subtitle">카테고리 별 수입/지출</p>
-      <!-- 제목 - topCategory → topCountCategory (빈도 기준) -->
+      <p class="subtitle">카테고리별 수입/지출</p>
       <div class="title-area">
         <h2 class="title">
           {{
             store.topCountCategory
-              ? `${store.topCountCategory.img} ${store.topCountCategory.name}에 가장 자주 지출하고 있어요`
+              ? `${store.topCountCategory.img} ${store.topCountCategory.name}에 가장 많이 쓰고 있어요`
               : '이번 달 지출 내역이 없어요'
           }}
         </h2>
@@ -20,9 +19,7 @@
 
       <template v-if="store.chartData.length > 0">
         <div class="content">
-          <!-- SVG 버블 차트 -->
           <div class="bubble-wrap" ref="bubbleWrapRef">
-            <!-- 툴팁 -->
             <div
               v-if="tooltip.visible"
               class="bubble-tooltip"
@@ -35,7 +32,7 @@
                   {{ tooltip.data?.amount.toLocaleString() }}원
                 </p>
                 <p class="tooltip-count">
-                  {{ store.expenseCountByCategory[tooltip.data?.id] }}회 지출
+                  {{ store.expenseCountByCategory[tooltip.data?.id] ?? 0 }}회 지출
                 </p>
                 <p class="tooltip-ratio">전체의 {{ tooltip.data?.ratio }}%</p>
               </div>
@@ -45,12 +42,7 @@
               :viewBox="`0 0 ${svgSize} ${svgSize}`"
               :width="svgSize"
               :height="svgSize"
-              style="
-                display: block;
-                width: 100%;
-                height: auto;
-                overflow: visible;
-              "
+              class="bubble-svg"
             >
               <g
                 v-for="(bubble, i) in bubbles"
@@ -59,6 +51,7 @@
                 @mouseenter="(e) => showTooltip(e, bubble)"
                 @mousemove="(e) => moveTooltip(e)"
                 @mouseleave="hideTooltip"
+                @click="(e) => toggleTooltip(e, bubble)"
               >
                 <circle
                   :cx="bubble.cx"
@@ -66,7 +59,7 @@
                   :r="0"
                   :fill="bubble.color + 'AA'"
                   :stroke="bubble.color"
-                  stroke-width="1"
+                  :stroke-width="selectedBubble?.id === bubble.id ? 3 : 1"
                   class="bubble-circle"
                   :style="{
                     animationDelay: `${i * 80}ms`,
@@ -83,15 +76,14 @@
                   fill="#444"
                   class="bubble-label"
                   :style="{ animationDelay: `${i * 80 + 300}ms` }"
-                  style="pointer-events: none"
                 >
                   {{ bubble.ratio }}%
                 </text>
               </g>
             </svg>
+
           </div>
 
-          <!-- 카테고리 리스트 -->
           <div class="category-list">
             <div
               v-for="(item, i) in store.chartData"
@@ -102,9 +94,7 @@
               <div class="category-row">
                 <span class="category-icon">{{ item.img }}</span>
                 <span class="category-name">{{ item.name }}</span>
-                <span class="category-amount"
-                  >{{ item.amount.toLocaleString() }}원</span
-                >
+                <span class="category-amount">{{ item.amount.toLocaleString() }}원</span>
               </div>
 
               <template v-if="item.goalAmount">
@@ -145,7 +135,6 @@
     </template>
   </div>
 
-  <!-- 💡 예산 설정 모달 연결 -->
   <SetBudgetModal
     :current-month-display="currentMonthDisplay"
     :visible="isBudgetModalOpen"
@@ -164,23 +153,24 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, watch, nextTick, computed } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useCategoryStore } from '@/stores/category';
 import { useTransactionStore } from '@/stores/budgetStore';
 import { useDashboardStore } from '@/stores/dashboard';
-import { useUserStore } from '@/stores/userStore'; // 💡 유저 스토어 추가
+import { useUserStore } from '@/stores/userStore';
 import SetBudgetModal from '@/components/common/SetBudgetModal.vue';
 import SuccessModal from '@/components/common/CompleteModal.vue';
 
 const store = useCategoryStore();
 const budgetStore = useTransactionStore();
 const dashboard = useDashboardStore();
-const userStore = useUserStore(); // 💡 스토어 인스턴스 생성
+const userStore = useUserStore();
 
 const bubbleWrapRef = ref(null);
 const svgSize = 300;
 
 const tooltip = ref({ visible: false, x: 0, y: 0, data: null });
+const selectedBubble = ref(null);
 const isBudgetModalOpen = ref(false);
 const messageModal = ref({
   visible: false,
@@ -189,30 +179,28 @@ const messageModal = ref({
   icon: '',
 });
 
-const currentMonthDisplay = computed(() => {
-  return `${dashboard.currentYear}년 ${dashboard.currentMonth}월`;
-});
+const currentMonthDisplay = computed(
+  () => `${dashboard.currentYear}년 ${dashboard.currentMonth}월`,
+);
 
 const handleSaveBudget = async (data) => {
   const currentUid = userStore.user?.id;
-  // 💡 대시보드에 표시된 연-월 정보 추출
   const month = `${dashboard.currentYear}-${String(dashboard.currentMonth).padStart(2, '0')}`;
 
   try {
     await budgetStore.saveTargetBudget({
       uid: Number(currentUid),
-      month: month,
+      month,
       cid: Number(data.cid),
       targetBudget: Number(data.amount),
     });
 
     isBudgetModalOpen.value = false;
-    // 저장 후 최신 통계 데이터를 다시 불러와 차트 갱신
     await store.fetchAll(currentUid);
-  } catch (error) {
+  } catch {
     messageModal.value = {
       visible: true,
-      icon: '❌',
+      icon: '⚠️',
       title: '저장 실패',
       description: '예산 저장 중 오류가 발생했습니다.',
     };
@@ -227,9 +215,9 @@ const showTooltip = (e, bubble) => {
 const moveTooltip = (e) => {
   const rect = bubbleWrapRef.value?.getBoundingClientRect();
   if (!rect) return;
+
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
-  // 툴팁이 오른쪽 밖으로 나가면 왼쪽에 표시
   tooltip.value.x = x + 140 > rect.width ? x - 145 : x + 12;
   tooltip.value.y = y - 10;
 };
@@ -238,17 +226,30 @@ const hideTooltip = () => {
   tooltip.value.visible = false;
 };
 
+const toggleTooltip = (e, bubble) => {
+  if (selectedBubble.value?.id === bubble.id && tooltip.value.visible) {
+    selectedBubble.value = null;
+    tooltip.value.visible = false;
+    return;
+  }
+
+  selectedBubble.value = bubble;
+  showTooltip(e, bubble);
+};
+
 const placeBubbles = (data) => {
   const placed = [];
+
   for (const d of data) {
     const maxAmount = Math.max(...data.map((x) => x.amount));
     const r = Math.max(
       12,
       Math.round((d.amount / maxAmount) * (svgSize * 0.32)),
     );
-    let cx,
-      cy,
-      attempts = 0;
+    let cx;
+    let cy;
+    let attempts = 0;
+
     do {
       cx = Math.random() * (svgSize - r * 2) + r;
       cy = Math.random() * (svgSize - r * 2) + r;
@@ -260,8 +261,10 @@ const placeBubbles = (data) => {
         return dist < (r + p.r) * 0.3;
       })
     );
+
     placed.push({ ...d, cx, cy, r });
   }
+
   return placed;
 };
 
@@ -270,27 +273,27 @@ const bubbles = ref([]);
 const refreshBubbles = () => {
   if (store.chartData.length) {
     bubbles.value = placeBubbles(store.chartData);
+    selectedBubble.value = store.chartData[0] ?? null;
+  } else {
+    selectedBubble.value = null;
   }
 };
 
 onMounted(async () => {
-  // 💡 이제 하드코딩된 기본값 '1'을 사용하지 않고, 로그인된 유저 ID만 사용합니다.
   const currentUid = userStore.user?.id;
   await store.fetchAll(currentUid);
   await nextTick();
   refreshBubbles();
 });
 
-// chartData가 바뀌면 버블 재배치 (기존 watch 유지)
 watch(() => store.chartData, refreshBubbles, { deep: true });
-
-onUnmounted(() => {});
 </script>
 
 <style scoped>
 .chart-page {
   width: 100%;
   padding: 1.5rem 0;
+  box-sizing: border-box;
 }
 
 .loading {
@@ -310,12 +313,14 @@ onUnmounted(() => {});
   justify-content: space-between;
   align-items: center;
   margin: 0 2rem 2rem;
+  gap: 16px;
 }
 
 .title {
   font-size: 1.4rem;
   font-weight: 600;
   margin: 0;
+  line-height: 1.4;
 }
 
 .budget-btn {
@@ -328,6 +333,7 @@ onUnmounted(() => {});
   font-size: 0.9rem;
   cursor: pointer;
   transition: opacity 0.2s;
+  flex-shrink: 0;
 }
 
 .budget-btn:hover {
@@ -348,7 +354,13 @@ onUnmounted(() => {});
   max-width: 40%;
 }
 
-/* 툴팁 */
+.bubble-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
 .bubble-tooltip {
   position: absolute;
   z-index: 10;
@@ -388,39 +400,36 @@ onUnmounted(() => {});
   gap: 2px;
 }
 
+.tooltip-name,
+.tooltip-amount,
+.tooltip-count,
+.tooltip-ratio {
+  margin: 0;
+}
+
 .tooltip-name {
   font-size: 0.9rem;
   font-weight: 600;
-  margin: 0;
   color: var(--color-text, #222);
 }
 
 .tooltip-amount {
   font-size: 0.85rem;
-  margin: 0;
   color: var(--color-text, #222);
 }
 
-.tooltip-count {
-  font-size: 0.8rem;
-  margin: 0;
-  color: #888;
-}
-
+.tooltip-count,
 .tooltip-ratio {
   font-size: 0.8rem;
-  margin: 0;
   color: #888;
 }
 
-/* 버블 hover */
 .bubble-group {
   cursor: pointer;
 }
 
 .bubble-group:hover .bubble-circle {
   filter: brightness(1.1);
-  stroke-width: 2;
 }
 
 @keyframes bubblePop {
@@ -457,6 +466,7 @@ onUnmounted(() => {});
 .bubble-label {
   opacity: 0;
   animation: fadeIn 0.3s ease forwards;
+  pointer-events: none;
 }
 
 @keyframes slideIn {
@@ -476,15 +486,14 @@ onUnmounted(() => {});
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-height: 300px; /* 왼쪽 SVG 차트 높이(svgSize)와 동일하게 제한 */
+  max-height: 300px;
   overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* 스크롤바 커스텀 스타일 (프로젝트 내 다른 리스트와 통일) */
 .category-list::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+  display: none;
 }
 
 .category-item {
@@ -560,9 +569,84 @@ onUnmounted(() => {});
   margin: 0;
 }
 
-@media (max-width: 600px) {
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.empty-icon {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.empty-text {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .chart-page {
+    padding: 0;
+  }
+
+  .subtitle {
+    margin: 0 0 6px;
+    font-size: 12px;
+  }
+
+  .title-area {
+    margin: 0 0 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .budget-btn {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+  }
+
   .content {
     flex-direction: column;
+    margin: 0;
+    gap: 18px;
+  }
+
+  .bubble-wrap {
+    max-width: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .bubble-tooltip {
+    white-space: normal;
+    max-width: 180px;
+  }
+
+  .category-list {
+    max-height: none;
+    overflow: visible;
+    width: min(100%, 300px);
+    margin: 0 auto;
+  }
+
+  .category-row {
+    align-items: flex-start;
+  }
+
+  .category-name,
+  .category-amount {
+    font-size: 14px;
   }
 }
 </style>

@@ -6,8 +6,9 @@ import CalendarMain from '../calendar/calendarMain.vue';
   <div class="calendar-page-view">
     <header class="page-header">
       <div class="header-text">
+        <p class="page-eyebrow">캘린더</p>
         <h3 class="h3">똑딱 캘린더</h3>
-        <p class="body-m color-gray">나의 소비 흐름을 한눈에 관리해보세요.</p>
+        <p class="body-m color-gray">날짜 흐름에 따라 수입과 지출을 확인해보세요.</p>
       </div>
     </header>
 
@@ -22,6 +23,9 @@ import CalendarMain from '../calendar/calendarMain.vue';
   padding: 40px;
   max-width: 1600px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .page-header {
@@ -31,11 +35,29 @@ import CalendarMain from '../calendar/calendarMain.vue';
   align-items: flex-end;
 }
 
+.page-eyebrow {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-deepgray-50);
+  margin-bottom: 8px;
+}
+
 .color-gray {
   color: var(--color-deepgray-60);
 }
 
 .content {
   width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .calendar-page-view {
+    padding: 0;
+  }
+
+  .page-header {
+    display: none;
+  }
 }
 </style>

@@ -1,18 +1,16 @@
 <script setup>
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useBudgetStore } from '@/stores/budgetStore2.js'; // 💡 스토어 임포트
+import { useBudgetStore } from '@/stores/budgetStore2.js';
 
 const props = defineProps({
-  items: { type: Array, default: () => [] }, // 스토어의 rangeBudgets
-  dates: { type: Array, default: () => [] }, // 선택된 날짜
+  items: { type: Array, default: () => [] },
+  dates: { type: Array, default: () => [] },
   total: { type: Object, default: () => ({ income: 0, expense: 0 }) },
 });
 
-const emit = defineEmits(['add-click', 'edit-click', 'delete-click']); // 💡 이벤트 정의 확장
-const budgetStore = useBudgetStore(); // 💡 카테고리 맵을 쓰기 위해 선언
+const emit = defineEmits(['add-click', 'edit-click', 'delete-click']);
+const budgetStore = useBudgetStore();
 
-// 1. 날짜 포맷팅 (예: 4월 1일 (수))
 const formattedDate = computed(() => {
   if (!props.dates[0]) return '';
   const date = new Date(props.dates[0]);
@@ -23,46 +21,34 @@ const formattedDate = computed(() => {
   });
 });
 
-/**
- * 💡 [추가] 다중 선택 시 첫 번째 날짜의 아이템만 필터링
- */
 const firstDateItems = computed(() => {
   if (!props.dates[0]) return [];
   return props.items.filter((item) => item.date === props.dates[0]);
 });
 
-/**
- * 💡 [추가] 첫 번째 날짜의 합계 계산
- */
-const firstDateTotal = computed(() => {
-  return firstDateItems.value.reduce(
+const firstDateTotal = computed(() =>
+  firstDateItems.value.reduce(
     (acc, cur) => {
       if (cur.type === 'income') acc.income += cur.amount;
       else acc.expense += cur.amount;
       return acc;
     },
     { income: 0, expense: 0 },
-  );
-});
+  ),
+);
 
-/**
- * 💡 [핵심 로직] 카테고리별로 내역 묶기
- * - item.cid를 사용해 budgetStore.categoryMap에서 카테고리 정보를 찾아옵니다.
- */
-const groupedItems = computed(() => {
-  return firstDateItems.value.reduce((acc, cur) => {
-    // 💡 cid를 통해 카테고리 이름(name)을 가져옴
+const groupedItems = computed(() =>
+  firstDateItems.value.reduce((acc, cur) => {
     const categoryName = budgetStore.categoryMap[cur.cid]?.name || '기타';
     if (!acc[categoryName]) acc[categoryName] = [];
     acc[categoryName].push(cur);
     return acc;
-  }, {});
-});
+  }, {}),
+);
 
-// 2. 가장 많이 지출한 카테고리 메시지용
 const topCategoryName = computed(() => {
   if (firstDateItems.value.length === 0) return null;
-  const expenseItems = firstDateItems.value.filter((i) => i.type === 'expense');
+  const expenseItems = firstDateItems.value.filter((item) => item.type === 'expense');
   if (expenseItems.length === 0) return null;
 
   const totals = expenseItems.reduce((acc, cur) => {
@@ -74,12 +60,10 @@ const topCategoryName = computed(() => {
   return Object.keys(totals).reduce((a, b) => (totals[a] > totals[b] ? a : b));
 });
 
-// 금액 포맷팅
-const formatPrice = (price) => price?.toLocaleString() + ' 원';
+const formatPrice = (price) => `${price?.toLocaleString()} 원`;
 
-// 가계부 추가 페이지 이동
 const goToAdd = () => {
-  emit('add-click', props.dates[0]); // 💡 부모에게 선택된 날짜 전달
+  emit('add-click', props.dates[0]);
 };
 </script>
 
@@ -88,17 +72,17 @@ const goToAdd = () => {
     <header class="list-header">
       <h2 class="date-title h3">{{ formattedDate }}</h2>
       <p v-if="topCategoryName" class="status-msg body-m">
-        {{ topCategoryName }}에 평소보다 많이 썼어요!
+        {{ topCategoryName }}에 평소보다 많이 썼네요!
       </p>
     </header>
 
     <div class="summary-chips">
       <div class="chip expense body-m">
-        <span>😡 총 지출</span>
+        <span>총 지출</span>
         <span class="amount">{{ formatPrice(firstDateTotal.expense) }}</span>
       </div>
       <div class="chip income body-m">
-        <span>😊 총 수입</span>
+        <span>총 수입</span>
         <span class="amount">{{ formatPrice(firstDateTotal.income) }}</span>
       </div>
     </div>
@@ -106,7 +90,7 @@ const goToAdd = () => {
     <hr class="divider" />
 
     <div class="list-content">
-      <h3 class="section-title subtitle-m">카테고리별 내역</h3>
+      <h3 class="section-title subtitle-m">카테고리 별 내역</h3>
 
       <div
         v-for="(list, categoryName) in groupedItems"
@@ -117,9 +101,7 @@ const goToAdd = () => {
           class="category-badge subtitle-s"
           :style="{ color: budgetStore.categoryMap[list[0].cid]?.color }"
         >
-          <span class="emoji">{{
-            budgetStore.categoryMap[list[0].cid]?.img || '❓'
-          }}</span>
+          <span class="emoji">{{ budgetStore.categoryMap[list[0].cid]?.img || '🏷️' }}</span>
           {{ categoryName }}
         </div>
 
@@ -127,7 +109,6 @@ const goToAdd = () => {
           <li v-for="item in list" :key="item.id" class="item-row">
             <span class="item-name body-m">{{ item.detail }}</span>
             <div class="item-right">
-              <!-- 💡 색상 클래스를 TranstionItem과 동일하게 negative/positive로 변경 -->
               <span
                 class="item-amount body-m"
                 :class="item.type === 'expense' ? 'negative' : 'positive'"
@@ -136,7 +117,6 @@ const goToAdd = () => {
                 {{ Number(item.amount).toLocaleString() }}원
               </span>
 
-              <!-- 💡 수정/삭제 아이콘 추가 (TranstionItem 스타일 이식) -->
               <div class="action-icons">
                 <svg
                   class="icon-btn pencil"
@@ -185,7 +165,7 @@ const goToAdd = () => {
 
 <style scoped>
 .daily-list-card {
-  background-color: var(--color-gray-10); /* 소연님 변수 적용 */
+  background-color: var(--color-gray-10);
   border-radius: 24px;
   padding: 24px;
   display: flex;
@@ -197,10 +177,12 @@ const goToAdd = () => {
 .list-header {
   margin-bottom: 24px;
 }
+
 .date-title {
   color: var(--color-deepgray-100);
   margin-bottom: 4px;
 }
+
 .status-msg {
   color: var(--color-deepgray-60);
 }
@@ -211,6 +193,7 @@ const goToAdd = () => {
   gap: 12px;
   margin-bottom: 24px;
 }
+
 .chip {
   background: var(--color-white);
   padding: 12px 20px;
@@ -231,6 +214,7 @@ const goToAdd = () => {
   overflow-y: auto;
   padding-right: 8px;
 }
+
 .section-title {
   margin-bottom: 16px;
   color: var(--color-deepgray-100);
@@ -239,6 +223,7 @@ const goToAdd = () => {
 .category-group {
   margin-bottom: 28px;
 }
+
 .category-badge {
   display: inline-flex;
   align-items: center;
@@ -255,36 +240,43 @@ const goToAdd = () => {
   align-items: center;
   padding: 10px 0;
 }
+
 .item-right {
   display: flex;
   align-items: center;
   gap: 14px;
 }
+
 .item-amount.negative {
   color: var(--color-deepgray-100);
 }
+
 .item-amount.positive {
-  color: #2ecc71; /* TranstionItem의 색상 적용 */
+  color: #2ecc71;
   font-weight: 600;
 }
 
 .action-icons {
   display: flex;
   gap: 8px;
-  opacity: 0.3; /* 평소에는 흐리게 */
+  opacity: 0.3;
   transition: opacity 0.2s;
 }
+
 .item-row:hover .action-icons {
   opacity: 1;
 }
+
 .icon-btn {
   cursor: pointer;
   transition: transform 0.2s;
 }
+
 .icon-btn.pencil:hover {
   color: var(--color-primary);
   transform: scale(1.2);
 }
+
 .icon-btn.trash:hover {
   color: #e74c3c;
   transform: scale(1.2);
@@ -301,6 +293,7 @@ const goToAdd = () => {
   align-items: center;
   cursor: pointer;
 }
+
 .plus-circle {
   width: 28px;
   height: 28px;
@@ -312,12 +305,71 @@ const goToAdd = () => {
   justify-content: center;
 }
 
-/* 스크롤바 커스텀 */
 .list-content::-webkit-scrollbar {
   width: 4px;
 }
+
 .list-content::-webkit-scrollbar-thumb {
   background: var(--color-deepgray-20);
   border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .daily-list-card {
+    height: auto;
+    min-height: 0;
+    border-radius: 24px;
+    padding: 20px 18px 24px;
+    background-color: var(--color-white);
+    box-shadow: 0 10px 26px rgba(44, 51, 51, 0.08);
+  }
+
+  .date-title {
+    font-size: 1.45rem;
+  }
+
+  .status-msg,
+  .section-title,
+  .item-name,
+  .item-amount,
+  .chip {
+    font-size: 0.9rem;
+  }
+
+  .summary-chips {
+    gap: 10px;
+  }
+
+  .chip {
+    padding: 10px 14px;
+  }
+
+  .list-content {
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .item-row {
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .item-right {
+    gap: 8px;
+  }
+
+  .action-icons {
+    opacity: 1;
+  }
+
+  .add-btn {
+    margin-top: 14px;
+    background: linear-gradient(180deg, #dff9dd 0%, #d6f6d5 100%);
+  }
+
+  .plus-circle {
+    background-color: var(--color-primary);
+    color: #17311d;
+  }
 }
 </style>

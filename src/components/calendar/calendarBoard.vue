@@ -2,34 +2,30 @@
 import { computed } from 'vue';
 import { useBudgetStore } from '@/stores/budgetStore2.js';
 
-const props = defineProps({
+defineProps({
   dots: Array,
   selectedDates: Array,
 });
-const emit = defineEmits(['click-date']);
 
+const emit = defineEmits(['click-date']);
 const budgetStore = useBudgetStore();
 
-/**
- * 💡 [로직] 현재 월 기준 날짜 계산 (5주/6주 유동적 대응)
- */
 const calendarDays = computed(() => {
   const year = budgetStore.currentMonth.getFullYear();
   const month = budgetStore.currentMonth.getMonth();
 
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
-
   const days = [];
   const startDayOfWeek = firstDay.getDay();
 
   const prevLastDay = new Date(year, month, 0);
-  for (let i = startDayOfWeek - 1; i >= 0; i--) {
+  for (let i = startDayOfWeek - 1; i >= 0; i -= 1) {
     const d = new Date(year, month - 1, prevLastDay.getDate() - i);
     days.push({ date: formatDateObj(d), num: d.getDate(), isCurrent: false });
   }
 
-  for (let i = 1; i <= lastDay.getDate(); i++) {
+  for (let i = 1; i <= lastDay.getDate(); i += 1) {
     const d = new Date(year, month, i);
     days.push({ date: formatDateObj(d), num: i, isCurrent: true });
   }
@@ -37,7 +33,7 @@ const calendarDays = computed(() => {
   const targetLength = days.length > 35 ? 42 : 35;
   const remaining = targetLength - days.length;
 
-  for (let i = 1; i <= remaining; i++) {
+  for (let i = 1; i <= remaining; i += 1) {
     const d = new Date(year, month + 1, i);
     days.push({ date: formatDateObj(d), num: i, isCurrent: false });
   }
@@ -53,18 +49,11 @@ function formatDateObj(date) {
 }
 
 const handleDayClick = (event, date) => {
-  // Ctrl 키(Windows) 또는 Meta 키(Mac Command)와 Shift 키 상태를 모두 전달
   emit('click-date', date, event.ctrlKey || event.metaKey, event.shiftKey);
 };
 
-/**
- * 🎨 카테고리 컬러 매핑
- */
 const getCategoryColor = (cid) => {
-  const category = budgetStore.categories.find(
-    (c) => Number(c.id) === Number(cid),
-  );
-  // DB에 컬러가 지정되어 있지 않다면 '기타' 카테고리 변수 사용
+  const category = budgetStore.categories.find((item) => Number(item.id) === Number(cid));
   return category ? category.color : 'var(--category-gray)';
 };
 </script>
@@ -73,11 +62,12 @@ const getCategoryColor = (cid) => {
   <div class="calendar-card">
     <div class="days-header subtitle-s">
       <span
-        v-for="(d, idx) in ['일', '월', '화', '수', '목', '금', '토']"
-        :key="d"
-        :class="{ sun: idx === 0 }"
-        >{{ d }}</span
+        v-for="(day, index) in ['일', '월', '화', '수', '목', '금', '토']"
+        :key="day"
+        :class="{ sun: index === 0 }"
       >
+        {{ day }}
+      </span>
     </div>
 
     <div class="grid">
@@ -95,7 +85,7 @@ const getCategoryColor = (cid) => {
 
         <div class="dots-container">
           <div
-            v-for="dot in dots.filter((d) => d.date === day.date)"
+            v-for="dot in dots.filter((item) => item.date === day.date)"
             :key="dot.id"
             class="dot"
             :style="{ backgroundColor: getCategoryColor(dot.cid) }"
@@ -147,7 +137,6 @@ const getCategoryColor = (cid) => {
   border-right: none;
 }
 
-/* 💡 [영역 선택] Primary-10 컬러 반영 */
 .cell.is-selected {
   background-color: var(--color-primary-10);
 }
@@ -162,20 +151,17 @@ const getCategoryColor = (cid) => {
   color: var(--color-deepgray-100);
 }
 
-/* 💡 [숫자 강조] Primary 컬러와 White 반영 */
 .cell.is-selected .date-num {
   background-color: var(--color-primary) !important;
   color: var(--color-white) !important;
   font-weight: 700;
 }
 
-/* 다른 달 날짜: Background 및 DeepGray-40 반영 */
 .other-month {
   color: var(--color-deepgray-40);
   background-color: var(--color-background);
 }
 
-/* 일요일: Category Red 반영 */
 .sun {
   color: var(--category-red);
 }
@@ -192,5 +178,43 @@ const getCategoryColor = (cid) => {
   width: 7px;
   height: 7px;
   border-radius: 50%;
+}
+
+@media (max-width: 768px) {
+  .calendar-card {
+    min-width: 0;
+    width: 100%;
+    border-radius: 24px;
+  }
+
+  .days-header {
+    padding: 12px 0;
+    font-size: 0.75rem;
+    background: transparent;
+  }
+
+  .cell {
+    min-height: 64px;
+    padding: 8px 6px;
+    align-items: center;
+  }
+
+  .date-num {
+    width: 30px;
+    height: 30px;
+    font-size: 0.92rem;
+  }
+
+  .dots-container {
+    margin-top: 6px;
+    justify-content: center;
+    min-height: 12px;
+    padding-bottom: 0;
+  }
+
+  .dot {
+    width: 5px;
+    height: 5px;
+  }
 }
 </style>

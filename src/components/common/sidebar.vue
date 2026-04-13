@@ -1,15 +1,22 @@
 <template>
-  <div class="sidebar">
-    <!-- 로고 -->
-    <div class="sidebar-logo">
-      <img :src="logo" alt="똑딱 로고" />
+  <aside class="sidebar" :class="{ 'mobile-open': isOpen, 'mobile-sidebar': isMobile }">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">
+        <img :src="logo" alt="로고" />
+      </div>
+      <button
+        v-if="isMobile"
+        class="close-button"
+        type="button"
+        aria-label="Close menu"
+        @click="$emit('close')"
+      >
+        ×
+      </button>
     </div>
 
-    <!-- 유저 -->
     <div class="user-profile">
       <img :src="profileIcon" alt="프로필 아이콘" />
-
-      <!-- 로그아웃 버튼 추가 -->
       <button class="logout-btn" @click="handleLogout" title="로그아웃">
         <svg
           width="20"
@@ -31,9 +38,8 @@
       <p class="user-sub">{{ userName }}님의 가계부</p>
     </div>
 
-    <!-- 뱃지 -->
     <div class="user-badge">
-      <p>획득한 뱃지</p>
+      <p>이번 달 배지</p>
       <div class="badge-grid">
         <div v-for="row in 2" :key="row" class="grid-row">
           <div
@@ -45,13 +51,12 @@
             <span v-if="getBadgeEmoji(row, i)" class="badge-emoji">
               {{ getBadgeEmoji(row, i) }}
             </span>
-            <img v-else :src="placeholder" alt="뱃지" />
+            <img v-else :src="placeholder" alt="배지" />
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 네비 -->
     <div class="sidebar-nav">
       <RouterLink
         v-for="item in navItems"
@@ -59,6 +64,7 @@
         :to="item.path"
         class="nav-item"
         active-class="is-active"
+        @click="handleNavClick"
       >
         <span class="nav-icon">{{ item.icon }}</span>
         {{ item.name }}
@@ -66,36 +72,30 @@
     </div>
 
     <div class="budget-container">
-      <!-- 위에 뜨는 메뉴 -->
       <div v-if="showMenu" class="menu-stack">
-        <!-- 자동완성 템플릿 버튼 -->
         <div class="template-wrapper">
           <button class="btn template" @click="showTemplates = !showTemplates">
             <span>자동완성 템플릿</span>
-            <span class="arrow">›</span>
+            <span class="arrow">→</span>
           </button>
 
-          <!-- 템플릿 팝업 -->
           <div v-if="showTemplates" class="template-popup">
-            <!-- 템플릿이 있으면 목록 표시 -->
             <template v-if="templateStore.templates.length > 0">
               <div
                 v-for="tmpl in templateStore.templates"
                 :key="tmpl.id"
                 class="template-item"
               >
-                <!-- 템플릿 정보 — 클릭 시 즉시 거래 추가 -->
                 <div class="tmpl-info" @click="handleApplyTemplate(tmpl)">
                   <span class="tmpl-title">{{ tmpl.detail }}</span>
                   <span class="tmpl-desc">
-                    {{ tmpl.type === 'expense' ? '-' : '+'
-                    }}{{ tmpl.amount.toLocaleString() }}원
+                    {{ tmpl.type === 'expense' ? '-' : '+' }}{{ tmpl.amount.toLocaleString() }}원
                   </span>
                 </div>
-                <!-- 수정 / 삭제 버튼 -->
                 <div class="tmpl-actions">
                   <button
                     class="tmpl-btn"
+                    type="button"
                     @click.stop="handleEditTemplate(tmpl)"
                   >
                     <img :src="editPencil" alt="수정" />
@@ -103,16 +103,17 @@
                   <img
                     class="tmpl-btn tmpl-delete-img"
                     :src="trash"
+                    alt="삭제"
                     @click="handleDeleteTemplate(tmpl)"
                   />
                 </div>
               </div>
             </template>
 
-            <!-- 템플릿이 3개 미만이면 추가 버튼 표시 -->
             <button
               v-if="templateStore.templates.length < 3"
               class="template-item add"
+              type="button"
               @click="showAddTemplateModal = true"
             >
               템플릿 추가하기
@@ -120,28 +121,25 @@
           </div>
         </div>
 
-        <!-- 새로 작성 버튼 -->
         <RouterLink
           to="/addTransaction"
           class="btn new-write"
           @click="closeAll"
         >
           <span>새로 작성</span>
-          <span class="arrow">›</span>
+          <span class="arrow">→</span>
         </RouterLink>
       </div>
 
-      <!-- 메인 버튼 -->
       <div
         class="add-budget"
         :class="{ collapsed: isCollapsed }"
         @click="toggleMain"
       >
-        <img :src="coinIcon" />
+        <img :src="coinIcon" alt="가계부" />
         <span class="label">가계부 쓰기</span>
       </div>
 
-      <!-- 공용 확인 모달 (로그아웃, 삭제 등) -->
       <ConfirmModal
         :visible="confirmModal.visible"
         :title="confirmModal.title"
@@ -159,24 +157,23 @@
         @close="modal.visible = false"
       />
 
-      <!-- 템플릿 추가 모달 -->
       <AddTemplateModal
         :visible="showAddTemplateModal"
         :item="selectedTemplate"
         @close="showAddTemplateModal = false"
       />
     </div>
-  </div>
+  </aside>
 </template>
 
 <script setup>
 import logo from '@/assets/icons/logo-signiture.svg';
 import profileIcon from '@/assets/icons/profile.svg';
-import placeholder from '@/assets/icons/placeholder.svg';
+import placeholder from '@/assets/icons/badge.svg';
 import coinIcon from '@/assets/icons/money.svg';
 import editPencil from '@/assets/icons/edit-pencil.svg';
 import trash from '@/assets/icons/trash.svg';
-import { ref, computed, onMounted, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCategoryStore } from '@/stores/category';
 import { useTransactionStore } from '@/stores/budgetStore';
@@ -187,6 +184,13 @@ import { useReactionStore } from '@/stores/reaction';
 import SuccessModal from '@/components/common/CompleteModal.vue';
 import ConfirmModal from '@/components/common/ConfirmModal.vue';
 import AddTemplateModal from '@/components/common/AddTemplateModal.vue';
+
+defineProps({
+  isMobile: { type: Boolean, default: false },
+  isOpen: { type: Boolean, default: true },
+});
+
+const emit = defineEmits(['close']);
 
 const userStore = useUserStore();
 const categoryStore = useCategoryStore();
@@ -205,12 +209,12 @@ const handleLogout = () => {
     action: () => {
       userStore.logout();
       confirmModal.value.visible = false;
+      emit('close');
       router.push({ name: 'onboarding' });
     },
   };
 };
 
-// 컨펌 모달 상태
 const confirmModal = ref({
   visible: false,
   title: '',
@@ -223,14 +227,13 @@ const userName = computed(() => userStore.user?.nickname || '');
 
 const navItems = [
   { name: '대시보드', icon: '📊', path: '/' },
-  { name: '거래내역', icon: '📝', path: '/transactionList' },
+  { name: '거래내역', icon: '💳', path: '/transactionList' },
   { name: '캘린더', icon: '📅', path: '/calendar' },
   { name: '프로필', icon: '👤', path: '/profile' },
 ];
 
 const badges = computed(() => {
   const result = Array(6).fill(null);
-
   const monthlyData = categoryStore.monthlyTopCountCategories;
 
   monthlyData.slice(0, 6).forEach((data, index) => {
@@ -238,7 +241,7 @@ const badges = computed(() => {
       const [year, month] = data.month.split('-');
       result[index] = {
         emoji: data.category.img,
-        title: `${year.slice(-2)}년 ${parseInt(month)}월 지출 빈도가 높은 카테고리: ${data.category.name} (${data.count}회)`,
+        title: `${year.slice(-2)}년 ${parseInt(month, 10)}월 최다 지출 카테고리: ${data.category.name} (${data.count}회)`,
       };
     }
   });
@@ -254,19 +257,18 @@ const getBadgeTitle = (row, col) =>
 
 onMounted(async () => {
   const uid = userStore.user?.id;
-  if (!uid) return; // 로그인 정보가 없으면 데이터를 불러오지 않음
+  if (!uid) return;
 
   if (!categoryStore.chartData.length) await categoryStore.fetchAll(uid);
   await userStore.fetchUser(uid);
   await templateStore.fetchTemplates(uid);
 });
 
-// 버튼 상태
-const isCollapsed = ref(false); // 버튼 접힘
-const showMenu = ref(false); // 위 버튼 표시
-const showTemplates = ref(false); // 템플릿 하위 메뉴
-const showAddTemplateModal = ref(false); // 템플릿 추가 모달
-const selectedTemplate = ref(null); // 수정용 선택 데이터
+const isCollapsed = ref(false);
+const showMenu = ref(false);
+const showTemplates = ref(false);
+const showAddTemplateModal = ref(false);
+const selectedTemplate = ref(null);
 
 const toggleMain = () => {
   isCollapsed.value = !isCollapsed.value;
@@ -276,41 +278,35 @@ const toggleMain = () => {
   }
 };
 
-// 메뉴 전체 닫기 (RouterLink 클릭 후 정리)
 const closeAll = () => {
   isCollapsed.value = false;
   showMenu.value = false;
   showTemplates.value = false;
   selectedTemplate.value = null;
+  emit('close');
 };
 
-// 💡 템플릿 수정 버튼 핸들러
+const handleNavClick = () => {
+  emit('close');
+};
+
 const handleEditTemplate = (tmpl) => {
   selectedTemplate.value = tmpl;
   showAddTemplateModal.value = true;
 };
 
-// 모달 상태
 const modal = ref({ visible: false, icon: '', title: '', description: '' });
 
-// 템플릿으로 즉시 거래 추가
 const handleApplyTemplate = async (tmpl) => {
   const uid = userStore.user?.id;
   if (!uid) return;
 
   try {
     await templateStore.applyTemplate(tmpl, uid);
-
-    // 💡 통합된 스토어 데이터 한 번만 갱신
     await budgetStore.loadData(uid);
-
-    // 카테고리 스토어 갱신 (횟수 반영)
     await categoryStore.fetchAll(uid);
-
-    // reactionMessages 로드 (최초 1회만)
     await reactionStore.fetchReactionMessages();
 
-    // 이번 달 누적 횟수 조회
     const cid = tmpl.cid ?? 10;
     const count = categoryStore.expenseCountByCategory[cid] ?? 1;
     const category = categoryStore.categories.find(
@@ -320,7 +316,6 @@ const handleApplyTemplate = async (tmpl) => {
       ? `${category.img} ${category.name}`
       : '해당 카테고리';
 
-    // 메시지 결정 후 모달 표시
     const message = reactionStore.resolveMessage(cid, count, categoryName);
     modal.value = {
       visible: true,
@@ -329,21 +324,17 @@ const handleApplyTemplate = async (tmpl) => {
       description: message,
     };
 
-    // 💡 거래내역 페이지로 이동
     router.push('/transactionList');
-
     closeAll();
   } catch {
-    alert('추가에 실패했어요. 다시 시도해주세요.');
+    alert('추가에 실패했습니다. 다시 시도해 주세요.');
   }
 };
 
-// 💡 추가 모달이 닫힐 때 선택된 데이터 초기화 (watch 등을 위해)
 watch(showAddTemplateModal, (val) => {
   if (!val) selectedTemplate.value = null;
 });
 
-// 템플릿 삭제
 const handleDeleteTemplate = async (tmpl) => {
   const uid = userStore.user?.id;
   if (!uid) return;
@@ -361,9 +352,9 @@ const handleDeleteTemplate = async (tmpl) => {
         confirmModal.value.visible = false;
         modal.value = {
           visible: true,
-          icon: '❌',
+          icon: '⚠️',
           title: '삭제 실패',
-          description: '삭제에 실패했어요. 다시 시도해주세요.',
+          description: '삭제에 실패했습니다. 다시 시도해 주세요.',
         };
       }
     },
@@ -379,7 +370,17 @@ const handleDeleteTemplate = async (tmpl) => {
   flex-direction: column;
   gap: 20px;
   background-color: var(--color-white);
-  z-index: 1;
+  z-index: 20;
+}
+
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.close-button {
+  display: none;
 }
 
 .sidebar-logo img {
@@ -392,12 +393,15 @@ const handleDeleteTemplate = async (tmpl) => {
   align-items: center;
   gap: 0.6rem;
 }
+
 .user-sub {
   font-weight: 700;
 }
+
 .user-profile img {
   width: 1.875rem;
 }
+
 .logout-btn {
   margin-left: auto;
   background: none;
@@ -448,9 +452,11 @@ const handleDeleteTemplate = async (tmpl) => {
   transition: transform 0.15s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
 }
+
 .badge-item:hover {
   transform: scale(1.15);
 }
+
 .badge-item img {
   width: 100%;
   height: 100%;
@@ -479,6 +485,7 @@ const handleDeleteTemplate = async (tmpl) => {
   cursor: pointer;
   color: var(--color-deepgray-80);
 }
+
 .nav-item.is-active {
   background-color: var(--color-gray-10);
   font-weight: 600;
@@ -489,7 +496,6 @@ const handleDeleteTemplate = async (tmpl) => {
   margin-top: auto;
 }
 
-/* 메인 버튼 */
 .add-budget {
   display: flex;
   align-items: center;
@@ -503,21 +509,23 @@ const handleDeleteTemplate = async (tmpl) => {
   transition: all 0.3s ease;
   font-weight: 700;
 }
+
 .add-budget .label {
   white-space: nowrap;
   transition: opacity 0.2s;
 }
+
 .add-budget.collapsed {
   width: 48px;
   background-color: var(--color-deepgray-20);
 }
+
 .add-budget.collapsed .label {
   opacity: 0;
   width: 0;
   overflow: hidden;
 }
 
-/* 위에 쌓이는 메뉴 */
 .menu-stack {
   position: absolute;
   bottom: 60px;
@@ -529,7 +537,6 @@ const handleDeleteTemplate = async (tmpl) => {
   z-index: 999;
 }
 
-/* 버튼 공통 */
 .btn {
   display: flex;
   align-items: center;
@@ -548,12 +555,14 @@ const handleDeleteTemplate = async (tmpl) => {
   background-color: #63f57c;
   color: #1a1a1a;
 }
+
 .new-write {
   width: 130px;
   background: white;
   border: 1px solid #eee;
   color: #1a1a1a;
 }
+
 .arrow {
   margin-left: auto;
 }
@@ -562,7 +571,6 @@ const handleDeleteTemplate = async (tmpl) => {
   position: relative;
 }
 
-/* 템플릿 팝업 */
 .template-popup {
   position: absolute;
   left: 190px;
@@ -579,7 +587,6 @@ const handleDeleteTemplate = async (tmpl) => {
   overflow: visible;
 }
 
-/* 템플릿 아이템 */
 .template-item {
   display: flex;
   align-items: center;
@@ -589,11 +596,11 @@ const handleDeleteTemplate = async (tmpl) => {
   gap: 6px;
   transition: background 0.15s;
 }
+
 .template-item:hover {
   background-color: var(--color-gray-10, #f5f5f5);
 }
 
-/* 템플릿 정보 영역 (클릭 시 즉시 추가) */
 .tmpl-info {
   display: flex;
   flex-direction: column;
@@ -601,22 +608,24 @@ const handleDeleteTemplate = async (tmpl) => {
   flex: 1;
   cursor: pointer;
 }
+
 .tmpl-title {
   font-size: 0.85rem;
   font-weight: 600;
   color: #222;
 }
+
 .tmpl-desc {
   font-size: 0.75rem;
   color: #888;
 }
 
-/* 수정 / 삭제 버튼 */
 .tmpl-actions {
   display: flex;
   gap: 4px;
   flex-shrink: 0;
 }
+
 .tmpl-btn {
   font-size: 0.7rem;
   padding: 3px 7px;
@@ -625,6 +634,7 @@ const handleDeleteTemplate = async (tmpl) => {
   cursor: pointer;
   text-decoration: none;
   font-weight: 500;
+  background: transparent;
 }
 
 .tmpl-btn > img:first-child {
@@ -645,7 +655,6 @@ const handleDeleteTemplate = async (tmpl) => {
   transform: scale(1.05);
 }
 
-/* 템플릿 추가하기 버튼 */
 .template-item.add {
   justify-content: flex-start;
   background: none;
@@ -698,6 +707,62 @@ const handleDeleteTemplate = async (tmpl) => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(280px, 82vw);
+    transform: translateX(-100%);
+    transition: transform 0.24s ease;
+    box-shadow: 0 18px 40px rgba(44, 51, 51, 0.18);
+    overflow-y: auto;
+  }
+
+  .mobile-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .close-button {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 10px;
+    background: var(--color-gray-10);
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--color-deepgray-80);
+  }
+
+  .budget-container {
+    width: 100%;
+    padding-top: 16px;
+  }
+
+  .menu-stack {
+    left: 0;
+    right: 0;
+    bottom: calc(100% + 8px);
+    align-items: stretch;
+  }
+
+  .template-popup {
+    left: 0;
+    top: calc(100% + 8px);
+    min-width: 220px;
+  }
+
+  .add-budget,
+  .template,
+  .new-write {
+    width: 100%;
   }
 }
 </style>

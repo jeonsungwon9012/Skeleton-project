@@ -1,10 +1,13 @@
 <template>
   <div class="planned-list">
-    <h3 class="title">최근거래 항목</h3>
+    <h3 class="title">최근 거래 내역</h3>
     <ul>
       <li v-for="item in recentList" :key="item.id" class="item">
         <span class="img">{{ item.categoryImg }}</span>
-        <span class="detail">{{ item.detail }}</span>
+        <div class="detail-wrap">
+          <span class="detail">{{ item.detail }}</span>
+          <span class="category">{{ item.category }}</span>
+        </div>
         <span
           class="amount"
           :class="{
@@ -12,28 +15,23 @@
             positive: item.type === 'income',
           }"
         >
-          {{ item.type === 'expense' ? '-' : '+'
-          }}{{ item.amount.toLocaleString() }}
+          {{ item.type === 'expense' ? '-' : '+' }}{{ item.amount.toLocaleString() }}
         </span>
-        <span class="category">{{ item.category }}</span>
       </li>
     </ul>
   </div>
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useTransactionStore } from '@/stores/budgetStore';
-import { useDashboardStore } from '@/stores/dashboard';
 
 const store = useTransactionStore();
-const dashboard = useDashboardStore();
 
 onMounted(() => store.loadData());
 
 const recentList = computed(() => {
-  // 💡 유저의 전체 내역(myBudgets) 중 날짜 기준 내림차순(최신순) 정렬 후 5개 추출
-  return store.myBudgets
+  return [...store.myBudgets]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);
 });
@@ -41,7 +39,7 @@ const recentList = computed(() => {
 
 <style scoped>
 .planned-list {
-  padding: 16px;
+  padding: 0;
 }
 
 .title {
@@ -64,22 +62,63 @@ ul {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.detail {
+.img {
+  flex-shrink: 0;
+}
+
+.detail-wrap {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail {
   font-size: 14px;
+  word-break: keep-all;
 }
 
 .amount {
   font-size: 14px;
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .amount.negative {
   color: #e74c3c;
 }
 
+.amount.positive {
+  color: #4caf50;
+}
+
 .category {
   font-size: 13px;
   color: #aaa;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .item {
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  .detail {
+    font-size: 13px;
+  }
+
+  .amount {
+    font-size: 13px;
+  }
+
+  .category {
+    font-size: 11px;
+  }
 }
 </style>

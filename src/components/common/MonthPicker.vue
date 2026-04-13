@@ -1,14 +1,11 @@
-<!--MonthPicker.vue-->
 <script setup>
 import { computed } from 'vue';
 
 const props = defineProps({
-  //부모로부터 현재 선택한 날짜 데이터 받아옴
-  currentMonth: Date
+  currentMonth: Date,
 });
 
-//사용자가 버튼 클릭시 월 변경  요청
-const emit = defineEmits(['change']);
+defineEmits(['change']);
 
 const formattedDate = computed(() => {
   const now = new Date();
@@ -16,8 +13,8 @@ const formattedDate = computed(() => {
   const isCurrentYear = now.getFullYear() === d.getFullYear();
 
   return isCurrentYear
-      ? `${d.getMonth() + 1}월`
-      : `${d.getFullYear()}년 ${d.getMonth() + 1}월`;
+    ? `${d.getMonth() + 1}월`
+    : `${d.getFullYear()}년 ${d.getMonth() + 1}월`;
 });
 </script>
 
@@ -34,8 +31,10 @@ const formattedDate = computed(() => {
   display: flex;
   align-items: center;
   gap: 24px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
-.color-title { color: var(--color-deepgray-100); }
+
 .nav-btn {
   width: 40px;
   height: 40px;
@@ -50,5 +49,28 @@ const formattedDate = computed(() => {
   font-size: var(--button--m);
   transition: background 0.2s;
 }
-.nav-btn:hover { background-color: var(--color-primary-80); }
+
+.nav-btn:hover {
+  background-color: var(--color-primary-80);
+}
+
+@media (max-width: 768px) {
+  .month-picker {
+    width: 100%;
+    justify-content: center;
+    gap: 14px;
+    padding: 0;
+  }
+
+  .month-picker h2 {
+    font-size: 1.25rem;
+  }
+
+  .nav-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+}
 </style>

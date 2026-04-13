@@ -1,10 +1,13 @@
 <template>
   <div class="planned-list">
-    <h3 class="title">예정된 거래 항목</h3>
+    <h3 class="title">예정된 거래 내역</h3>
     <ul>
       <li v-for="item in upcomingList" :key="item.id" class="item">
         <span class="img">{{ item.categoryImg }}</span>
-        <span class="detail">{{ item.detail }}</span>
+        <div class="detail-wrap">
+          <span class="detail">{{ item.detail }}</span>
+          <span class="category">{{ item.category }}</span>
+        </div>
         <span
           class="amount"
           :class="{
@@ -12,32 +15,26 @@
             positive: item.type === 'income',
           }"
         >
-          {{ item.type === 'expense' ? '-' : '+'
-          }}{{ item.amount.toLocaleString() }}
+          {{ item.type === 'expense' ? '-' : '+' }}{{ item.amount.toLocaleString() }}
         </span>
-        <span class="category">{{ item.category }}</span>
       </li>
     </ul>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useTransactionStore } from '@/stores/budgetStore';
-import { useDashboardStore } from '@/stores/dashboard';
-import { computed } from 'vue';
 
 const store = useTransactionStore();
-const dashboard = useDashboardStore();
 
 onMounted(() => store.loadData());
 
 const upcomingList = computed(() => {
   const today = new Date();
-  today.setHours(23, 59, 59, 999); // 오늘 자정 이후부터 체크
+  today.setHours(23, 59, 59, 999);
 
-  // 💡 오늘 이후의 데이터만 필터링 -> 날짜 오름차순(가까운 순) 정렬 -> 5개 추출
-  return store.myBudgets
+  return [...store.myBudgets]
     .filter((item) => new Date(item.date) > today)
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .slice(0, 5);
@@ -46,7 +43,7 @@ const upcomingList = computed(() => {
 
 <style scoped>
 .planned-list {
-  padding: 16px;
+  padding: 0;
 }
 
 .title {
@@ -69,22 +66,63 @@ ul {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.detail {
+.img {
+  flex-shrink: 0;
+}
+
+.detail-wrap {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail {
   font-size: 14px;
+  word-break: keep-all;
 }
 
 .amount {
   font-size: 14px;
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .amount.negative {
   color: #e74c3c;
 }
 
+.amount.positive {
+  color: #4caf50;
+}
+
 .category {
   font-size: 13px;
   color: #aaa;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .item {
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  .detail {
+    font-size: 13px;
+  }
+
+  .amount {
+    font-size: 13px;
+  }
+
+  .category {
+    font-size: 11px;
+  }
 }
 </style>

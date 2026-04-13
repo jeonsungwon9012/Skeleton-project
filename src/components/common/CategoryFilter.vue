@@ -1,11 +1,10 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { computed, ref } from 'vue';
 
-// 💡 부모(CalendarMain)로부터 진짜 DB 데이터를 받음
 const props = defineProps({
-  categories: { type: Array, default: () => [] }, // 스토어의 categories.value
-  selectedCategories: { type: Array, default: () => [] }, // 선택된 ID 배열
-  selectedType: { type: String, default: '전체' },
+  categories: { type: Array, default: () => [] },
+  selectedCategories: { type: Array, default: () => [] },
+  selectedType: { type: String, default: 'all' },
   isScheduledOnly: { type: Boolean, default: false },
 });
 
@@ -16,154 +15,106 @@ const emit = defineEmits([
   'select-all',
 ]);
 
-// 수입/지출 드롭다운 상태
 const isDropdownOpen = ref(false);
+const isCategoryOpen = ref(false);
+
+const typeLabel = computed(() => {
+  if (props.selectedType === 'income') return '수입/지출';
+  if (props.selectedType === 'expense') return '수입/지출';
+  return '수입/지출';
+});
+
+const selectedCategoryCount = computed(() => props.selectedCategories.length);
+
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
 
-// 버튼 표시 텍스트 계산
-const typeLabel = computed(() => {
-  if (props.selectedType === 'income') return '수입 내역';
-  if (props.selectedType === 'expense') return '지출 내역';
-  return '수입/지출';
-});
+const toggleCategoryPanel = () => {
+  isCategoryOpen.value = !isCategoryOpen.value;
+};
 
 const handleTypeSelect = (type) => {
   emit('select-type', type);
   isDropdownOpen.value = false;
 };
-
-// 💡 마우스 드래그 및 휠 스크롤 로직
-const filterContainer = ref(null);
-
-onMounted(() => {
-  const el = filterContainer.value;
-  if (!el) return;
-
-  let isDown = false;
-  let startX;
-  let scrollLeft;
-
-  el.addEventListener('mousedown', (e) => {
-    isDown = true;
-    startX = e.pageX - el.offsetLeft;
-    scrollLeft = el.scrollLeft;
-    el.style.cursor = 'grabbing';
-  });
-
-  el.addEventListener('mouseleave', () => {
-    isDown = false;
-    el.style.cursor = 'grab';
-  });
-  el.addEventListener('mouseup', () => {
-    isDown = false;
-    el.style.cursor = 'grab';
-  });
-
-  el.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - el.offsetLeft;
-    const walk = (x - startX) * 2;
-    el.scrollLeft = scrollLeft - walk;
-  });
-
-  el.addEventListener(
-    'wheel',
-    (e) => {
-      if (e.deltaY !== 0) {
-        e.preventDefault();
-        el.scrollLeft += e.deltaY;
-      }
-    },
-    { passive: false },
-  );
-});
 </script>
 
 <template>
   <div class="category-filter-container">
-    <div class="dropdown-wrapper">
+    <div class="filter-row">
+      <div class="dropdown-wrapper">
+        <button
+          class="cat-item dropdown-trigger"
+          :class="{ 'active-type': selectedType !== 'all' }"
+          type="button"
+          @click.stop="toggleDropdown"
+        >
+          <div class="icon-circle gray-bg">⇵</div>
+          <span class="subtitle-s">{{ typeLabel }}</span>
+          <span class="arrow" :class="{ open: isDropdownOpen }">⌄</span>
+        </button>
+
+        <ul v-if="isDropdownOpen" class="dropdown-menu">
+          <li :class="{ active: selectedType === 'all' }" @click="handleTypeSelect('all')">
+            전체
+          </li>
+          <li :class="{ active: selectedType === 'income' }" @click="handleTypeSelect('income')">
+            수입
+          </li>
+          <li :class="{ active: selectedType === 'expense' }" @click="handleTypeSelect('expense')">
+            지출
+          </li>
+        </ul>
+      </div>
+
+      <div class="divider"></div>
+
       <button
-        class="cat-item dropdown-trigger"
+        class="cat-item"
         :class="{
-          'active-type': selectedType !== 'all' && selectedType !== '전체',
+          'active-pill':
+            selectedType === 'all' && !isScheduledOnly && selectedCategories.length === 0,
         }"
-        @click.stop="toggleDropdown"
+        type="button"
+        @click="$emit('select-all')"
       >
-        <div class="icon-circle gray-bg">⇅</div>
-        <span class="subtitle-s">{{ typeLabel }}</span>
-        <span class="arrow" :class="{ open: isDropdownOpen }">▾</span>
+        <div class="icon-circle gray-bg">✓</div>
+        <span class="subtitle-s">전체</span>
       </button>
 
-      <ul v-if="isDropdownOpen" class="dropdown-menu">
-        <li
-          @click="handleTypeSelect('전체')"
-          :class="{
-            active: selectedType === 'all' || selectedType === '전체',
-          }"
-        >
-          전체 내역
-        </li>
-        <li
-          @click="handleTypeSelect('income')"
-          :class="{ active: selectedType === 'income' }"
-        >
-          수입 내역
-        </li>
-        <li
-          @click="handleTypeSelect('expense')"
-          :class="{ active: selectedType === 'expense' }"
-        >
-          지출 내역
-        </li>
-      </ul>
+      <button
+        class="cat-item"
+        :class="{ 'active-scheduled': isScheduledOnly }"
+        type="button"
+        @click="$emit('toggle-scheduled')"
+      >
+        <div class="icon-circle primary-bg">⏰</div>
+        <span class="subtitle-s">예정</span>
+      </button>
+
+      <div class="divider mobile-hidden"></div>
+
+      <button
+        class="category-toggle"
+        :class="{ open: isCategoryOpen, active: selectedCategoryCount > 0 }"
+        type="button"
+        @click="toggleCategoryPanel"
+      >
+        <span class="toggle-text subtitle-s">
+          카테고리
+          <span v-if="selectedCategoryCount > 0" class="toggle-count">{{ selectedCategoryCount }}</span>
+        </span>
+        <span class="arrow" :class="{ open: isCategoryOpen }">⌄</span>
+      </button>
     </div>
 
-    <div class="divider"></div>
-
-    <button
-      class="cat-item"
-      :class="{
-        'active-type':
-          (selectedType === 'all' || selectedType === '전체') &&
-          !isScheduledOnly &&
-          selectedCategories.length === 0,
-      }"
-      @click="$emit('select-all')"
-    >
-      <div
-        class="icon-circle"
-        :class="
-          (selectedType === 'all' || selectedType === '전체') &&
-          !isScheduledOnly &&
-          selectedCategories.length === 0
-            ? 'primary-bg'
-            : 'gray-bg'
-        "
-      >
-        📄
-      </div>
-      <span class="subtitle-s">전체</span>
-    </button>
-
-    <button
-      class="cat-item"
-      :class="{ 'active-scheduled': isScheduledOnly }"
-      @click="$emit('toggle-scheduled')"
-    >
-      <div class="icon-circle primary-bg">⏰</div>
-      <span class="subtitle-s">예정</span>
-    </button>
-
-    <div class="divider"></div>
-
-    <div class="category-list" ref="filterContainer">
+    <div class="category-list" :class="{ open: isCategoryOpen }">
       <button
         v-for="cat in categories"
         :key="cat.id"
         class="cat-item"
+        type="button"
         :style="
           selectedCategories.includes(Number(cat.id))
             ? {
@@ -183,18 +134,30 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 소연님의 디자인 시스템(CSS 변수) 철저히 반영 */
 .category-filter-container {
   display: flex;
+  flex-direction: column;
   gap: 10px;
-  align-items: center;
-  padding: 10px 0;
-  font-family: var(--font-main);
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  font-family: var(--font-main);
+  box-sizing: border-box;
 }
 
-.cat-item {
+.filter-row {
   display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.cat-item,
+.category-toggle {
+  display: inline-flex;
   align-items: center;
   padding: 6px 14px 6px 6px;
   border-radius: 50px;
@@ -203,31 +166,38 @@ onMounted(() => {
   cursor: pointer;
   transition: 0.2s;
   white-space: nowrap;
-  flex-shrink: 0; /* ❗ 아이템이 찌그러지지 않게 설정 */
+  flex-shrink: 0;
 }
 
-/* 텍스트 스타일 */
 .subtitle-s {
   font-size: var(--subtitle--s);
   font-weight: 500;
   color: var(--color-deepgray-100);
 }
 
-/* 활성화 상태 */
 .active-type,
-.active-scheduled {
+.active-scheduled,
+.category-toggle.active,
+.category-toggle.open {
   border-color: var(--color-primary);
   background-color: var(--color-primary-10);
 }
+
 .active-type span,
 .active-scheduled span {
   color: var(--color-primary);
 }
 
-/* 드롭다운 */
+.active-pill {
+  border-color: var(--color-deepgray-100);
+  background: var(--color-gray-10);
+}
+
 .dropdown-wrapper {
   position: relative;
+  flex-shrink: 0;
 }
+
 .dropdown-menu {
   position: absolute;
   top: 48px;
@@ -247,16 +217,17 @@ onMounted(() => {
   cursor: pointer;
   font-size: var(--subtitle--s);
 }
+
 .dropdown-menu li:hover {
   background-color: var(--color-gray-10);
 }
+
 .dropdown-menu li.active {
   color: var(--color-primary);
   background-color: var(--color-primary-10);
   font-weight: 600;
 }
 
-/* 아이콘 원형 데코 */
 .icon-circle {
   width: 28px;
   height: 28px;
@@ -265,29 +236,54 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
+
 .gray-bg {
   background-color: var(--color-gray-10);
 }
+
 .primary-bg {
   background-color: var(--color-primary-10);
 }
+
 .white-bg {
   background-color: var(--color-white);
+}
+
+.category-toggle {
+  margin-left: auto;
+  padding-right: 12px;
+}
+
+.toggle-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toggle-count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 0.72rem;
+  line-height: 18px;
+  text-align: center;
 }
 
 .category-list {
   display: flex;
   gap: 8px;
-  flex: 1; /* 남은 공간을 차지 */
-  min-width: 0; /* flex 자식의 최소 너비 해제 */
-  flex-wrap: nowrap; /* 내부 줄바꿈 방지 */
-  overflow-x: auto; /* 아이콘 리스트만 스크롤 허용 */
-  cursor: grab;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  overflow-x: auto;
+  scrollbar-width: none;
+  min-width: 0;
 }
+
 .category-list::-webkit-scrollbar {
   display: none;
 }
@@ -300,25 +296,60 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.edit-btn {
-  background-color: var(--color-gray-10);
-  border: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .arrow {
   margin-left: 6px;
   font-size: 10px;
   color: var(--color-deepgray-40);
   transition: 0.2s;
 }
+
 .arrow.open {
   transform: rotate(180deg);
+}
+
+@media (max-width: 768px) {
+  .category-filter-container {
+    gap: 8px;
+    padding: 0;
+  }
+
+  .filter-row {
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-hidden {
+    display: none;
+  }
+
+  .dropdown-menu {
+    top: calc(100% + 6px);
+  }
+
+  .category-toggle {
+    margin-left: 0;
+  }
+
+  .category-list {
+    display: none;
+    overflow-x: visible;
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+
+  .category-list.open {
+    display: flex;
+  }
+
+  .category-list .cat-item {
+    flex: 0 1 auto;
+    max-width: 100%;
+  }
 }
 </style>
