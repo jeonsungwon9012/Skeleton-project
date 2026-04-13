@@ -744,25 +744,34 @@ const handleDeleteTemplate = async (tmpl) => {
   .budget-container {
     width: 100%;
     padding-top: 16px;
+    overflow: visible;
   }
 
   .menu-stack {
-    left: 0;
-    right: 0;
-    bottom: calc(100% + 8px);
+    position: static;
+    margin-bottom: 8px;
     align-items: stretch;
   }
 
   .template-popup {
-    left: 0;
-    top: calc(100% + 8px);
-    min-width: 220px;
+    position: static;
+    left: auto;
+    top: auto;
+    margin-top: 8px;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .add-budget,
   .template,
   .new-write {
     width: 100%;
+  }
+
+  .template-item {
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 </style>

@@ -12,28 +12,30 @@ const emit = defineEmits(['confirm', 'close']);
 </script>
 
 <template>
-  <div v-if="visible" class="modal-backdrop" @click="emit('close')">
-    <div class="modal-card" @click.stop>
-      <div class="modal-icon">{{ icon }}</div>
-      <h3 class="modal-title">{{ title }}</h3>
-      <p class="modal-description">{{ description }}</p>
-      <div class="button-group">
-        <button type="button" class="btn-cancel" @click="emit('close')">
-          {{ cancelText }}
-        </button>
-        <button type="button" class="btn-confirm" @click="emit('confirm')">
-          {{ confirmText }}
-        </button>
+  <Teleport to="body">
+    <div v-if="visible" class="modal-backdrop" @click="emit('close')">
+      <div class="modal-card" @click.stop>
+        <div class="modal-icon">{{ icon }}</div>
+        <h3 class="modal-title">{{ title }}</h3>
+        <p class="modal-description">{{ description }}</p>
+        <div class="button-group">
+          <button type="button" class="btn-cancel" @click="emit('close')">
+            {{ cancelText }}
+          </button>
+          <button type="button" class="btn-confirm" @click="emit('confirm')">
+            {{ confirmText }}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <style scoped>
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 2000;
+  z-index: 3000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,6 +99,7 @@ const emit = defineEmits(['confirm', 'close']);
   background-color: var(--color-gray-10);
   color: var(--color-deepgray-60);
 }
+
 .btn-confirm {
   background-color: #ff5252;
   color: white;

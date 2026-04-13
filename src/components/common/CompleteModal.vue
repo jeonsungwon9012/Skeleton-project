@@ -26,23 +26,25 @@ const handleClose = () => {
 </script>
 
 <template>
-  <div v-if="visible" class="success-modal-backdrop" @click="handleClose">
-    <div class="success-modal" @click.stop>
-      <div class="success-modal-icon">{{ icon }}</div>
-      <h3 class="success-modal-title">{{ title }}</h3>
-      <p class="success-modal-description">{{ description }}</p>
-      <button type="button" class="success-modal-button" @click="handleClose">
-        확인
-      </button>
+  <Teleport to="body">
+    <div v-if="visible" class="success-modal-backdrop" @click="handleClose">
+      <div class="success-modal" @click.stop>
+        <div class="success-modal-icon">{{ icon }}</div>
+        <h3 class="success-modal-title">{{ title }}</h3>
+        <p class="success-modal-description">{{ description }}</p>
+        <button type="button" class="success-modal-button" @click="handleClose">
+          확인
+        </button>
+      </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <style scoped>
 .success-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 3000;
   display: flex;
   align-items: center;
   justify-content: center;

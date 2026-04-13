@@ -2410,6 +2410,42 @@
       "date": "2026-04-17",
       "memo": "11",
       "uid": 1
+    },
+    {
+      "date": "2026-04-13",
+      "type": "expense",
+      "amount": 2500,
+      "detail": "아메리카노",
+      "memo": "아메리카노 수혈",
+      "uid": 1,
+      "cid": 2,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "hSKgYxpSJjU"
+    },
+    {
+      "date": "2026-04-13",
+      "type": "expense",
+      "amount": 2500,
+      "detail": "아메리카노",
+      "memo": "아메리카노 수혈",
+      "uid": 1,
+      "cid": 2,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "cBjoqzk90CI"
+    },
+    {
+      "date": "2026-04-13",
+      "type": "expense",
+      "amount": 2500,
+      "detail": "아메리카노",
+      "memo": "아메리카노 수혈",
+      "uid": 1,
+      "cid": 2,
+      "isRecurring": false,
+      "cycle": null,
+      "id": "XnWMeGX8now"
     }
   ],
   "TEMPLATE": [
