@@ -20,9 +20,16 @@ export const useTemplateStore = defineStore('template', () => {
 
   // 템플릿으로 오늘 날짜 거래 즉시 추가
   const applyTemplate = async (tmpl, uid) => {
-    const today = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+
     await templateApi.addBudgetFromTemplate({
-      date: today,
+      date: formattedDate,
       type: tmpl.type,
       amount: tmpl.amount,
       detail: tmpl.detail,

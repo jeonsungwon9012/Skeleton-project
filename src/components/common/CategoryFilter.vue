@@ -19,8 +19,9 @@ const isDropdownOpen = ref(false);
 const isCategoryOpen = ref(false);
 
 const typeLabel = computed(() => {
-  if (props.selectedType === 'income') return '수입/지출';
-  if (props.selectedType === 'expense') return '수입/지출';
+  if (props.selectedType === 'income') return '수입';
+  if (props.selectedType === 'expense') return '지출';
+  if (props.selectedType === 'all') return '전체';
   return '수입/지출';
 });
 
@@ -37,6 +38,18 @@ const toggleCategoryPanel = () => {
 const handleTypeSelect = (type) => {
   emit('select-type', type);
   isDropdownOpen.value = false;
+};
+
+const handleSelectAll = () => {
+  emit('select-all');
+};
+
+const handleToggleScheduled = () => {
+  emit('toggle-scheduled');
+};
+
+const handleToggleCategory = (id) => {
+  emit('toggle-category', id);
 };
 </script>
 
@@ -56,13 +69,22 @@ const handleTypeSelect = (type) => {
         </button>
 
         <ul v-if="isDropdownOpen" class="dropdown-menu">
-          <li :class="{ active: selectedType === 'all' }" @click="handleTypeSelect('all')">
+          <li
+            :class="{ active: selectedType === 'all' }"
+            @click="handleTypeSelect('all')"
+          >
             전체
           </li>
-          <li :class="{ active: selectedType === 'income' }" @click="handleTypeSelect('income')">
+          <li
+            :class="{ active: selectedType === 'income' }"
+            @click="handleTypeSelect('income')"
+          >
             수입
           </li>
-          <li :class="{ active: selectedType === 'expense' }" @click="handleTypeSelect('expense')">
+          <li
+            :class="{ active: selectedType === 'expense' }"
+            @click="handleTypeSelect('expense')"
+          >
             지출
           </li>
         </ul>
@@ -73,13 +95,21 @@ const handleTypeSelect = (type) => {
       <button
         class="cat-item"
         :class="{
-          'active-pill':
-            selectedType === 'all' && !isScheduledOnly && selectedCategories.length === 0,
+          'active-pill': !isScheduledOnly && selectedCategories.length === 0,
         }"
         type="button"
-        @click="$emit('select-all')"
+        @click="handleSelectAll"
       >
-        <div class="icon-circle gray-bg">✓</div>
+        <div
+          class="icon-circle"
+          :class="
+            !isScheduledOnly && selectedCategories.length === 0
+              ? 'primary-bg'
+              : 'gray-bg'
+          "
+        >
+          ✓
+        </div>
         <span class="subtitle-s">전체</span>
       </button>
 
@@ -87,7 +117,7 @@ const handleTypeSelect = (type) => {
         class="cat-item"
         :class="{ 'active-scheduled': isScheduledOnly }"
         type="button"
-        @click="$emit('toggle-scheduled')"
+        @click="handleToggleScheduled"
       >
         <div class="icon-circle primary-bg">⏰</div>
         <span class="subtitle-s">예정</span>
@@ -103,7 +133,9 @@ const handleTypeSelect = (type) => {
       >
         <span class="toggle-text subtitle-s">
           카테고리
-          <span v-if="selectedCategoryCount > 0" class="toggle-count">{{ selectedCategoryCount }}</span>
+          <span v-if="selectedCategoryCount > 0" class="toggle-count">{{
+            selectedCategoryCount
+          }}</span>
         </span>
         <span class="arrow" :class="{ open: isCategoryOpen }">⌄</span>
       </button>
@@ -124,7 +156,7 @@ const handleTypeSelect = (type) => {
               }
             : {}
         "
-        @click="$emit('toggle-category', cat.id)"
+        @click="handleToggleCategory(cat.id)"
       >
         <div class="icon-circle white-bg">{{ cat.img }}</div>
         <span class="subtitle-s">{{ cat.name }}</span>
@@ -177,6 +209,7 @@ const handleTypeSelect = (type) => {
 
 .active-type,
 .active-scheduled,
+.active-pill,
 .category-toggle.active,
 .category-toggle.open {
   border-color: var(--color-primary);
@@ -184,13 +217,9 @@ const handleTypeSelect = (type) => {
 }
 
 .active-type span,
-.active-scheduled span {
+.active-scheduled span,
+.active-pill span {
   color: var(--color-primary);
-}
-
-.active-pill {
-  border-color: var(--color-deepgray-100);
-  background: var(--color-gray-10);
 }
 
 .dropdown-wrapper {

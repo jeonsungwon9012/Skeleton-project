@@ -23,7 +23,7 @@ export const useTransactionStore = defineStore('transaction', () => {
   // --- [필터 상태] ---
   const selectedDates = ref([]); // 캘린더 선택 날짜
   const selectedCategories = ref([]); // 카테고리 ID 배열 (Number)
-  const selectedType = ref('전체'); // '전체', 'income', 'expense'
+  const selectedType = ref('all'); // 'all', 'income', 'expense'
   const searchQuery = ref(''); // 검색어
   const isScheduledOnly = ref(false); // 예정 내역 필터
 
@@ -49,24 +49,32 @@ export const useTransactionStore = defineStore('transaction', () => {
         selectedCategories.value.length === 0 ||
         selectedCategories.value.includes(Number(item.cid));
       const matchType =
-        selectedType.value === '전체' || item.type === selectedType.value;
-      return matchCat && matchType;
+        selectedType.value === 'all' || item.type === selectedType.value;
+
+      const now = new Date();
+      const matchScheduled =
+        !isScheduledOnly.value || new Date(item.date) >= now;
+
+      return matchCat && matchType && matchScheduled;
     });
   });
 
   // 캘린더 선택 날짜/카테고리 기반 상세 내역
   const rangeBudgets = computed(() => {
-    return myBudgets.value.filter((item) => {
+    const filtered = myBudgets.value.filter((item) => {
       const matchDate =
         selectedDates.value.length === 0 ||
-        selectedDates.value.includes(item.date);
+        selectedDates.value.includes(item.date.substring(0, 10));
       const matchCat =
         selectedCategories.value.length === 0 ||
         selectedCategories.value.includes(Number(item.cid));
       const matchType =
-        selectedType.value === '전체' || item.type === selectedType.value;
-      const isFuture = new Date(item.date) > new Date();
-      const matchScheduled = !isScheduledOnly.value || isFuture;
+        selectedType.value === 'all' || item.type === selectedType.value;
+
+      const now = new Date();
+      const matchScheduled =
+        !isScheduledOnly.value || new Date(item.date) >= now;
+
       const matchSearch =
         !searchQuery.value ||
         item.detail.includes(searchQuery.value) ||
@@ -76,6 +84,16 @@ export const useTransactionStore = defineStore('transaction', () => {
         matchDate && matchCat && matchType && matchScheduled && matchSearch
       );
     });
+
+    const now = new Date();
+    const past = filtered
+      .filter((item) => new Date(item.date) <= now)
+      .sort((a, b) => new Date(b.date) - new Date(a.date)); // 과거 내역: 최신순(내림차순)
+    const future = filtered
+      .filter((item) => new Date(item.date) > now)
+      .sort((a, b) => new Date(a.date) - new Date(b.date)); // 예정 내역: 가까운순(오름차순)
+
+    return [...past, ...future];
   });
 
   const selectedTotal = computed(() => {
@@ -174,9 +192,6 @@ export const useTransactionStore = defineStore('transaction', () => {
     else {
       selectedDates.value = [date];
     }
-
-    selectedCategories.value = [];
-    isScheduledOnly.value = false;
   }
 
   function toggleCategory(cid) {
@@ -184,12 +199,10 @@ export const useTransactionStore = defineStore('transaction', () => {
     const index = selectedCategories.value.indexOf(numCid);
     if (index > -1) selectedCategories.value.splice(index, 1);
     else selectedCategories.value.push(numCid);
-    selectedDates.value = [];
-    isScheduledOnly.value = false;
   }
 
   function resetFilters() {
-    selectedType.value = '전체';
+    selectedType.value = 'all';
     selectedCategories.value = [];
     isScheduledOnly.value = false;
     selectedDates.value = [];
@@ -228,7 +241,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     computed(() =>
       list.value.filter(
         (item) =>
-          selectedType.value === '전체' || selectedType.value === item.type,
+          selectedType.value === 'all' || selectedType.value === item.type,
       ),
     );
 
@@ -242,28 +255,24 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   const filteredByToday = (list) =>
     computed(() => {
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
+      const now = new Date();
 
       const past = list.value
-        .filter((item) => new Date(item.date) <= today)
+        .filter((item) => new Date(item.date) <= now)
         .sort((a, b) => new Date(b.date) - new Date(a.date)); // 이전 날짜 내림차순
 
       const future = list.value
-        .filter((item) => new Date(item.date) > today)
+        .filter((item) => new Date(item.date) > now)
         .sort((a, b) => new Date(a.date) - new Date(b.date)); // 미래 날짜는 가까운 순서대로
 
       return [...past, ...future]; // 이전 날짜 먼저, 이후 날짜 아래
     });
 
   const upcomingList = computed(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const now = new Date();
 
     return myBudgets.value
-      .filter(
-        (item) => item.isRecurring === true && new Date(item.date) > today,
-      )
+      .filter((item) => item.isRecurring === true && new Date(item.date) > now)
       .sort((a, b) => new Date(a.date) - new Date(b.date))
       .slice(0, 5);
   });
@@ -295,45 +304,76 @@ export const useTransactionStore = defineStore('transaction', () => {
     };
   };
 
-  // 💡 [추가] 이번 달 최다 빈도 카테고리(ID 1~5) 기반 요약 메시지 계산
+  // 💡 [변경] 이번 달과 저번 달의 카테고리별 수입/지출 차이 분석 메시지
   const topMonthlyMessage = computed(() => {
     const dashboardStore = useDashboardStore();
-    const year = dashboardStore.currentYear;
-    const month = String(dashboardStore.currentMonth).padStart(2, '0');
-    const prefix = `${year}-${month}`;
+    const currYear = dashboardStore.currentYear;
+    const currMonth = dashboardStore.currentMonth;
 
-    // 1. 이번달 내역 중 cid 1~5인 것 필터링
-    const targetBudgets = myBudgets.value.filter((b) => {
-      const cid = Number(b.cid);
-      return b.date.startsWith(prefix) && cid >= 1 && cid <= 5;
-    });
-
-    if (targetBudgets.length === 0)
-      return `${dashboardStore.currentMonth}월은 아직 조용하네요! 똑딱과 함께 가계부를 써보세요.`;
-
-    // 2. 빈도 계산
-    const counts = {};
-    targetBudgets.forEach((b) => {
-      counts[b.cid] = (counts[b.cid] || 0) + 1;
-    });
-
-    // 3. 최다 빈도 cid 찾기
-    let maxCid = null;
-    let maxCount = -1;
-    for (const cid in counts) {
-      if (counts[cid] > maxCount) {
-        maxCount = counts[cid];
-        maxCid = Number(cid);
-      }
+    // 1. 이전 달 계산
+    let prevYear = currYear;
+    let prevMonth = currMonth - 1;
+    if (prevMonth === 0) {
+      prevMonth = 12;
+      prevYear -= 1;
     }
 
-    // 4. 메시지 매칭
-    const msgObj = monthlySummaryMessages.value.find(
-      (m) => Number(m.cid) === maxCid,
-    );
-    return msgObj
-      ? msgObj.message
-      : '오늘도 똑딱과 함께 스마트한 소비를 시작해요!';
+    const currPrefix = `${currYear}-${String(currMonth).padStart(2, '0')}`;
+    const prevPrefix = `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
+
+    // 2. 카테고리별 수입/지출 합산 함수
+    const aggregate = (prefix) => {
+      const totals = { income: {}, expense: {} };
+      myBudgets.value.forEach((b) => {
+        if (b.date.startsWith(prefix)) {
+          const type = b.type;
+          const cid = String(b.cid);
+          totals[type][cid] =
+            (totals[type][cid] || 0) + (Number(b.amount) || 0);
+        }
+      });
+      return totals;
+    };
+
+    const currData = aggregate(currPrefix);
+    const prevData = aggregate(prevPrefix);
+
+    // 3. 모든 참여 카테고리 ID 추출
+    const allCids = new Set([
+      ...Object.keys(currData.income),
+      ...Object.keys(currData.expense),
+      ...Object.keys(prevData.income),
+      ...Object.keys(prevData.expense),
+    ]);
+
+    let maxDiff = -1;
+    let winner = null; // { cid, type, diff }
+
+    allCids.forEach((cid) => {
+      ['income', 'expense'].forEach((type) => {
+        const currVal = currData[type][cid] || 0;
+        const prevVal = prevData[type][cid] || 0;
+        const diff = currVal - prevVal;
+        const absDiff = Math.abs(diff);
+
+        if (absDiff > maxDiff && absDiff !== 0) {
+          maxDiff = absDiff;
+          winner = { cid, type, diff };
+        }
+      });
+    });
+
+    if (!winner) {
+      return `${currMonth}월은 아직 조용하네요! 똑딱과 함께 가계부를 써보세요.`;
+    }
+
+    // 4. 결과 메시지 조립
+    const category = categoryMap.value[winner.cid];
+    const categoryName = category ? `${category.img} ${category.name}` : '기타';
+    const typeLabel = winner.type === 'expense' ? '지출' : '수입';
+    const trend = winner.diff > 0 ? '늘었어요' : '줄었어요';
+
+    return `이번달은 ${categoryName} ${typeLabel}이 가장 많이 ${trend}`;
   });
 
   // 💡 [추가] 유저별 템플릿 개수 확인

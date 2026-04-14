@@ -23,7 +23,19 @@ const formattedDate = computed(() => {
 
 const firstDateItems = computed(() => {
   if (!props.dates[0]) return [];
-  return props.items.filter((item) => item.date === props.dates[0]);
+  const filtered = props.items.filter(
+    (item) => item.date.substring(0, 10) === props.dates[0],
+  );
+
+  const now = new Date();
+  const past = filtered
+    .filter((item) => new Date(item.date) <= now)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  const future = filtered
+    .filter((item) => new Date(item.date) > now)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  return [...past, ...future];
 });
 
 const firstDateTotal = computed(() =>
@@ -48,7 +60,9 @@ const groupedItems = computed(() =>
 
 const topCategoryName = computed(() => {
   if (firstDateItems.value.length === 0) return null;
-  const expenseItems = firstDateItems.value.filter((item) => item.type === 'expense');
+  const expenseItems = firstDateItems.value.filter(
+    (item) => item.type === 'expense',
+  );
   if (expenseItems.length === 0) return null;
 
   const totals = expenseItems.reduce((acc, cur) => {
@@ -78,11 +92,17 @@ const goToAdd = () => {
 
     <div class="summary-chips">
       <div class="chip expense body-m">
-        <span>총 지출</span>
+        <div class="chip-label">
+          <span class="chip-icon">💸</span>
+          <span>총 지출</span>
+        </div>
         <span class="amount">{{ formatPrice(firstDateTotal.expense) }}</span>
       </div>
       <div class="chip income body-m">
-        <span>총 수입</span>
+        <div class="chip-label">
+          <span class="chip-icon">💰</span>
+          <span>총 수입</span>
+        </div>
         <span class="amount">{{ formatPrice(firstDateTotal.income) }}</span>
       </div>
     </div>
@@ -101,13 +121,26 @@ const goToAdd = () => {
           class="category-badge subtitle-s"
           :style="{ color: budgetStore.categoryMap[list[0].cid]?.color }"
         >
-          <span class="emoji">{{ budgetStore.categoryMap[list[0].cid]?.img || '🏷️' }}</span>
+          <span class="emoji">{{
+            budgetStore.categoryMap[list[0].cid]?.img || '🏷️'
+          }}</span>
           {{ categoryName }}
         </div>
 
         <ul class="transaction-items">
           <li v-for="item in list" :key="item.id" class="item-row">
-            <span class="item-name body-m">{{ item.detail }}</span>
+            <div class="item-left">
+              <div
+                class="cat-icon-circle"
+                :style="{
+                  backgroundColor:
+                    budgetStore.categoryMap[item.cid]?.color + '20',
+                }"
+              >
+                {{ budgetStore.categoryMap[item.cid]?.img || '🏷️' }}
+              </div>
+              <span class="item-name body-m">{{ item.detail }}</span>
+            </div>
             <div class="item-right">
               <span
                 class="item-amount body-m"
@@ -203,6 +236,27 @@ const goToAdd = () => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
+.chip.expense .amount {
+  color: var(--color-red, #e74c3c);
+  font-weight: 600;
+}
+
+.chip.income .amount {
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+.chip-label {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* 아이콘과 텍스트 사이 간격 */
+}
+
+.chip-icon {
+  font-size: 1.2em; /* 아이콘 크기 조정 */
+  line-height: 1;
+}
+
 .divider {
   border: 0;
   border-top: 1px solid var(--color-deepgray-10);
@@ -234,11 +288,29 @@ const goToAdd = () => {
   margin-bottom: 12px;
 }
 
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.cat-icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
 .item-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: 12px 0;
 }
 
 .item-right {
@@ -248,7 +320,8 @@ const goToAdd = () => {
 }
 
 .item-amount.negative {
-  color: var(--color-deepgray-100);
+  color: var(--color-red, #e74c3c);
+  font-weight: 600;
 }
 
 .item-amount.positive {
@@ -365,6 +438,10 @@ const goToAdd = () => {
   .add-btn {
     margin-top: 14px;
     background: linear-gradient(180deg, #dff9dd 0%, #d6f6d5 100%);
+  }
+
+  .chip-label {
+    gap: 4px;
   }
 
   .plus-circle {

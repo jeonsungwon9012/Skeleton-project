@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useDashboardStore } from '@/stores/dashboard';
 import { useTransactionStore } from '@/stores/budgetStore';
 
@@ -16,35 +16,45 @@ onMounted(() => {
 <template>
   <div class="summary">
     <p class="page-title">캘린더</p>
-    <div class="header">
-      <div class="month-nav">
-        <button @click="dashboard.prevMonth" aria-label="Previous month">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M15 18L9 12L15 6"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-        <h2>{{ monthLabel }}</h2>
-        <button @click="dashboard.nextMonth" aria-label="Next month">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M9 6L15 12L9 18"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+    <div class="header-layout">
+      <div class="header-left">
+        <div class="month-nav">
+          <button @click="dashboard.prevMonth" aria-label="Previous month">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M15 18L9 12L15 6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <h2>{{ monthLabel }}</h2>
+          <button @click="dashboard.nextMonth" aria-label="Next month">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M9 6L15 12L9 18"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="monthly-message">
+          {{ transactionStore.topMonthlyMessage }}
+        </div>
+        <button
+          class="compare-toggle-btn"
+          :class="{ active: dashboard.isCompareMode }"
+          @click="dashboard.isCompareMode = !dashboard.isCompareMode"
+        >
+          {{ dashboard.isCompareMode ? '일반 보기' : '전 달과 비교' }}
         </button>
       </div>
-      <div class="monthly-message">
-        {{ transactionStore.topMonthlyMessage }}
-      </div>
+      <div class="header-right"></div>
     </div>
   </div>
 </template>
@@ -63,10 +73,21 @@ onMounted(() => {
   margin-bottom: 12px;
 }
 
-.header {
+.header-layout {
+  display: flex;
+  gap: 24px; /* Dashboard.vue의 main-side gap과 일치 */
+  width: 100%;
+}
+
+.header-left {
+  flex: 1; /* Dashboard.vue의 left-side 비율과 일치 */
   display: flex;
   align-items: center;
   gap: 20px;
+}
+
+.header-right {
+  flex: 1; /* Dashboard.vue의 right-side 비율과 일치 */
 }
 
 .month-nav {
@@ -109,6 +130,24 @@ onMounted(() => {
   transform: scale(0.95);
 }
 
+.compare-toggle-btn {
+  margin-left: auto;
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: 1.5px solid var(--color-primary, #4caf50);
+  background: white;
+  color: var(--color-primary, #4caf50);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.compare-toggle-btn.active {
+  background: var(--color-primary, #4caf50);
+  color: white;
+}
+
 .monthly-message {
   background: #f0faf0;
   color: #4caf50;
@@ -146,6 +185,11 @@ onMounted(() => {
     height: 28px;
     border: none;
     background: #f2f4f6;
+  }
+
+  .compare-toggle-btn {
+    margin-left: 0;
+    width: 100%;
   }
 
   .month-nav button:hover {

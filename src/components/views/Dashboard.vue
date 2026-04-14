@@ -3,7 +3,7 @@
     <ThisMonthSummary />
     <div class="main-side">
       <div class="left-side">
-        <SummaryCard />
+        <SummaryCard :compare-mode="dashboard.isCompareMode" />
         <BubbleChart />
       </div>
 
@@ -16,11 +16,14 @@
 </template>
 
 <script setup>
+import { useDashboardStore } from '@/stores/dashboard';
 import SummaryCard from '../dashboard/SummaryCard.vue';
 import ThisMonthSummary from '../dashboard/summary.vue';
 import BubbleChart from '../dashboard/bubbleChart.vue';
 import RecentTransaction from '../dashboard/RecentTransaction.vue';
 import UpcomingTransaction from '../dashboard/UpcomingTransaction.vue';
+
+const dashboard = useDashboardStore();
 </script>
 
 <style scoped>
