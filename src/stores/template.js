@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { templateApi } from '@/api/template';
+import axios from 'axios';
 
 export const useTemplateStore = defineStore('template', () => {
   // 유저의 템플릿 목록 (최대 3개)
@@ -28,14 +29,18 @@ export const useTemplateStore = defineStore('template', () => {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
 
+    const budgetsRes = await axios.get('/api/BUDGET');
+    const nextId = Math.max(0, ...budgetsRes.data.map((b) => Number(b.id))) + 1;
+
     await templateApi.addBudgetFromTemplate({
+      id: nextId,
       date: formattedDate,
       type: tmpl.type,
       amount: tmpl.amount,
       detail: tmpl.detail,
       memo: tmpl.memo,
       uid: Number(uid),
-      cid: tmpl.cid,
+      cid: Number(tmpl.cid),
       isRecurring: false,
       cycle: null,
     });

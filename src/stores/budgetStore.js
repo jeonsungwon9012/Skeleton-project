@@ -382,25 +382,35 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   // 💡 [추가] 거래 내역 추가
   const addBudget = async (payload) => {
-    // 💡 현재 목록에서 가장 큰 ID + 1 (숫자 형식)
+    // 전체 내역을 가져와서 가장 큰 ID를 찾아 다음 인덱스 결정 (순차적 숫자 ID 보장)
+    const allRes = await axios.get('/api/BUDGET');
     const nextId =
       Math.max(
         0,
-        ...budgetList.value.map((b) => parseInt(b.id)).filter((n) => !isNaN(n)),
+        ...allRes.data.map((b) => Number(b.id)).filter((n) => !isNaN(n)),
       ) + 1;
 
     const response = await axios.post('/api/BUDGET', {
       id: nextId,
       ...payload,
-      uid: Number(currentUid.value),
+      uid: Number(payload.uid || currentUid.value),
+      cid: Number(payload.cid),
     });
-    budgetList.value.push(response.data);
+
+    // 현재 로드된 유저의 목록에 해당하는 경우에만 로컬 상태 업데이트
+    if (Number(response.data.uid) === Number(currentUid.value)) {
+      budgetList.value.push(response.data);
+    }
     return response.data;
   };
 
   // 💡 [추가] 거래 내역 수정
   const editBudget = async (id, payload) => {
-    const response = await axios.put(`/api/BUDGET/${id}`, payload);
+    const response = await axios.put(`/api/BUDGET/${id}`, {
+      ...payload,
+      uid: Number(payload.uid),
+      cid: Number(payload.cid),
+    });
     const index = budgetList.value.findIndex(
       (b) => String(b.id) === String(id),
     );
@@ -410,8 +420,13 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   // 💡 [추가] 카테고리 추가
   const addCategory = async (payload) => {
+    const allRes = await axios.get('/api/CATEGORY');
     const nextId =
-      Math.max(...categories.value.map((c) => Number(c.id)), 0) + 1;
+      Math.max(
+        0,
+        ...allRes.data.map((c) => Number(c.id)).filter((n) => !isNaN(n)),
+      ) + 1;
+
     const response = await categoryApi.createCategory({
       id: nextId,
       ...payload,
@@ -432,16 +447,18 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   // 💡 [추가] 템플릿 추가
   const addTemplate = async (payload) => {
+    const allRes = await axios.get('/api/TEMPLATE');
     const nextId =
       Math.max(
         0,
-        ...templates.value.map((t) => parseInt(t.id)).filter((n) => !isNaN(n)),
+        ...allRes.data.map((t) => Number(t.id)).filter((n) => !isNaN(n)),
       ) + 1;
 
     const response = await axios.post('/api/TEMPLATE', {
       id: nextId,
       ...payload,
       uid: Number(currentUid.value),
+      cid: Number(payload.cid),
     });
     templates.value.push(response.data);
     return response.data;
@@ -449,7 +466,11 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   // 💡 [추가] 템플릿 수정
   const editTemplate = async (id, payload) => {
-    const response = await axios.put(`/api/TEMPLATE/${id}`, payload);
+    const response = await axios.put(`/api/TEMPLATE/${id}`, {
+      ...payload,
+      uid: Number(payload.uid),
+      cid: Number(payload.cid),
+    });
     const index = templates.value.findIndex((t) => String(t.id) === String(id));
     if (index !== -1) templates.value[index] = response.data;
     return response.data;
@@ -477,9 +498,12 @@ export const useTransactionStore = defineStore('transaction', () => {
         const nextId =
           Math.max(
             0,
-            ...allRes.data.map((t) => parseInt(t.id)).filter((n) => !isNaN(n)),
+            ...allRes.data.map((t) => Number(t.id)).filter((n) => !isNaN(n)),
           ) + 1;
-        await axios.post('/api/targetBudget', { ...payload, id: nextId });
+        await axios.post('/api/targetBudget', {
+          ...payload,
+          id: Number(nextId),
+        });
       }
     } catch (err) {
       console.error('예산 저장 실패:', err);

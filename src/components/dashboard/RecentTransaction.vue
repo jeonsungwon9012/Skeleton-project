@@ -6,7 +6,6 @@
         <span class="img">{{ item.categoryImg }}</span>
         <div class="detail-wrap">
           <span class="detail">{{ item.detail }}</span>
-          <span class="category">{{ item.category }}</span>
         </div>
         <span
           class="amount"
@@ -15,7 +14,8 @@
             positive: item.type === 'income',
           }"
         >
-          {{ item.type === 'expense' ? '-' : '+' }}{{ item.amount.toLocaleString() }}
+          {{ item.type === 'expense' ? '-' : '+'
+          }}{{ item.amount.toLocaleString() }}
         </span>
       </li>
     </ul>
@@ -31,7 +31,9 @@ const store = useTransactionStore();
 onMounted(() => store.loadData());
 
 const recentList = computed(() => {
+  const now = new Date();
   return [...store.myBudgets]
+    .filter((item) => new Date(item.date) <= now) // 현재 시간 기준 과거/현재 내역만 포함
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);
 });

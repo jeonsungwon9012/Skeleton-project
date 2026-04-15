@@ -1,7 +1,7 @@
 {
   "USER": [
     {
-      "id": "1",
+      "id": 1,
       "nickname": "김지훈",
       "email": "jihoon@example.com",
       "age": 20,
@@ -11,7 +11,7 @@
       "budgetCount": 18
     },
     {
-      "id": "2",
+      "id": 2,
       "nickname": "이수아",
       "email": "sua1@example.com",
       "age": 10,
@@ -28,10 +28,10 @@
       "count": 0,
       "cid": 1,
       "budgetCount": 0,
-      "id": "3"
+      "id": 3
     },
     {
-      "id": "4",
+      "id": 4,
       "nickname": "test1",
       "email": "test1@test1.com",
       "age": 30,
@@ -41,7 +41,7 @@
       "budgetCount": 0
     },
     {
-      "id": "IfZiFOQi5UA",
+      "id": 5,
       "nickname": "test2",
       "email": "test2@test.com",
       "age": 30,
@@ -53,7 +53,7 @@
   ],
   "CATEGORY": [
     {
-      "id": "1",
+      "id": 1,
       "name": "식비/외식",
       "img": "🍚",
       "isBasic": true,
@@ -61,7 +61,7 @@
       "uid": null
     },
     {
-      "id": "2",
+      "id": 2,
       "name": "간식/카페",
       "img": "☕",
       "isBasic": true,
@@ -69,7 +69,7 @@
       "uid": null
     },
     {
-      "id": "3",
+      "id": 3,
       "name": "생활/마트",
       "img": "🛒",
       "isBasic": true,
@@ -77,7 +77,7 @@
       "uid": null
     },
     {
-      "id": "4",
+      "id": 4,
       "name": "저축/고정지출",
       "img": "🏦",
       "isBasic": true,
@@ -85,7 +85,7 @@
       "uid": null
     },
     {
-      "id": "5",
+      "id": 5,
       "name": "교통/차량",
       "img": "🚌",
       "isBasic": true,
@@ -93,7 +93,7 @@
       "uid": null
     },
     {
-      "id": "6",
+      "id": 6,
       "name": "주거/통신",
       "img": "🏠",
       "isBasic": true,
@@ -101,7 +101,7 @@
       "uid": null
     },
     {
-      "id": "7",
+      "id": 7,
       "name": "문화/취미",
       "img": "🎬",
       "isBasic": true,
@@ -109,7 +109,7 @@
       "uid": null
     },
     {
-      "id": "8",
+      "id": 8,
       "name": "패션/미용",
       "img": "💄",
       "isBasic": true,
@@ -117,7 +117,7 @@
       "uid": null
     },
     {
-      "id": "9",
+      "id": 9,
       "name": "교육/자기계발",
       "img": "📚",
       "isBasic": true,
@@ -125,7 +125,7 @@
       "uid": null
     },
     {
-      "id": "10",
+      "id": 10,
       "name": "기타/예비비",
       "img": "🎸",
       "isBasic": true,
@@ -138,12 +138,12 @@
       "color": "#67EA76",
       "isBasic": false,
       "uid": 2,
-      "id": "11"
+      "id": 11
     }
   ],
   "BUDGET": [
     {
-      "id": "1",
+      "id": 1,
       "date": "2026-03-08 14:25",
       "type": "expense",
       "amount": 67000,
@@ -155,7 +155,7 @@
       "cycle": null
     },
     {
-      "id": "2",
+      "id": 2,
       "date": "2026-03-08 18:10",
       "type": "expense",
       "amount": 42000,
@@ -167,7 +167,7 @@
       "cycle": null
     },
     {
-      "id": "3",
+      "id": 3,
       "date": "2026-03-09 12:30",
       "type": "expense",
       "amount": 6500,
@@ -179,7 +179,7 @@
       "cycle": null
     },
     {
-      "id": "4",
+      "id": 4,
       "date": "2026-03-09 17:45",
       "type": "expense",
       "amount": 8000,
@@ -191,7 +191,7 @@
       "cycle": null
     },
     {
-      "id": "5",
+      "id": 5,
       "date": "2026-03-09 09:00",
       "type": "expense",
       "amount": 14900,
@@ -203,7 +203,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "6",
+      "id": 6,
       "date": "2026-03-11 10:15",
       "type": "expense",
       "amount": 50000,
@@ -215,7 +215,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "7",
+      "id": 7,
       "date": "2026-03-11 15:30",
       "type": "expense",
       "amount": 55000,
@@ -227,7 +227,7 @@
       "cycle": null
     },
     {
-      "id": "8",
+      "id": 8,
       "date": "2026-03-13 21:20",
       "type": "expense",
       "amount": 18000,
@@ -239,7 +239,7 @@
       "cycle": null
     },
     {
-      "id": "9",
+      "id": 9,
       "date": "2026-03-15 14:10",
       "type": "expense",
       "amount": 5500,
@@ -251,7 +251,7 @@
       "cycle": null
     },
     {
-      "id": "10",
+      "id": 10,
       "date": "2026-03-20 08:45",
       "type": "expense",
       "amount": 4500,
@@ -263,7 +263,7 @@
       "cycle": null
     },
     {
-      "id": "11",
+      "id": 11,
       "date": "2026-03-22 20:05",
       "type": "expense",
       "amount": 14900,
@@ -275,7 +275,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "12",
+      "id": 12,
       "date": "2026-03-22 13:40",
       "type": "expense",
       "amount": 18000,
@@ -287,7 +287,7 @@
       "cycle": null
     },
     {
-      "id": "13",
+      "id": 13,
       "date": "2026-03-22 19:15",
       "type": "expense",
       "amount": 8000,
@@ -299,7 +299,7 @@
       "cycle": null
     },
     {
-      "id": "14",
+      "id": 14,
       "date": "2026-03-23 16:50",
       "type": "expense",
       "amount": 6000,
@@ -311,7 +311,7 @@
       "cycle": null
     },
     {
-      "id": "15",
+      "id": 15,
       "date": "2026-03-24 11:20",
       "type": "expense",
       "amount": 3800,
@@ -323,7 +323,7 @@
       "cycle": null
     },
     {
-      "id": "16",
+      "id": 16,
       "date": "2026-03-25 18:30",
       "type": "expense",
       "amount": 25000,
@@ -335,7 +335,7 @@
       "cycle": null
     },
     {
-      "id": "17",
+      "id": 17,
       "date": "2026-03-29 10:15",
       "type": "expense",
       "amount": 15000,
@@ -347,7 +347,7 @@
       "cycle": null
     },
     {
-      "id": "18",
+      "id": 18,
       "date": "2026-03-30 15:40",
       "type": "expense",
       "amount": 35000,
@@ -359,7 +359,7 @@
       "cycle": null
     },
     {
-      "id": "19",
+      "id": 19,
       "date": "2026-03-31 12:00",
       "type": "expense",
       "amount": 50000,
@@ -371,7 +371,7 @@
       "cycle": null
     },
     {
-      "id": "20",
+      "id": 20,
       "date": "2026-03-31 19:25",
       "type": "expense",
       "amount": 29000,
@@ -383,7 +383,7 @@
       "cycle": null
     },
     {
-      "id": "21",
+      "id": 21,
       "date": "2026-04-02 14:10",
       "type": "expense",
       "amount": 29000,
@@ -395,7 +395,7 @@
       "cycle": null
     },
     {
-      "id": "22",
+      "id": 22,
       "date": "2026-04-14 09:30",
       "type": "expense",
       "amount": 100000,
@@ -407,7 +407,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "23",
+      "id": 23,
       "date": "2026-04-15 11:20",
       "type": "expense",
       "amount": 3800,
@@ -419,7 +419,7 @@
       "cycle": null
     },
     {
-      "id": "24",
+      "id": 24,
       "date": "2026-04-16 17:40",
       "type": "expense",
       "amount": 35000,
@@ -431,7 +431,7 @@
       "cycle": null
     },
     {
-      "id": "25",
+      "id": 25,
       "date": "2026-04-17 10:15",
       "type": "expense",
       "amount": 15000,
@@ -443,7 +443,7 @@
       "cycle": null
     },
     {
-      "id": "26",
+      "id": 26,
       "date": "2026-04-17 15:30",
       "type": "expense",
       "amount": 5500,
@@ -455,7 +455,7 @@
       "cycle": null
     },
     {
-      "id": "27",
+      "id": 27,
       "date": "2026-04-17 00:05",
       "type": "expense",
       "amount": 450000,
@@ -467,7 +467,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "28",
+      "id": 28,
       "date": "2026-04-17 19:45",
       "type": "expense",
       "amount": 42000,
@@ -479,7 +479,7 @@
       "cycle": null
     },
     {
-      "id": "29",
+      "id": 29,
       "date": "2026-04-18 13:20",
       "type": "expense",
       "amount": 35000,
@@ -491,7 +491,7 @@
       "cycle": null
     },
     {
-      "id": "30",
+      "id": 30,
       "date": "2026-04-18 16:40",
       "type": "expense",
       "amount": 30000,
@@ -503,7 +503,7 @@
       "cycle": null
     },
     {
-      "id": "31",
+      "id": 31,
       "date": "2026-04-20 11:30",
       "type": "expense",
       "amount": 50000,
@@ -515,7 +515,7 @@
       "cycle": null
     },
     {
-      "id": "32",
+      "id": 32,
       "date": "2026-04-21 21:15",
       "type": "expense",
       "amount": 18000,
@@ -527,7 +527,7 @@
       "cycle": null
     },
     {
-      "id": "33",
+      "id": 33,
       "date": "2026-04-23 09:00",
       "type": "income",
       "amount": 2500000,
@@ -539,7 +539,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "34",
+      "id": 34,
       "date": "2026-04-25 12:45",
       "type": "expense",
       "amount": 6500,
@@ -551,7 +551,7 @@
       "cycle": null
     },
     {
-      "id": "35",
+      "id": 35,
       "date": "2026-04-26 10:00",
       "type": "income",
       "amount": 2000000,
@@ -563,7 +563,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "36",
+      "id": 36,
       "date": "2026-04-28 13:10",
       "type": "expense",
       "amount": 5500,
@@ -575,7 +575,7 @@
       "cycle": null
     },
     {
-      "id": "37",
+      "id": 37,
       "date": "2026-04-30 08:20",
       "type": "expense",
       "amount": 1500,
@@ -587,7 +587,7 @@
       "cycle": null
     },
     {
-      "id": "38",
+      "id": 38,
       "date": "2026-04-30 18:50",
       "type": "expense",
       "amount": 15000,
@@ -599,7 +599,7 @@
       "cycle": null
     },
     {
-      "id": "39",
+      "id": 39,
       "date": "2026-04-30 16:15",
       "type": "expense",
       "amount": 8000,
@@ -611,7 +611,7 @@
       "cycle": null
     },
     {
-      "id": "40",
+      "id": 40,
       "date": "2026-04-30 12:30",
       "type": "expense",
       "amount": 9000,
@@ -623,7 +623,7 @@
       "cycle": null
     },
     {
-      "id": "41",
+      "id": 41,
       "date": "2026-05-01 14:00",
       "type": "expense",
       "amount": 30000,
@@ -635,7 +635,7 @@
       "cycle": null
     },
     {
-      "id": "42",
+      "id": 42,
       "date": "2026-05-02 12:40",
       "type": "expense",
       "amount": 6500,
@@ -647,7 +647,7 @@
       "cycle": null
     },
     {
-      "id": "43",
+      "id": 43,
       "date": "2026-05-06 13:15",
       "type": "expense",
       "amount": 5500,
@@ -659,7 +659,7 @@
       "cycle": null
     },
     {
-      "id": "44",
+      "id": 44,
       "date": "2026-05-09 08:30",
       "type": "expense",
       "amount": 1500,
@@ -671,7 +671,7 @@
       "cycle": null
     },
     {
-      "id": "45",
+      "id": 45,
       "date": "2026-05-10 00:05",
       "type": "expense",
       "amount": 550000,
@@ -683,7 +683,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "46",
+      "id": 46,
       "date": "2026-05-10 16:45",
       "type": "expense",
       "amount": 6000,
@@ -695,7 +695,7 @@
       "cycle": null
     },
     {
-      "id": "47",
+      "id": 47,
       "date": "2026-05-13 11:20",
       "type": "expense",
       "amount": 50000,
@@ -707,7 +707,7 @@
       "cycle": null
     },
     {
-      "id": "48",
+      "id": 48,
       "date": "2026-05-14 15:10",
       "type": "expense",
       "amount": 3800,
@@ -719,7 +719,7 @@
       "cycle": null
     },
     {
-      "id": "49",
+      "id": 49,
       "date": "2026-05-14 09:00",
       "type": "income",
       "amount": 2000000,
@@ -731,7 +731,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "50",
+      "id": 50,
       "date": "2026-05-18 14:25",
       "type": "expense",
       "amount": 1500,
@@ -743,7 +743,7 @@
       "cycle": null
     },
     {
-      "id": "51",
+      "id": 51,
       "date": "2026-05-18 19:30",
       "type": "expense",
       "amount": 18000,
@@ -755,7 +755,7 @@
       "cycle": null
     },
     {
-      "id": "52",
+      "id": 52,
       "date": "2026-05-21 12:50",
       "type": "expense",
       "amount": 8000,
@@ -767,7 +767,7 @@
       "cycle": null
     },
     {
-      "id": "53",
+      "id": 53,
       "date": "2026-05-22 13:40",
       "type": "expense",
       "amount": 12000,
@@ -779,7 +779,7 @@
       "cycle": null
     },
     {
-      "id": "54",
+      "id": 54,
       "date": "2026-05-23 11:15",
       "type": "expense",
       "amount": 15000,
@@ -791,7 +791,7 @@
       "cycle": null
     },
     {
-      "id": "55",
+      "id": 55,
       "date": "2026-05-25 12:30",
       "type": "expense",
       "amount": 9000,
@@ -803,7 +803,7 @@
       "cycle": null
     },
     {
-      "id": "56",
+      "id": 56,
       "date": "2026-05-27 10:05",
       "type": "expense",
       "amount": 100000,
@@ -815,7 +815,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "57",
+      "id": 57,
       "date": "2026-05-28 08:45",
       "type": "expense",
       "amount": 4500,
@@ -827,7 +827,7 @@
       "cycle": null
     },
     {
-      "id": "58",
+      "id": 58,
       "date": "2026-05-28 17:50",
       "type": "expense",
       "amount": 15000,
@@ -839,7 +839,7 @@
       "cycle": null
     },
     {
-      "id": "59",
+      "id": 59,
       "date": "2026-05-29 19:15",
       "type": "expense",
       "amount": 29000,
@@ -851,7 +851,7 @@
       "cycle": null
     },
     {
-      "id": "60",
+      "id": 60,
       "date": "2026-05-31 11:20",
       "type": "expense",
       "amount": 35000,
@@ -863,7 +863,7 @@
       "cycle": null
     },
     {
-      "id": "61",
+      "id": 61,
       "date": "2026-06-02 16:30",
       "type": "expense",
       "amount": 8000,
@@ -875,7 +875,7 @@
       "cycle": null
     },
     {
-      "id": "62",
+      "id": 62,
       "date": "2026-06-04 08:15",
       "type": "expense",
       "amount": 3800,
@@ -887,7 +887,7 @@
       "cycle": null
     },
     {
-      "id": "63",
+      "id": 63,
       "date": "2026-06-04 18:40",
       "type": "expense",
       "amount": 42000,
@@ -899,7 +899,7 @@
       "cycle": null
     },
     {
-      "id": "64",
+      "id": 64,
       "date": "2026-06-05 14:50",
       "type": "expense",
       "amount": 14000,
@@ -911,7 +911,7 @@
       "cycle": null
     },
     {
-      "id": "65",
+      "id": 65,
       "date": "2026-06-07 20:15",
       "type": "expense",
       "amount": 18000,
@@ -923,7 +923,7 @@
       "cycle": null
     },
     {
-      "id": "66",
+      "id": 66,
       "date": "2026-06-09 15:20",
       "type": "expense",
       "amount": 3000,
@@ -935,7 +935,7 @@
       "cycle": null
     },
     {
-      "id": "67",
+      "id": 67,
       "date": "2026-06-12 19:40",
       "type": "expense",
       "amount": 29000,
@@ -947,7 +947,7 @@
       "cycle": null
     },
     {
-      "id": "68",
+      "id": 68,
       "date": "2026-06-17 00:05",
       "type": "expense",
       "amount": 550000,
@@ -959,7 +959,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "69",
+      "id": 69,
       "date": "2026-06-17 12:45",
       "type": "expense",
       "amount": 9000,
@@ -971,7 +971,7 @@
       "cycle": null
     },
     {
-      "id": "70",
+      "id": 70,
       "date": "2026-06-18 00:05",
       "type": "expense",
       "amount": 450000,
@@ -983,7 +983,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "71",
+      "id": 71,
       "date": "2026-06-18 15:30",
       "type": "expense",
       "amount": 18000,
@@ -995,7 +995,7 @@
       "cycle": null
     },
     {
-      "id": "72",
+      "id": 72,
       "date": "2026-06-19 13:10",
       "type": "expense",
       "amount": 8000,
@@ -1007,7 +1007,7 @@
       "cycle": null
     },
     {
-      "id": "73",
+      "id": 73,
       "date": "2026-06-19 18:25",
       "type": "expense",
       "amount": 35000,
@@ -1019,7 +1019,7 @@
       "cycle": null
     },
     {
-      "id": "74",
+      "id": 74,
       "date": "2026-06-20 19:15",
       "type": "expense",
       "amount": 25000,
@@ -1031,7 +1031,7 @@
       "cycle": null
     },
     {
-      "id": "75",
+      "id": 75,
       "date": "2026-06-21 11:30",
       "type": "expense",
       "amount": 50000,
@@ -1043,7 +1043,7 @@
       "cycle": null
     },
     {
-      "id": "76",
+      "id": 76,
       "date": "2026-06-21 16:40",
       "type": "expense",
       "amount": 30000,
@@ -1055,7 +1055,7 @@
       "cycle": null
     },
     {
-      "id": "77",
+      "id": 77,
       "date": "2026-06-23 14:15",
       "type": "expense",
       "amount": 55000,
@@ -1067,7 +1067,7 @@
       "cycle": null
     },
     {
-      "id": "78",
+      "id": 78,
       "date": "2026-06-26 12:20",
       "type": "expense",
       "amount": 6500,
@@ -1079,7 +1079,7 @@
       "cycle": null
     },
     {
-      "id": "79",
+      "id": 79,
       "date": "2026-06-29 08:45",
       "type": "expense",
       "amount": 4500,
@@ -1091,7 +1091,7 @@
       "cycle": null
     },
     {
-      "id": "80",
+      "id": 80,
       "date": "2026-06-30 13:10",
       "type": "expense",
       "amount": 5500,
@@ -1103,7 +1103,7 @@
       "cycle": null
     },
     {
-      "id": "81",
+      "id": 81,
       "date": "2026-07-01 10:20",
       "type": "expense",
       "amount": 50000,
@@ -1115,7 +1115,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "82",
+      "id": 82,
       "date": "2026-07-02 18:40",
       "type": "expense",
       "amount": 35000,
@@ -1127,7 +1127,7 @@
       "cycle": null
     },
     {
-      "id": "83",
+      "id": 83,
       "date": "2026-07-02 19:25",
       "type": "expense",
       "amount": 29000,
@@ -1139,7 +1139,7 @@
       "cycle": null
     },
     {
-      "id": "84",
+      "id": 84,
       "date": "2026-07-03 00:10",
       "type": "expense",
       "amount": 550000,
@@ -1151,7 +1151,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "85",
+      "id": 85,
       "date": "2026-07-06 13:15",
       "type": "expense",
       "amount": 5500,
@@ -1163,7 +1163,7 @@
       "cycle": null
     },
     {
-      "id": "86",
+      "id": 86,
       "date": "2026-07-06 08:45",
       "type": "expense",
       "amount": 1500,
@@ -1175,7 +1175,7 @@
       "cycle": null
     },
     {
-      "id": "87",
+      "id": 87,
       "date": "2026-07-07 08:20",
       "type": "expense",
       "amount": 1500,
@@ -1187,7 +1187,7 @@
       "cycle": null
     },
     {
-      "id": "88",
+      "id": 88,
       "date": "2026-07-09 19:15",
       "type": "expense",
       "amount": 8000,
@@ -1199,7 +1199,7 @@
       "cycle": null
     },
     {
-      "id": "89",
+      "id": 89,
       "date": "2026-07-12 11:40",
       "type": "expense",
       "amount": 35000,
@@ -1211,7 +1211,7 @@
       "cycle": null
     },
     {
-      "id": "90",
+      "id": 90,
       "date": "2026-07-13 15:20",
       "type": "expense",
       "amount": 14000,
@@ -1223,7 +1223,7 @@
       "cycle": null
     },
     {
-      "id": "91",
+      "id": 91,
       "date": "2026-07-13 09:10",
       "type": "expense",
       "amount": 4500,
@@ -1235,7 +1235,7 @@
       "cycle": null
     },
     {
-      "id": "92",
+      "id": 92,
       "date": "2026-07-15 10:05",
       "type": "expense",
       "amount": 14900,
@@ -1247,7 +1247,7 @@
       "cycle": "monthly"
     },
     {
-      "id": "93",
+      "id": 93,
       "date": "2026-07-16 19:30",
       "type": "expense",
       "amount": 25000,
@@ -1259,7 +1259,7 @@
       "cycle": null
     },
     {
-      "id": "94",
+      "id": 94,
       "date": "2026-07-20 21:15",
       "type": "expense",
       "amount": 18000,
@@ -1271,7 +1271,7 @@
       "cycle": null
     },
     {
-      "id": "95",
+      "id": 95,
       "date": "2026-07-22 13:40",
       "type": "expense",
       "amount": 8000,
@@ -1283,7 +1283,7 @@
       "cycle": null
     },
     {
-      "id": "96",
+      "id": 96,
       "date": "2026-07-24 18:20",
       "type": "expense",
       "amount": 42000,
@@ -1295,7 +1295,7 @@
       "cycle": null
     },
     {
-      "id": "97",
+      "id": 97,
       "date": "2026-07-25 14:15",
       "type": "expense",
       "amount": 55000,
@@ -1307,7 +1307,7 @@
       "cycle": null
     },
     {
-      "id": "98",
+      "id": 98,
       "date": "2026-07-28 16:30",
       "type": "expense",
       "amount": 6000,
@@ -1319,7 +1319,7 @@
       "cycle": null
     },
     {
-      "id": "99",
+      "id": 99,
       "date": "2026-07-29 12:45",
       "type": "expense",
       "amount": 12000,
@@ -1331,7 +1331,7 @@
       "cycle": null
     },
     {
-      "id": "100",
+      "id": 100,
       "date": "2026-07-31 00:05",
       "type": "expense",
       "amount": 450000,
@@ -1343,7 +1343,7 @@
       "cycle": "monthly"
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 12:45",
       "type": "expense",
       "amount": 12000,
       "detail": "마라탕",
@@ -1352,10 +1352,10 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "101"
+      "id": 101
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 09:20",
       "type": "expense",
       "amount": 4500,
       "detail": "아메리카노",
@@ -1364,10 +1364,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "102"
+      "id": 102
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 10:15",
       "type": "expense",
       "amount": 4500,
       "detail": "아메리카노",
@@ -1376,28 +1376,28 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "103"
+      "id": 103
     },
     {
+      "id": 104,
       "type": "expense",
       "detail": "카페라떼",
       "amount": 4500,
       "cid": 2,
-      "date": "2026-04-11",
-      "memo": "카공",
-      "id": "104"
+      "date": "2026-04-11 15:30",
+      "memo": "카공"
     },
     {
+      "id": 105,
       "type": "expense",
       "detail": "카페라떼",
       "amount": 4500,
       "cid": 2,
-      "date": "2026-04-11",
-      "memo": "카공",
-      "id": "105"
+      "date": "2026-04-11 16:40",
+      "memo": "카공"
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 18:22",
       "type": "expense",
       "amount": 4599,
       "detail": "카페라떼",
@@ -1406,13 +1406,13 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "106",
+      "id": 106,
       "categoryName": "간식/카페",
       "categoryImg": "☕",
       "categoryColor": "#FFB347"
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 19:15",
       "type": "expense",
       "amount": 5500,
       "detail": "카페라떼",
@@ -1421,10 +1421,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "107"
+      "id": 107
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 20:45",
       "type": "expense",
       "amount": 5500,
       "detail": "카페라떼",
@@ -1433,10 +1433,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "108"
+      "id": 108
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 21:30",
       "type": "expense",
       "amount": 5500,
       "detail": "카페라떼",
@@ -1445,10 +1445,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "109"
+      "id": 109
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 22:10",
       "type": "expense",
       "amount": 5500,
       "detail": "카페라떼",
@@ -1457,10 +1457,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "110"
+      "id": 110
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 23:15",
       "type": "expense",
       "amount": 5500,
       "detail": "카페라떼",
@@ -1469,11 +1469,12 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "111"
+      "id": 111
     },
     {
+      "id": 112,
       "uid": 1,
-      "date": "2026-04-12",
+      "date": "2026-04-12 08:30",
       "type": "expense",
       "amount": 2999,
       "cid": 5,
@@ -1482,13 +1483,12 @@
       "isRecurring": false,
       "cycle": null,
       "isTemplate": true,
-      "id": "112",
       "categoryName": "교통/차량",
       "categoryImg": "🚌",
       "categoryColor": "#4DD0E1"
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 14:20",
       "type": "expense",
       "amount": 3000,
       "detail": "아메리카노",
@@ -1497,32 +1497,34 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "113"
+      "id": 113
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 17:50",
       "type": "expense",
       "amount": 2000,
       "detail": "교통비",
       "memo": "버스비 너무 비싸 ㅠㅠ",
       "uid": 1,
       "isRecurring": false,
+      "cid": 5,
       "cycle": null,
-      "id": "114"
+      "id": 114
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 18:40",
       "type": "expense",
       "amount": 2000,
       "detail": "교통비",
       "memo": "버스비 너무 비싸 ㅠㅠ",
       "uid": 1,
       "isRecurring": false,
+      "cid": 5,
       "cycle": null,
-      "id": "115"
+      "id": 115
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 12:30",
       "type": "expense",
       "amount": 10000,
       "detail": "마라탕",
@@ -1531,22 +1533,22 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "116"
+      "id": 116
     },
     {
+      "id": 117,
       "uid": 1,
-      "date": "2026-04-12",
+      "date": "2026-04-12 11:20",
       "type": "expense",
       "amount": 2800,
       "cid": 2,
       "detail": "에너지 드링크",
       "memo": "이거 먹어야 잠을 안자!!!",
       "isRecurring": false,
-      "cycle": null,
-      "id": "117"
+      "cycle": null
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 15:45",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -1555,10 +1557,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "118"
+      "id": 118
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 16:10",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -1567,10 +1569,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "119"
+      "id": 119
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 17:30",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -1579,10 +1581,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "120"
+      "id": 120
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 18:20",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -1591,10 +1593,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "121"
+      "id": 121
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 12:15",
       "type": "expense",
       "amount": 10000,
       "detail": "마라탕",
@@ -1603,10 +1605,10 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "122"
+      "id": 122
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 13:40",
       "type": "expense",
       "amount": 10000,
       "detail": "마라탕",
@@ -1615,10 +1617,10 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "123"
+      "id": 123
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 19:10",
       "type": "expense",
       "amount": 10000,
       "detail": "마라탕",
@@ -1627,10 +1629,10 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "124"
+      "id": 124
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 20:20",
       "type": "expense",
       "amount": 10000,
       "detail": "마라탕",
@@ -1639,10 +1641,10 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "125"
+      "id": 125
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 21:05",
       "type": "expense",
       "amount": 10000,
       "detail": "마라탕",
@@ -1651,10 +1653,10 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "126"
+      "id": 126
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 22:40",
       "type": "expense",
       "amount": 10000,
       "detail": "마라탕",
@@ -1663,10 +1665,10 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "127"
+      "id": 127
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 11:30",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -1675,10 +1677,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "128"
+      "id": 128
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 12:50",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -1687,10 +1689,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "129"
+      "id": 129
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 14:10",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -1699,10 +1701,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "130"
+      "id": 130
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 15:20",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -1711,10 +1713,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "131"
+      "id": 131
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 18:30",
       "type": "expense",
       "amount": 10000,
       "detail": "마라탕",
@@ -1723,10 +1725,10 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "132"
+      "id": 132
     },
     {
-      "date": "2026-04-11",
+      "date": "2026-04-11 19:40",
       "type": "expense",
       "amount": 10000,
       "detail": "마라탕",
@@ -1735,10 +1737,10 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "133"
+      "id": 133
     },
     {
-      "date": "2026-04-12",
+      "date": "2026-04-12 12:15",
       "type": "expense",
       "amount": 10000,
       "detail": "마라탕",
@@ -1747,35 +1749,36 @@
       "cid": 1,
       "isRecurring": false,
       "cycle": null,
-      "id": "134"
+      "id": 134
     },
     {
+      "id": 135,
       "uid": 1,
-      "date": "2026-04-12",
+      "date": "2026-04-12 08:20",
       "type": "expense",
       "amount": 2500,
       "cid": 5,
       "detail": "교통비",
       "memo": "교통비 너무 나간다",
       "isRecurring": true,
-      "cycle": "daily",
-      "id": "135"
+      "cycle": "daily"
     },
     {
+      "id": 136,
       "uid": 1,
-      "date": "2026-05-01",
+      "date": "2026-05-01 00:01",
       "type": "expense",
       "amount": 499000,
       "cid": 6,
       "detail": "월세",
       "memo": "월세 ㅠㅠ",
       "isRecurring": true,
-      "cycle": "monthly",
-      "id": "136"
+      "cycle": "monthly"
     },
     {
+      "id": 137,
       "uid": 2,
-      "date": "2026-04-13",
+      "date": "2026-04-13 18:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
@@ -1783,157 +1786,157 @@
       "memo": "이날은 안탈거 같은데 삭제할까?",
       "isRecurring": true,
       "cycle": "weekly",
-      "id": "137",
       "categoryName": "주거/통신",
       "categoryImg": "🏠",
       "categoryColor": "#64B5F6"
     },
     {
+      "id": 138,
       "uid": 2,
-      "date": "2026-04-20",
+      "date": "2026-04-20 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "138"
+      "cycle": "weekly"
     },
     {
+      "id": 139,
       "uid": 2,
-      "date": "2026-04-27",
+      "date": "2026-04-27 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "139"
+      "cycle": "weekly"
     },
     {
+      "id": 140,
       "uid": 2,
-      "date": "2026-05-04",
+      "date": "2026-05-04 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "140"
+      "cycle": "weekly"
     },
     {
+      "id": 141,
       "uid": 2,
-      "date": "2026-05-11",
+      "date": "2026-05-11 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "141"
+      "cycle": "weekly"
     },
     {
+      "id": 142,
       "uid": 2,
-      "date": "2026-05-18",
+      "date": "2026-05-18 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "142"
+      "cycle": "weekly"
     },
     {
+      "id": 143,
       "uid": 2,
-      "date": "2026-05-25",
+      "date": "2026-05-25 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "143"
+      "cycle": "weekly"
     },
     {
+      "id": 144,
       "uid": 2,
-      "date": "2026-06-01",
+      "date": "2026-06-01 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "144"
+      "cycle": "weekly"
     },
     {
+      "id": 145,
       "uid": 2,
-      "date": "2026-06-08",
+      "date": "2026-06-08 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "145"
+      "cycle": "weekly"
     },
     {
+      "id": 146,
       "uid": 2,
-      "date": "2026-06-15",
+      "date": "2026-06-15 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "146"
+      "cycle": "weekly"
     },
     {
+      "id": 147,
       "uid": 2,
-      "date": "2026-06-22",
+      "date": "2026-06-22 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "147"
+      "cycle": "weekly"
     },
     {
+      "id": 148,
       "uid": 2,
-      "date": "2026-06-29",
+      "date": "2026-06-29 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "148"
+      "cycle": "weekly"
     },
     {
+      "id": 149,
       "uid": 2,
-      "date": "2026-07-06",
+      "date": "2026-07-06 08:30",
       "type": "expense",
       "amount": 8000,
       "cid": 6,
       "detail": "택시비",
       "memo": "월요일에 힘내라고 나를 위한 선물",
       "isRecurring": true,
-      "cycle": "weekly",
-      "id": "149"
+      "cycle": "weekly"
     },
     {
-      "date": "2026-04-12",
+      "id": 150,
+      "date": "2026-04-12 14:15",
       "type": "expense",
       "amount": 4500,
       "detail": "카페라떼",
@@ -1942,13 +1945,13 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "150",
       "categoryName": "간식/카페",
       "categoryImg": "☕",
       "categoryColor": "#FFB347"
     },
     {
-      "date": "2026-04-12",
+      "id": 151,
+      "date": "2026-04-12 15:20",
       "type": "expense",
       "amount": 5500,
       "detail": "카페라떼",
@@ -1956,11 +1959,11 @@
       "uid": 2,
       "cid": 2,
       "isRecurring": false,
-      "cycle": null,
-      "id": "151"
+      "cycle": null
     },
     {
-      "date": "2026-04-12",
+      "id": 152,
+      "date": "2026-04-12 16:40",
       "type": "expense",
       "amount": 5500,
       "detail": "카페라떼",
@@ -1968,11 +1971,11 @@
       "uid": 2,
       "cid": 2,
       "isRecurring": false,
-      "cycle": null,
-      "id": "152"
+      "cycle": null
     },
     {
-      "date": "2026-04-12",
+      "id": 153,
+      "date": "2026-04-12 17:30",
       "type": "expense",
       "amount": 5500,
       "detail": "카페라떼",
@@ -1980,11 +1983,11 @@
       "uid": 2,
       "cid": 2,
       "isRecurring": false,
-      "cycle": null,
-      "id": "153"
+      "cycle": null
     },
     {
-      "date": "2026-04-12",
+      "id": 154,
+      "date": "2026-04-12 12:30",
       "type": "expense",
       "amount": 15000,
       "detail": "점심값",
@@ -1992,11 +1995,11 @@
       "uid": 3,
       "cid": 1,
       "isRecurring": false,
-      "cycle": null,
-      "id": "154"
+      "cycle": null
     },
     {
-      "date": "2026-04-12",
+      "id": 155,
+      "date": "2026-04-12 13:10",
       "type": "expense",
       "amount": 15000,
       "detail": "점심값",
@@ -2004,11 +2007,11 @@
       "uid": 3,
       "cid": 1,
       "isRecurring": false,
-      "cycle": null,
-      "id": "155"
+      "cycle": null
     },
     {
-      "date": "2026-04-12",
+      "id": 156,
+      "date": "2026-04-12 14:45",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -2016,106 +2019,105 @@
       "uid": 1,
       "cid": 2,
       "isRecurring": false,
-      "cycle": null,
-      "id": "xr6u_9KlPsE"
+      "cycle": null
     },
     {
-      "id": "BqCGGivBZfw",
+      "id": 157,
       "type": "expense",
       "detail": "밥값",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-08",
+      "date": "2026-04-08 12:20",
       "memo": "학식",
       "uid": 1
     },
     {
-      "id": "LL4Ii0jHE28",
+      "id": 158,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-01",
+      "date": "2026-04-01 12:15",
       "memo": "밀린 학식 저장",
       "uid": 1
     },
     {
-      "id": "X6LSF3d6TgE",
+      "id": 159,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-02",
+      "date": "2026-04-02 12:40",
       "memo": "밀린 학식 저장",
       "uid": 1
     },
     {
-      "id": "1EawVBKUTlg",
+      "id": 160,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-09",
+      "date": "2026-04-09 12:10",
       "memo": "밀린 학식 저장",
       "uid": 1
     },
     {
-      "id": "fYoxwoVay8Y",
+      "id": 161,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-10",
+      "date": "2026-04-10 12:50",
       "memo": "밀린 학식 저장",
       "uid": 1
     },
     {
-      "id": "iEoDFdFd6uo",
+      "id": 162,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-03",
+      "date": "2026-04-03 12:35",
       "memo": "밀린 학식 저장",
       "uid": 1
     },
     {
-      "id": "Z5Zu84X_kWw",
+      "id": 163,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-07",
+      "date": "2026-04-07 12:15",
       "memo": "밀린 학식 저장",
       "uid": 1
     },
     {
-      "id": "TIt0vOw4AgM",
+      "id": 164,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-06",
+      "date": "2026-04-06 12:45",
       "memo": "밀린 학식 저장",
       "uid": 1
     },
     {
-      "id": "hXcLrgUSAEs",
+      "id": 165,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-05",
+      "date": "2026-04-05 12:20",
       "memo": "밀린 학식 저장",
       "uid": 1
     },
     {
-      "id": "CU2JtN5AUaU",
+      "id": 166,
       "type": "expense",
       "detail": "학식",
       "amount": 6000,
       "cid": 1,
-      "date": "2026-04-04",
+      "date": "2026-04-04 12:10",
       "memo": "이날은 다른걸 먹었나...?",
       "uid": 1,
       "categoryName": "식비/외식",
@@ -2123,162 +2125,162 @@
       "categoryColor": "#FF7676"
     },
     {
-      "id": "L2shgT1T8CY",
+      "id": 167,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-13",
+      "date": "2026-04-13 12:30",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "6QzWvGCC334",
+      "id": 168,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-14",
+      "date": "2026-04-14 12:15",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "H2dhD0NOY5Y",
+      "id": 169,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-15",
+      "date": "2026-04-15 12:40",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "8KZmgy96Qpc",
+      "id": 170,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-16",
+      "date": "2026-04-16 12:20",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "9ClRj3FxFEU",
+      "id": 171,
       "type": "expense",
       "detail": "학식",
       "amount": 5000,
       "cid": 1,
-      "date": "2026-04-17",
+      "date": "2026-04-17 12:15",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "8ZHkNvZsULc",
+      "id": 172,
       "type": "expense",
       "detail": "학식",
       "amount": 4000,
       "cid": 1,
-      "date": "2026-04-13",
+      "date": "2026-04-13 11:30",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "6lE3a1idX6I",
+      "id": 173,
       "type": "expense",
       "detail": "학식",
       "amount": 4000,
       "cid": 1,
-      "date": "2026-04-14",
+      "date": "2026-04-14 11:45",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "9QCeR3R_p-w",
+      "id": 174,
       "type": "expense",
       "detail": "학식",
       "amount": 4000,
       "cid": 1,
-      "date": "2026-04-15",
+      "date": "2026-04-15 11:20",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "0KtOzs0ob0w",
+      "id": 175,
       "type": "expense",
       "detail": "학식",
       "amount": 4000,
       "cid": 1,
-      "date": "2026-04-16",
+      "date": "2026-04-16 11:10",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "p2X7EEq_tQk",
+      "id": 176,
       "type": "expense",
       "detail": "학식",
       "amount": 4000,
       "cid": 1,
-      "date": "2026-04-17",
+      "date": "2026-04-17 11:50",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "zQ7l-BmKOYM",
+      "id": 177,
       "type": "expense",
       "detail": "학식",
       "amount": 3000,
       "cid": 1,
-      "date": "2026-04-13",
+      "date": "2026-04-13 10:20",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "8ZLAi72RR9g",
+      "id": 178,
       "type": "expense",
       "detail": "학식",
       "amount": 3000,
       "cid": 1,
-      "date": "2026-04-14",
+      "date": "2026-04-14 10:45",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "WNctuJPi-38",
+      "id": 179,
       "type": "expense",
       "detail": "학식",
       "amount": 3000,
       "cid": 1,
-      "date": "2026-04-15",
+      "date": "2026-04-15 10:15",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "s0Bj__1Wk6w",
+      "id": 180,
       "type": "expense",
       "detail": "학식",
       "amount": 3000,
       "cid": 1,
-      "date": "2026-04-16",
+      "date": "2026-04-16 10:30",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "QE-0if95S68",
+      "id": 181,
       "type": "expense",
       "detail": "학식",
       "amount": 3000,
       "cid": 1,
-      "date": "2026-04-17",
+      "date": "2026-04-17 10:40",
       "memo": "이때도 학식먹음",
       "uid": 1
     },
     {
-      "id": "dr1KaFdoAh4",
+      "id": 182,
       "type": "expense",
       "detail": "학식",
       "amount": 3500,
       "cid": 1,
-      "date": "2026-04-18",
+      "date": "2026-04-18 12:15",
       "memo": "이때도 학식먹음",
       "uid": 1,
       "categoryName": "식비/외식",
@@ -2286,7 +2288,7 @@
       "categoryColor": "#FF7676"
     },
     {
-      "date": "2026-04-13",
+      "date": "2026-04-13 14:15",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -2295,10 +2297,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "84Z6mrZj2YA"
+      "id": 183
     },
     {
-      "date": "2026-04-13",
+      "date": "2026-04-13 15:45",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -2307,10 +2309,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "RSU-688n-VM"
+      "id": 184
     },
     {
-      "date": "2026-04-13",
+      "date": "2026-04-13 16:30",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -2319,100 +2321,100 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "PmReZoWqnfo"
+      "id": 185
     },
     {
-      "id": "v7Xr7quB3DI",
+      "id": 186,
       "type": "expense",
       "detail": "커피",
       "amount": 100,
       "cid": 5,
-      "date": "2026-04-09",
+      "date": "2026-04-09 10:20",
       "memo": "11",
       "uid": 1
     },
     {
-      "id": "TH0ClCI2qZo",
+      "id": 187,
       "type": "expense",
       "detail": "커피",
       "amount": 100,
       "cid": 5,
-      "date": "2026-04-10",
+      "date": "2026-04-10 10:30",
       "memo": "11",
       "uid": 1
     },
     {
-      "id": "hzYWkkG2nig",
+      "id": 188,
       "type": "expense",
       "detail": "커피",
       "amount": 100,
       "cid": 5,
-      "date": "2026-04-11",
+      "date": "2026-04-11 10:40",
       "memo": "11",
       "uid": 1
     },
     {
-      "id": "nBh3UolRZdk",
+      "id": 189,
       "type": "expense",
       "detail": "커피",
       "amount": 100,
       "cid": 5,
-      "date": "2026-04-12",
+      "date": "2026-04-12 10:50",
       "memo": "11",
       "uid": 1
     },
     {
-      "id": "DYb-iviYCSE",
+      "id": 190,
       "type": "expense",
       "detail": "커피",
       "amount": 100,
       "cid": 5,
-      "date": "2026-04-13",
+      "date": "2026-04-13 11:00",
       "memo": "11",
       "uid": 1
     },
     {
-      "id": "yMnOipy5DYU",
+      "id": 191,
       "type": "expense",
       "detail": "커피",
       "amount": 100,
       "cid": 5,
-      "date": "2026-04-14",
+      "date": "2026-04-14 11:10",
       "memo": "11",
       "uid": 1
     },
     {
-      "id": "dJ9l_7-70qk",
+      "id": 192,
       "type": "expense",
       "detail": "커피",
       "amount": 100,
       "cid": 5,
-      "date": "2026-04-15",
+      "date": "2026-04-15 11:20",
       "memo": "11",
       "uid": 1
     },
     {
-      "id": "eAd4nbwfnag",
+      "id": 193,
       "type": "expense",
       "detail": "커피",
       "amount": 100,
       "cid": 5,
-      "date": "2026-04-16",
+      "date": "2026-04-16 11:30",
       "memo": "11",
       "uid": 1
     },
     {
-      "id": "Sc5Q4PeKvrc",
+      "id": 194,
       "type": "expense",
       "detail": "커피",
       "amount": 100,
       "cid": 5,
-      "date": "2026-04-17",
+      "date": "2026-04-17 11:40",
       "memo": "11",
       "uid": 1
     },
     {
-      "date": "2026-04-13",
+      "date": "2026-04-13 17:15",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -2421,10 +2423,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "hSKgYxpSJjU"
+      "id": 195
     },
     {
-      "date": "2026-04-13",
+      "date": "2026-04-13 18:45",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -2433,10 +2435,10 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "cBjoqzk90CI"
+      "id": 196
     },
     {
-      "date": "2026-04-13",
+      "date": "2026-04-13 19:30",
       "type": "expense",
       "amount": 2500,
       "detail": "아메리카노",
@@ -2445,52 +2447,52 @@
       "cid": 2,
       "isRecurring": false,
       "cycle": null,
-      "id": "XnWMeGX8now"
+      "id": 197
     },
     {
-      "id": "edPRsg6GidU",
+      "id": 198,
       "type": "income",
       "detail": "용돈",
       "amount": 50000,
       "cid": 10,
-      "date": "2026-04-08",
+      "date": "2026-04-08 15:30",
       "memo": "아싸 용돈",
       "uid": 1
     },
     {
-      "id": "WaxEkZa2anw",
+      "id": 199,
       "type": "income",
       "detail": "용돈",
       "amount": 50000,
       "cid": 10,
-      "date": "2026-04-24",
+      "date": "2026-04-24 16:45",
       "memo": "아싸 용돈",
       "uid": 1
     },
     {
-      "id": "YSeT9e-XixA",
+      "id": 200,
       "type": "income",
       "detail": "용돈",
       "amount": 50000,
       "cid": 10,
-      "date": "2026-04-30",
+      "date": "2026-04-30 18:20",
       "memo": "아싸 용돈",
       "uid": 1
     },
     {
-      "id": "eBMliXDt2jY",
+      "id": 201,
       "type": "income",
       "detail": "용돈",
       "amount": 50000,
       "cid": 10,
-      "date": "2026-04-28",
+      "date": "2026-04-28 17:15",
       "memo": "아싸 용돈",
       "uid": 1
     }
   ],
   "TEMPLATE": [
     {
-      "id": "1",
+      "id": 1,
       "uid": 2,
       "amount": 5500,
       "type": "expense",
@@ -2505,7 +2507,7 @@
       "detail": "아메리카노",
       "memo": "아메리카노 수혈",
       "cid": 2,
-      "id": "3"
+      "id": 3
     },
     {
       "uid": 2,
@@ -2514,10 +2516,10 @@
       "detail": "마라마라탕",
       "memo": "자주 먹을듯?",
       "cid": 1,
-      "id": "4"
+      "id": 4
     },
     {
-      "id": "5",
+      "id": 5,
       "uid": 3,
       "type": "expense",
       "detail": "점심값",
@@ -2526,7 +2528,7 @@
       "memo": "밥값 너무 많이 나가"
     },
     {
-      "id": "6",
+      "id": 6,
       "uid": null,
       "type": "income",
       "detail": "월급",
@@ -2535,7 +2537,7 @@
       "memo": "와 월급이다!"
     },
     {
-      "id": "7",
+      "id": 7,
       "uid": null,
       "type": "expense",
       "detail": "커피",
@@ -2544,7 +2546,7 @@
       "memo": "커! 피수형"
     },
     {
-      "id": "8",
+      "id": 8,
       "uid": null,
       "type": "expense",
       "detail": "점심",
@@ -2555,56 +2557,56 @@
   ],
   "targetBudget": [
     {
-      "id": "1",
+      "id": 1,
       "uid": 1,
       "cid": 1,
       "targetBudget": 200000,
       "month": "2026-04"
     },
     {
-      "id": "2",
+      "id": 2,
       "uid": 1,
       "cid": 2,
       "targetBudget": 50000,
       "month": "2026-04"
     },
     {
-      "id": "3",
+      "id": 3,
       "uid": 1,
       "cid": 3,
       "targetBudget": 100000,
       "month": "2026-04"
     },
     {
-      "id": "4",
+      "id": 4,
       "uid": 1,
       "cid": 4,
       "targetBudget": 300000,
       "month": "2026-04"
     },
     {
-      "id": "5",
+      "id": 5,
       "uid": 1,
       "cid": 5,
       "targetBudget": 50000,
       "month": "2026-04"
     },
     {
-      "id": "6",
+      "id": 6,
       "uid": 2,
       "cid": 1,
       "targetBudget": 150000,
       "month": "2026-04"
     },
     {
-      "id": "7",
+      "id": 7,
       "uid": 2,
       "cid": 2,
       "targetBudget": 40000,
       "month": "2026-04"
     },
     {
-      "id": "8",
+      "id": 8,
       "uid": 2,
       "cid": 8,
       "targetBudget": 80000,
@@ -2615,90 +2617,90 @@
       "month": "2026-04",
       "cid": 10,
       "targetBudget": 40000,
-      "id": "ECI_N3GcmFg"
+      "id": 9
     },
     {
       "uid": null,
       "month": "2026-04",
       "cid": 1,
       "targetBudget": 500000,
-      "id": "FQm1Wsw8cV8"
+      "id": 10
     },
     {
       "uid": 2,
       "month": "2026-05",
       "cid": 4,
       "targetBudget": 500000,
-      "id": "vLuVc0UwkfU"
+      "id": 11
     },
     {
       "uid": 2,
       "month": "2026-05",
       "cid": 8,
       "targetBudget": 200000,
-      "id": "rdtGVAdSQlA"
+      "id": 12
     },
     {
       "uid": 2,
       "month": "2026-05",
       "cid": 6,
       "targetBudget": 50000,
-      "id": "tbawj7iLKx0"
+      "id": 13
     },
     {
       "uid": 2,
       "month": "2026-05",
       "cid": 10,
       "targetBudget": 100000,
-      "id": "Wwp-5HIbJYI"
+      "id": 14
     },
     {
       "uid": 2,
       "month": "2026-05",
       "cid": 11,
       "targetBudget": 300000,
-      "id": "INHn3bRc_qc"
+      "id": 15
     }
   ],
   "reactionCount": [
     {
-      "id": "1",
+      "id": 1,
       "cid": 1,
       "uid": 1,
       "currentCount": 3
     },
     {
-      "id": "2",
+      "id": 2,
       "cid": 2,
       "uid": 1,
       "currentCount": 5
     },
     {
-      "id": "3",
+      "id": 3,
       "cid": 3,
       "uid": 1,
       "currentCount": 1
     },
     {
-      "id": "4",
+      "id": 4,
       "cid": 5,
       "uid": 1,
       "currentCount": 2
     },
     {
-      "id": "5",
+      "id": 5,
       "cid": 1,
       "uid": 2,
       "currentCount": 2
     },
     {
-      "id": "6",
+      "id": 6,
       "cid": 2,
       "uid": 2,
       "currentCount": 3
     },
     {
-      "id": "7",
+      "id": 7,
       "cid": 7,
       "uid": 2,
       "currentCount": 1

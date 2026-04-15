@@ -3,31 +3,7 @@
     <div class="mobile-page-title mobile-only">거래내역</div>
 
     <div class="header">
-      <div class="month-picker-area">
-        <button class="nav-btn" type="button" @click="prevMonth">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M15 18L9 12L15 6"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-        <h2 class="month-title">{{ currentMonth }}월</h2>
-        <button class="nav-btn" type="button" @click="nextMonth">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M9 6L15 12L9 18"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
+      <MonthPicker :current-month="currentMonth" @change="changeMonth" />
 
       <input
         v-model="search"
@@ -35,114 +11,40 @@
         class="memo_window search-input"
       />
 
-      <button class="mobile-search-btn mobile-only" type="button" aria-label="Search">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" />
-          <path d="M20 20L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        </svg>
-      </button>
-    </div>
-
-    <div class="filter-bar">
-      <div class="dropdown-wrapper">
-        <button
-          class="cat-item dropdown-trigger"
-          :class="{ 'active-type': selectedType !== 'all' }"
-          type="button"
-          @click.stop="toggleTypeDropdown"
-        >
-          <div class="icon-circle gray-bg">⇵</div>
-          <span class="subtitle-s">{{ typeLabel }}</span>
-          <span class="arrow" :class="{ open: isTypeDropdownOpen }">⌄</span>
-        </button>
-
-        <ul v-if="isTypeDropdownOpen" class="dropdown-menu">
-          <li @click="handleTypeSelect('all')" :class="{ active: selectedType === 'all' }">
-            수입/지출
-          </li>
-          <li @click="handleTypeSelect('income')" :class="{ active: selectedType === 'income' }">
-            수입 내역
-          </li>
-          <li @click="handleTypeSelect('expense')" :class="{ active: selectedType === 'expense' }">
-            지출 내역
-          </li>
-        </ul>
-      </div>
-
-      <div class="filters" ref="filtersRef">
-        <button
-          :class="{ active: isAllCategorySelected }"
-          type="button"
-          @click="selectAllCategory"
-        >
-          전체
-        </button>
-        <button
-          v-for="category in visibleCategories"
-          :key="category.id"
-          type="button"
-          :class="{ active: selectedCategory.includes(Number(category.id)) }"
-          :style="{
-            background: selectedCategory.includes(Number(category.id)) ? category.color : '',
-            borderColor: category.color,
-          }"
-          @click="toggleCategory(category.id)"
-        >
-          {{ category.img }} {{ category.name }}
-        </button>
-      </div>
-
       <button
-        v-if="store.categories.length > visibleCount"
-        class="toggle-btn"
+        class="mobile-search-btn mobile-only"
         type="button"
-        @click="showAllCategories = !showAllCategories"
+        aria-label="Search"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-          <path
-            :d="showAllCategories ? 'M15 18L9 12L15 6' : 'M9 6L15 12L9 18'"
-            stroke="#666"
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <circle
+            cx="11"
+            cy="11"
+            r="7"
+            stroke="currentColor"
             stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-
-      <button class="upcoming-toggle" type="button" @click="showUpcoming = !showUpcoming">
-        <svg
-          v-if="showUpcoming"
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-        >
-          <path
-            d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z"
-            stroke="#444"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <circle cx="12" cy="12" r="3" stroke="#444" stroke-width="2" />
-        </svg>
-        <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M17.94 17.94A10.07 10.07 0 0112 20C5 20 2 12 2 12A18.09 18.09 0 015.06 7.06M9.9 4.24A9.12 9.12 0 0112 4C19 4 22 12 22 12A18.09 18.09 0 0119.08 16.08M1 1L23 23"
-            stroke="#444"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
           />
           <path
-            d="M10.73 10.73A3 3 0 0013.27 13.27"
-            stroke="#444"
+            d="M20 20L17 17"
+            stroke="currentColor"
             stroke-width="2"
             stroke-linecap="round"
           />
         </svg>
       </button>
     </div>
+
+    <CategoryFilter
+      :categories="store.categories"
+      :selected-categories="selectedCategory"
+      :selected-type="selectedType"
+      :is-scheduled-only="showUpcoming"
+      @select-type="handleTypeSelect"
+      @toggle-category="toggleCategory"
+      @toggle-scheduled="showUpcoming = !showUpcoming"
+      @select-all="selectAllCategory"
+      class="filter-bar"
+    />
 
     <div class="table-container desktop-only">
       <table class="table">
@@ -189,11 +91,15 @@
             <td>{{ item.detail }}</td>
             <td>
               <span :class="item.type === 'expense' ? 'negative' : 'positive'">
-                {{ item.type === 'expense' ? '-' : '+' }}{{ Number(item.amount).toLocaleString() }}원
+                {{ item.type === 'expense' ? '-' : '+'
+                }}{{ Number(item.amount).toLocaleString() }}원
               </span>
             </td>
             <td>
-              <span :style="{ background: item.categoryColor }" class="category-img">
+              <span
+                :style="{ background: item.categoryColor }"
+                class="category-img"
+              >
                 {{ item.categoryImg }}
               </span>
               {{ item.categoryName }}
@@ -266,7 +172,10 @@
         >
           <div class="mobile-card-main">
             <div class="mobile-card-left">
-              <span :style="{ background: item.categoryColor }" class="mobile-icon-circle">
+              <span
+                :style="{ background: item.categoryColor }"
+                class="mobile-icon-circle"
+              >
                 {{ item.categoryImg }}
               </span>
               <div class="mobile-texts">
@@ -276,11 +185,20 @@
             </div>
 
             <div class="mobile-card-right">
-              <span :class="item.type === 'expense' ? 'negative' : 'positive'" class="mobile-amount">
-                {{ item.type === 'expense' ? '-' : '+' }}{{ Number(item.amount).toLocaleString() }}
+              <span
+                :class="item.type === 'expense' ? 'negative' : 'positive'"
+                class="mobile-amount"
+              >
+                {{ item.type === 'expense' ? '-' : '+'
+                }}{{ Number(item.amount).toLocaleString() }}
               </span>
               <div class="mobile-inline-actions">
-                <button class="icon-action" type="button" @click="handleEdit(item)" aria-label="Edit">
+                <button
+                  class="icon-action"
+                  type="button"
+                  @click="handleEdit(item)"
+                  aria-label="Edit"
+                >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942"
@@ -291,7 +209,12 @@
                     />
                   </svg>
                 </button>
-                <button class="icon-action" type="button" @click="handleDelete(item.id)" aria-label="Delete">
+                <button
+                  class="icon-action"
+                  type="button"
+                  @click="handleDelete(item.id)"
+                  aria-label="Delete"
+                >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M20 9L18.005 20.3463C17.8369 21.3026 17.0062 22 16.0353 22H7.96474C6.99379 22 6.1631 21.3026 5.99496 20.3463L4 9H20Z"
@@ -350,6 +273,8 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useTransactionStore } from '@/stores/budgetStore';
+import MonthPicker from '@/components/common/MonthPicker.vue';
+import CategoryFilter from '@/components/common/CategoryFilter.vue';
 import { useCategoryStore } from '@/stores/category';
 import { useBudgetStore } from '@/stores/budgetStore2';
 import { useUserStore } from '@/stores/userStore';
@@ -364,17 +289,16 @@ const categoryStore = useCategoryStore();
 const calendarStore = useBudgetStore();
 
 const {
-  currentMonthNum: currentMonth,
+  currentMonth,
+  currentMonthNum,
   selectedCategories: selectedCategory,
   selectedType,
   searchQuery: search,
 } = storeToRefs(store);
 
-const isTypeDropdownOpen = ref(false);
+const { changeMonth } = store;
+
 const selectedIds = ref([]);
-const showAllCategories = ref(false);
-const visibleCount = 5;
-const filtersRef = ref(null);
 
 const deleteModal = reactive({ visible: false, targetId: null });
 const editModal = reactive({
@@ -385,19 +309,8 @@ const editModal = reactive({
 });
 const successModal = reactive({ visible: false, title: '', description: '' });
 
-const toggleTypeDropdown = () => {
-  isTypeDropdownOpen.value = !isTypeDropdownOpen.value;
-};
-
-const typeLabel = computed(() => {
-  if (selectedType.value === 'income') return '수입 내역';
-  if (selectedType.value === 'expense') return '지출 내역';
-  return '수입/지출';
-});
-
 const handleTypeSelect = (type) => {
   selectedType.value = type;
-  isTypeDropdownOpen.value = false;
 };
 
 const isUpcoming = (dateStr) => {
@@ -408,57 +321,15 @@ const isUpcoming = (dateStr) => {
 
 onMounted(async () => {
   await store.loadData();
-
-  const slider = filtersRef.value;
-  if (slider) {
-    let isDown = false;
-    let startX = 0;
-    let scrollLeft = 0;
-
-    slider.addEventListener('mousedown', (e) => {
-      isDown = true;
-      startX = e.pageX - slider.offsetLeft;
-      scrollLeft = slider.scrollLeft;
-    });
-    slider.addEventListener('mouseleave', () => {
-      isDown = false;
-    });
-    slider.addEventListener('mouseup', () => {
-      isDown = false;
-    });
-    slider.addEventListener('mousemove', (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - slider.offsetLeft;
-      slider.scrollLeft = scrollLeft - (x - startX) * 2;
-    });
-    slider.addEventListener(
-      'wheel',
-      (e) => {
-        if (e.deltaY !== 0) {
-          e.preventDefault();
-          slider.scrollLeft += e.deltaY;
-        }
-      },
-      { passive: false },
-    );
-  }
-
-  window.addEventListener('click', () => {
-    isTypeDropdownOpen.value = false;
-  });
 });
 
 const filteredByCategory = store.filteredByCategory(selectedCategory, search);
-const filteredByMonth = store.filteredByMonth(filteredByCategory, currentMonth);
+const filteredByMonth = store.filteredByMonth(
+  filteredByCategory,
+  currentMonthNum,
+);
 const filteredByType = store.filteredByType(filteredByMonth, selectedType);
 const filteredMCT = store.filteredByToday(filteredByType);
-
-const visibleCategories = computed(() =>
-  showAllCategories.value
-    ? store.categories
-    : store.categories.slice(0, visibleCount),
-);
 
 const mobileGroupedItems = computed(() => {
   const visible = filteredMCT.value.filter(
@@ -475,12 +346,6 @@ const mobileGroupedItems = computed(() => {
     return acc;
   }, []);
 });
-
-const isAllCategorySelected = computed(
-  () =>
-    Array.isArray(selectedCategory.value) &&
-    selectedCategory.value.includes('전체'),
-);
 
 const isAllSelected = computed(() => {
   const selectableItems = filteredMCT.value;
@@ -509,37 +374,24 @@ watch(
 );
 
 const selectAllCategory = () => {
-  selectedCategory.value = ['전체'];
+  selectedCategory.value = [];
 };
 
-const toggleCategory = (name) => {
+const toggleCategory = (id) => {
   if (!Array.isArray(selectedCategory.value)) {
-    selectedCategory.value = ['전체'];
+    selectedCategory.value = [];
   }
 
-  if (name === '전체') {
-    selectedCategory.value = ['전체'];
-    return;
-  }
-
-  let current = selectedCategory.value.filter((c) => c !== '전체');
-
-  const targetId = Number(name);
+  let current = [...selectedCategory.value];
+  const targetId = Number(id);
 
   if (current.includes(targetId)) {
     current = current.filter((c) => c !== targetId);
-    selectedCategory.value = current.length === 0 ? ['전체'] : current;
   } else {
-    selectedCategory.value = [...current, targetId];
+    current.push(targetId);
   }
-};
 
-const prevMonth = () => {
-  currentMonth.value = currentMonth.value === 1 ? 12 : currentMonth.value - 1;
-};
-
-const nextMonth = () => {
-  currentMonth.value = currentMonth.value === 12 ? 1 : currentMonth.value + 1;
+  selectedCategory.value = current;
 };
 
 const formatMobileDate = (dateStr) => {
@@ -634,12 +486,6 @@ const executeDelete = async () => {
   min-width: 0;
 }
 
-.month-picker-area {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
 .month-title {
   font-size: 1.5rem;
   font-weight: 700;
@@ -668,28 +514,8 @@ const executeDelete = async () => {
 }
 
 .filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 5px;
+  margin-bottom: 12px;
   min-width: 0;
-}
-
-.dropdown-wrapper {
-  position: relative;
-}
-
-.cat-item {
-  display: flex;
-  align-items: center;
-  padding: 6px 14px 6px 6px;
-  border-radius: 50px;
-  background-color: var(--color-white);
-  border: 1px solid var(--color-deepgray-10);
-  cursor: pointer;
-  transition: 0.2s;
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .subtitle-s {
@@ -698,128 +524,8 @@ const executeDelete = async () => {
   color: var(--color-deepgray-100);
 }
 
-.icon-circle {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  margin-right: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-}
-
-.gray-bg {
-  background-color: var(--color-gray-10);
-}
-
-.active-type {
-  border-color: var(--color-primary);
-  background-color: var(--color-primary-10);
-}
-
-.active-type span {
-  color: var(--color-primary);
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 42px;
-  left: 0;
-  background-color: var(--color-white);
-  border-radius: 16px;
-  width: 140px;
-  padding: 8px;
-  z-index: 1000;
-  box-shadow: var(--drop--shadow);
-  border: 1px solid var(--color-gray-10);
-  list-style: none;
-  margin: 0;
-}
-
-.dropdown-menu li {
-  padding: 10px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 13px;
-  color: #444;
-}
-
-.dropdown-menu li:hover {
-  background-color: var(--color-gray-10);
-}
-
-.dropdown-menu li.active {
-  color: var(--color-primary);
-  background-color: var(--color-primary-10);
-  font-weight: 600;
-}
-
-.filters {
-  height: 34px;
-  line-height: 1;
-  padding: 0 12px;
-  width: 800px;
-  margin: 15px 0;
-  display: flex;
-  gap: 8px;
-  flex-wrap: nowrap;
-  overflow: hidden;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  cursor: grab;
-}
-
-.filters::-webkit-scrollbar {
-  display: none;
-}
-
-.filters button {
-  flex-shrink: 0;
-  white-space: nowrap;
-  margin-right: 8px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid #ddd;
-  background: #f5f5f5;
-}
-
-.filters .active {
-  background: #4caf50;
-  color: white;
-}
-
-.toggle-btn,
-.upcoming-toggle {
-  height: 34px;
-  min-width: unset;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 12px;
-  border-radius: 20px;
-  border: 1.5px solid #ccc;
-  background: #fff;
-  cursor: pointer;
-  color: #444;
-}
-
 .upcoming {
   opacity: 0.4;
-}
-
-.arrow {
-  margin-left: 6px;
-  font-size: 10px;
-  color: var(--color-deepgray-40);
-  transition: 0.2s;
-}
-
-.arrow.open {
-  transform: rotate(180deg);
 }
 
 .memo_window {
@@ -1042,7 +748,7 @@ input[type='checkbox'] {
     display: block;
   }
 
-.mobile-list {
+  .mobile-list {
     display: flex;
     flex-direction: column;
     gap: 18px;

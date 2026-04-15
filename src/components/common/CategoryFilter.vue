@@ -169,7 +169,7 @@ const handleToggleCategory = (id) => {
 .category-filter-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px; /* 두 줄 사이의 간격을 좁혀서 '아래로 밀림' 해결 */
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -183,6 +183,7 @@ const handleToggleCategory = (id) => {
   gap: 10px;
   width: 100%;
   max-width: 100%;
+  justify-content: flex-start; /* 중앙 정렬 해제: 왼쪽부터 정렬 */
   min-width: 0;
   box-sizing: border-box;
 }
@@ -310,7 +311,24 @@ const handleToggleCategory = (id) => {
   gap: 8px;
   overflow-x: auto;
   scrollbar-width: none;
+  justify-content: flex-start;
+  width: 100%;
   min-width: 0;
+  /* 슬라이드 효과를 위한 설정 */
+  max-height: 0;
+  opacity: 0;
+  overflow-y: hidden;
+  transition:
+    max-height 0.3s ease-in-out,
+    opacity 0.2s ease-in-out,
+    padding 0.3s ease-in-out;
+  padding: 0;
+}
+
+.category-list.open {
+  max-height: 200px; /* 카테고리 리스트의 최대 높이 (내용에 맞게 조절 가능) */
+  opacity: 1;
+  padding: 8px 0;
 }
 
 .category-list::-webkit-scrollbar {
