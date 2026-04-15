@@ -44,19 +44,18 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   // 캘린더용 점(Dots) 데이터
   const calendarDots = computed(() => {
-    return myBudgets.value.filter((item) => {
-      const matchCat =
-        selectedCategories.value.length === 0 ||
-        selectedCategories.value.includes(Number(item.cid));
-      const matchType =
-        selectedType.value === 'all' || item.type === selectedType.value;
-
-      const now = new Date();
-      const matchScheduled =
-        !isScheduledOnly.value || new Date(item.date) >= now;
-
-      return matchCat && matchType && matchScheduled;
-    });
+    // 💡 날짜 데이터에 시간(HH:mm)이 포함되면서 캘린더 컴포넌트의 날짜 비교 로직(YYYY-MM-DD)이 깨지는 것을 방지합니다.
+    return myBudgets.value
+      .filter((item) => {
+        return item.date.startsWith(
+          `${currentMonth.value.getFullYear()}-${String(currentMonth.value.getMonth() + 1).padStart(2, '0')}`,
+        );
+      })
+      .map((item) => ({
+        ...item,
+        // 시간 정보를 제외한 순수 날짜 정보(10자리)만 전달하여 캘린더 매칭률을 높입니다.
+        date: item.date.substring(0, 10),
+      }));
   });
 
   // 캘린더 선택 날짜/카테고리 기반 상세 내역

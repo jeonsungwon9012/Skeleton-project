@@ -50,27 +50,33 @@
       <table class="table">
         <thead>
           <tr>
-            <th width="40px">
+            <th width="65px">
               <input
                 type="checkbox"
                 :checked="isAllSelected"
                 @change="toggleAll"
               />
             </th>
-            <th width="50px" class="item-index">No.</th>
-            <th>날짜</th>
-            <th>거래 내역</th>
-            <th>금액</th>
-            <th>카테고리</th>
-            <th width="100px">
-              <button
-                class="bulk-delete-btn"
+            <th width="210px">날짜</th>
+            <th width="210px">거래 내역</th>
+            <th width="210px">금액</th>
+            <th width="210px">카테고리</th>
+            <th width="180px">
+              <div
+                class="bulk-action-container"
                 :class="{ invisible: selectedIds.length === 0 }"
-                type="button"
-                @click="deleteSelected"
               >
-                삭제
-              </button>
+                <span class="selected-count"
+                  >{{ selectedIds.length }}건 선택</span
+                >
+                <button
+                  class="bulk-delete-btn"
+                  type="button"
+                  @click="deleteSelected"
+                >
+                  삭제
+                </button>
+              </div>
             </th>
           </tr>
         </thead>
@@ -86,9 +92,8 @@
             <td>
               <input type="checkbox" :value="item.id" v-model="selectedIds" />
             </td>
-            <td class="item-index">{{ index + 1 }}</td>
-            <td>{{ item.date }}</td>
-            <td>{{ item.detail }}</td>
+            <td class="time-cell">{{ formatDateTime(item.date) }}</td>
+            <td class="detail-cell">{{ item.detail }}</td>
             <td>
               <span :class="item.type === 'expense' ? 'negative' : 'positive'">
                 {{ item.type === 'expense' ? '-' : '+'
@@ -179,6 +184,7 @@
                 {{ item.categoryImg }}
               </span>
               <div class="mobile-texts">
+                <span class="mobile-time">{{ formatOnlyTime(item.date) }}</span>
                 <p class="mobile-detail">{{ item.detail }}</p>
                 <p v-if="item.memo" class="mobile-memo">{{ item.memo }}</p>
               </div>
@@ -392,6 +398,24 @@ const toggleCategory = (id) => {
   }
 
   selectedCategory.value = current;
+};
+
+// 데스크톱용: 월-일 시간 (04-11 12시 45분)
+const formatDateTime = (dateStr) => {
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  return `${m}-${d} ${hours}시 ${minutes}분`;
+};
+
+// 모바일용: 시간만 (날짜 그룹이 별도로 있으므로)
+const formatOnlyTime = (dateStr) => {
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
+  return `${date.getHours()}시 ${date.getMinutes()}분`;
 };
 
 const formatMobileDate = (dateStr) => {
@@ -656,13 +680,6 @@ input[type='checkbox'] {
   pointer-events: none;
 }
 
-.item-index {
-  padding-left: 45px !important;
-  padding-right: 70px !important;
-  color: #888;
-  font-size: 0.85rem;
-}
-
 .mobile-only {
   display: none;
 }
@@ -841,6 +858,13 @@ input[type='checkbox'] {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .mobile-time {
+    font-size: 11px;
+    color: #999;
+    display: block;
+    margin-bottom: 2px;
   }
 
   .mobile-inline-actions {
