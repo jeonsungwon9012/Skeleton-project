@@ -165,3 +165,13 @@
   padding: 0; /* 브라우저가 기본적으로 제공하는 안쪽 여백(padding)을 0으로 초기화 */
   box-sizing: border-box; /* 너비와 높이 계산 시, 패딩과 테두리를 포함하여 계산 -> 레이아웃 잡기 편리해짐 */
 }
+
+/* 💡 예정된 거래 내역 스타일 (흐리게 표시) */
+.is-scheduled {
+  opacity: 0.5;
+  filter: grayscale(0.4);
+  transition: opacity 0.2s ease;
+}
+.is-scheduled:hover {
+  opacity: 0.8;
+}

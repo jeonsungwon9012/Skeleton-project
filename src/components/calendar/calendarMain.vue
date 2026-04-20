@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useBudgetStore } from '@/stores/budgetStore2.js';
+import { useTransactionStore } from '@/stores/budgetStore.js';
 import MonthPicker from '@/components/common/MonthPicker.vue';
 import CategoryFilter from '@/components/common/CategoryFilter.vue';
 import CalendarBoard from '@/components/calendar/calendarBoard.vue';
@@ -11,7 +11,7 @@ import EditModal from '@/components/common/EditModal.vue';
 import ConfirmModal from '@/components/common/ConfirmModal.vue';
 import SuccessModal from '@/components/common/CompleteModal.vue';
 
-const budgetStore = useBudgetStore();
+const budgetStore = useTransactionStore();
 
 const {
   currentMonth,

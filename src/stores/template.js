@@ -21,6 +21,7 @@ export const useTemplateStore = defineStore('template', () => {
 
   // 템플릿으로 오늘 날짜 거래 즉시 추가
   const applyTemplate = async (tmpl, uid) => {
+    // 로컬 시간을 기준으로 YYYY-MM-DD HH:mm 포맷 생성 (UTC 오차 방지)
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');

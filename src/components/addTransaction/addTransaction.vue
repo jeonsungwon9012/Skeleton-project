@@ -440,6 +440,13 @@ const formatDate = (dateObj) => {
   return `${year}-${month}-${day}`;
 };
 
+const formatDateTime = (dateStr) => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${dateStr} ${hours}:${minutes}`;
+};
+
 const getNextDailyDate = () => formatDate(new Date());
 
 const getNextWeeklyDate = (targetDay) => {
@@ -562,18 +569,19 @@ const submitTransaction = async () => {
   isSubmitting.value = true;
 
   try {
-    const calculatedDate = form.isRecurring
-      ? getCalculatedRecurringDate()
-      : form.date;
-    if (!calculatedDate) {
-      return;
-    }
+    const rawDate = form.isRecurring ? getCalculatedRecurringDate() : form.date;
+    if (!rawDate) return;
+
+    // 시간 정보가 없으면 현재 시간을 추가
+    const calculatedDate = rawDate.includes(' ')
+      ? rawDate
+      : formatDateTime(rawDate);
 
     if (form.id) {
       // 기존 가계부 내역 수정
       const payload = {
         uid: form.uid,
-        date: form.date, // 기존 내역은 날짜가 이미 있으므로 calculatedDate를 사용하지 않음
+        date: calculatedDate,
         type: form.type,
         amount: Number(form.amount),
         cid: Number(form.cid),
@@ -618,7 +626,7 @@ const submitTransaction = async () => {
           while (current <= endDate) {
             const payload = {
               uid: form.uid,
-              date: formatDate(current),
+              date: formatDateTime(formatDate(current)),
               type: form.type,
               amount: Number(form.amount),
               cid: Number(form.cid),
@@ -653,7 +661,7 @@ const submitTransaction = async () => {
           // 💡 일반 지출/수입: 단건 저장
           const payload = {
             uid: form.uid,
-            date: form.date,
+            date: calculatedDate,
             type: form.type,
             amount: Number(form.amount),
             cid: Number(form.cid),

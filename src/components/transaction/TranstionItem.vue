@@ -64,7 +64,7 @@
             <th width="180px">
               <div
                 class="bulk-action-container"
-                :class="{ invisible: selectedIds.length === 0 }"
+                v-show="selectedIds.length > 0"
               >
                 <span class="selected-count"
                   >{{ selectedIds.length }}건 선택</span
@@ -82,11 +82,10 @@
         </thead>
         <tbody>
           <tr
-            v-for="(item, index) in filteredMCT"
+            v-for="item in filteredMCT"
             :key="item.id"
             class="btn-hover"
             :class="{ upcoming: isUpcoming(item.date) }"
-            v-show="!isUpcoming(item.date) || showUpcoming"
             @dblclick="handleShowDetail(item)"
           >
             <td>
@@ -335,14 +334,17 @@ const filteredByMonth = store.filteredByMonth(
   currentMonthNum,
 );
 const filteredByType = store.filteredByType(filteredByMonth, selectedType);
-const filteredMCT = store.filteredByToday(filteredByType);
+
+// 예정 버튼(showUpcoming) 상태에 따라 데이터 리스트 자체를 필터링하여 '전체 선택'과 독립적으로 작동하게 함
+const filteredMCT = computed(() => {
+  const base = store.filteredByToday(filteredByType).value;
+  return showUpcoming.value
+    ? base
+    : base.filter((item) => !isUpcoming(item.date));
+});
 
 const mobileGroupedItems = computed(() => {
-  const visible = filteredMCT.value.filter(
-    (item) => !isUpcoming(item.date) || showUpcoming.value,
-  );
-
-  return visible.reduce((acc, item) => {
+  return filteredMCT.value.reduce((acc, item) => {
     const group = acc.find((entry) => entry.date === item.date);
     if (group) {
       group.items.push(item);
@@ -367,7 +369,8 @@ const toggleAll = (e) => {
     : [];
 };
 
-watch([currentMonth, selectedType, search], () => {
+// 예정 필터나 검색어 등이 변경될 때 선택된 체크박스 상태를 초기화하여 꼬임 방지
+watch([currentMonth, selectedType, search, showUpcoming], () => {
   selectedIds.value = [];
 });
 
@@ -381,6 +384,7 @@ watch(
 
 const selectAllCategory = () => {
   selectedCategory.value = [];
+  showUpcoming.value = false;
 };
 
 const toggleCategory = (id) => {
@@ -408,7 +412,7 @@ const formatDateTime = (dateStr) => {
   const d = String(date.getDate()).padStart(2, '0');
   const hours = date.getHours();
   const minutes = date.getMinutes();
-  return `${m}-${d} ${hours}시 ${minutes}분`;
+  return `${m}/${d} \u00A0\u00A0 ${hours}시 ${minutes}분`;
 };
 
 // 모바일용: 시간만 (날짜 그룹이 별도로 있으므로)
@@ -601,11 +605,6 @@ const executeDelete = async () => {
 .table td {
   padding: 10px;
   border-bottom: 1px solid #eee;
-  text-align: left;
-}
-
-.table th:first-child,
-.table td:first-child {
   text-align: center;
 }
 
@@ -615,6 +614,8 @@ const executeDelete = async () => {
   z-index: 0;
   background-color: #fff;
   box-shadow: inset 0 -1px 0 #eee;
+  height: 64px;
+  vertical-align: middle;
 }
 
 input[type='checkbox'] {
@@ -634,6 +635,7 @@ input[type='checkbox'] {
   visibility: hidden;
   display: flex;
   align-items: center;
+  justify-content: center;
   height: 24px;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -675,9 +677,11 @@ input[type='checkbox'] {
   transition: all 0.2s ease;
 }
 
-.bulk-delete-btn.invisible {
-  visibility: hidden;
-  pointer-events: none;
+.bulk-action-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
 
 .mobile-only {

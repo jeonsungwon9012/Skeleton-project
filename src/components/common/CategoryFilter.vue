@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 
 const props = defineProps({
   categories: { type: Array, default: () => [] },
@@ -17,6 +17,58 @@ const emit = defineEmits([
 
 const isDropdownOpen = ref(false);
 const isCategoryOpen = ref(false);
+
+const filterRowRef = ref(null);
+const categoryListRef = ref(null);
+
+/**
+ * 드래그 및 휠 스크롤 로직 초기화
+ */
+const initDragScroll = (el) => {
+  if (!el) return;
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  el.addEventListener('mousedown', (e) => {
+    isDown = true;
+    startX = e.pageX - el.offsetLeft;
+    scrollLeft = el.scrollLeft;
+    el.style.cursor = 'grabbing';
+  });
+
+  const stopDragging = () => {
+    isDown = false;
+    el.style.cursor = 'grab';
+  };
+
+  el.addEventListener('mouseleave', stopDragging);
+  el.addEventListener('mouseup', stopDragging);
+
+  el.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startX) * 1.5; // 스크롤 속도 조절
+    el.scrollLeft = scrollLeft - walk;
+  });
+
+  el.addEventListener(
+    'wheel',
+    (e) => {
+      if (e.deltaY !== 0) {
+        el.scrollLeft += e.deltaY;
+        e.preventDefault(); // 세로 스크롤 방지
+      }
+    },
+    { passive: false },
+  );
+};
+
+onMounted(() => {
+  initDragScroll(filterRowRef.value);
+  initDragScroll(categoryListRef.value);
+});
 
 const typeLabel = computed(() => {
   if (props.selectedType === 'income') return '수입';
@@ -55,7 +107,7 @@ const handleToggleCategory = (id) => {
 
 <template>
   <div class="category-filter-container">
-    <div class="filter-row">
+    <div class="filter-row" ref="filterRowRef">
       <div class="dropdown-wrapper">
         <button
           class="cat-item dropdown-trigger"
@@ -141,7 +193,11 @@ const handleToggleCategory = (id) => {
       </button>
     </div>
 
-    <div class="category-list" :class="{ open: isCategoryOpen }">
+    <div
+      class="category-list"
+      :class="{ open: isCategoryOpen }"
+      ref="categoryListRef"
+    >
       <button
         v-for="cat in categories"
         :key="cat.id"
@@ -186,6 +242,13 @@ const handleToggleCategory = (id) => {
   justify-content: flex-start; /* 중앙 정렬 해제: 왼쪽부터 정렬 */
   min-width: 0;
   box-sizing: border-box;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox 스크롤바 숨김 */
+  cursor: grab;
+}
+
+.filter-row::-webkit-scrollbar {
+  display: none; /* Chrome 스크롤바 숨김 */
 }
 
 .cat-item,
@@ -314,6 +377,7 @@ const handleToggleCategory = (id) => {
   justify-content: flex-start;
   width: 100%;
   min-width: 0;
+  cursor: grab;
   /* 슬라이드 효과를 위한 설정 */
   max-height: 0;
   opacity: 0;
@@ -361,16 +425,7 @@ const handleToggleCategory = (id) => {
   }
 
   .filter-row {
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
   }
-
-  .filter-row::-webkit-scrollbar {
-    display: none;
-  }
-
   .mobile-hidden {
     display: none;
   }

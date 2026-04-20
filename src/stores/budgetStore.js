@@ -44,56 +44,82 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   // 캘린더용 점(Dots) 데이터
   const calendarDots = computed(() => {
+    const now = Date.now();
+
     // 💡 날짜 데이터에 시간(HH:mm)이 포함되면서 캘린더 컴포넌트의 날짜 비교 로직(YYYY-MM-DD)이 깨지는 것을 방지합니다.
     return myBudgets.value
       .filter((item) => {
-        return item.date.startsWith(
+        const dateStr = item.date.split(' ')[0];
+        const isCurrentMonth = dateStr.startsWith(
           `${currentMonth.value.getFullYear()}-${String(currentMonth.value.getMonth() + 1).padStart(2, '0')}`,
         );
+
+        const itemTime = new Date(item.date.replace(' ', 'T')).getTime();
+        const isScheduled = itemTime > now;
+
+        const matchScheduled = !isScheduledOnly.value || isScheduled;
+        return isCurrentMonth && matchScheduled;
       })
       .map((item) => ({
         ...item,
         // 시간 정보를 제외한 순수 날짜 정보(10자리)만 전달하여 캘린더 매칭률을 높입니다.
         date: item.date.substring(0, 10),
+        isScheduled: new Date(item.date.replace(' ', 'T')).getTime() > now,
       }));
   });
 
   // 캘린더 선택 날짜/카테고리 기반 상세 내역
   const rangeBudgets = computed(() => {
-    const filtered = myBudgets.value.filter((item) => {
-      const matchDate =
-        selectedDates.value.length === 0 ||
-        selectedDates.value.includes(item.date.substring(0, 10));
-      const matchCat =
-        selectedCategories.value.length === 0 ||
-        selectedCategories.value.includes(Number(item.cid));
-      const matchType =
-        selectedType.value === 'all' || item.type === selectedType.value;
+    const now = Date.now();
 
-      const now = new Date();
-      const matchScheduled =
-        !isScheduledOnly.value || new Date(item.date) >= now;
+    const filtered = myBudgets.value
+      .filter((item) => {
+        const itemTime = new Date(item.date.replace(' ', 'T')).getTime();
+        const isScheduled = itemTime > now;
 
-      const matchSearch =
-        !searchQuery.value ||
-        item.detail.includes(searchQuery.value) ||
-        (item.memo && item.memo.includes(searchQuery.value));
+        const matchDate =
+          selectedDates.value.length === 0 ||
+          selectedDates.value.includes(item.date.substring(0, 10));
+        const matchCat =
+          selectedCategories.value.length === 0 ||
+          selectedCategories.value.includes(Number(item.cid));
+        const matchType =
+          selectedType.value === 'all' || item.type === selectedType.value;
 
-      return (
-        matchDate && matchCat && matchType && matchScheduled && matchSearch
-      );
-    });
+        const matchScheduled = !isScheduledOnly.value || isScheduled;
+        const matchSearch =
+          !searchQuery.value ||
+          item.detail.includes(searchQuery.value) ||
+          (item.memo && item.memo.includes(searchQuery.value));
 
-    const now = new Date();
+        return (
+          matchDate && matchCat && matchType && matchScheduled && matchSearch
+        );
+      })
+      .map((item) => ({
+        ...item,
+        isScheduled: new Date(item.date.replace(' ', 'T')).getTime() > now,
+      }));
+
     const past = filtered
-      .filter((item) => new Date(item.date) <= now)
-      .sort((a, b) => new Date(b.date) - new Date(a.date)); // 과거 내역: 최신순(내림차순)
+      .filter((item) => !item.isScheduled)
+      .sort(
+        (a, b) =>
+          new Date(b.date.replace(' ', 'T')) -
+          new Date(a.date.replace(' ', 'T')),
+      );
     const future = filtered
-      .filter((item) => new Date(item.date) > now)
-      .sort((a, b) => new Date(a.date) - new Date(b.date)); // 예정 내역: 가까운순(오름차순)
+      .filter((item) => item.isScheduled)
+      .sort(
+        (a, b) =>
+          new Date(a.date.replace(' ', 'T')) -
+          new Date(b.date.replace(' ', 'T')),
+      );
 
     return [...past, ...future];
   });
+
+  const monthlyRecentTransactions = computed(() => rangeBudgets.value);
 
   const selectedTotal = computed(() => {
     return rangeBudgets.value.reduce(
@@ -254,24 +280,41 @@ export const useTransactionStore = defineStore('transaction', () => {
 
   const filteredByToday = (list) =>
     computed(() => {
-      const now = new Date();
+      const now = new Date().getTime(); // 현재 시각을 밀리초로 고정
 
       const past = list.value
-        .filter((item) => new Date(item.date) <= now)
-        .sort((a, b) => new Date(b.date) - new Date(a.date)); // 이전 날짜 내림차순
+        .filter((item) => {
+          const itemTime = new Date(item.date.replace(' ', 'T')).getTime();
+          return itemTime <= now;
+        })
+        .sort(
+          (a, b) =>
+            new Date(b.date.replace(' ', 'T')) -
+            new Date(a.date.replace(' ', 'T')),
+        )
+        .map((item) => ({ ...item, isScheduled: false })); // 속성 명시적 추가
 
       const future = list.value
-        .filter((item) => new Date(item.date) > now)
-        .sort((a, b) => new Date(a.date) - new Date(b.date)); // 미래 날짜는 가까운 순서대로
+        .filter((item) => new Date(item.date.replace(' ', 'T')).getTime() > now)
+        .sort(
+          (a, b) =>
+            new Date(a.date.replace(' ', 'T')) -
+            new Date(b.date.replace(' ', 'T')),
+        )
+        .map((item) => ({ ...item, isScheduled: true })); // 속성 명시적 추가
 
       return [...past, ...future]; // 이전 날짜 먼저, 이후 날짜 아래
     });
 
   const upcomingList = computed(() => {
-    const now = new Date();
+    const now = new Date().getTime();
 
     return myBudgets.value
-      .filter((item) => item.isRecurring === true && new Date(item.date) > now)
+      .filter(
+        (item) =>
+          item.isRecurring === true &&
+          new Date(item.date.replace(' ', 'T')).getTime() > now,
+      )
       .sort((a, b) => new Date(a.date) - new Date(b.date))
       .slice(0, 5);
   });
@@ -526,6 +569,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     isScheduledOnly,
     calendarDots,
     rangeBudgets,
+    monthlyRecentTransactions,
     topMonthlyMessage,
     monthlySummaryMessages,
     selectedTotal,
