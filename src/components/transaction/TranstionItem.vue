@@ -5,33 +5,9 @@
     <div class="header">
       <MonthPicker :current-month="currentMonth" @change="changeMonth" />
 
-      <input
-        v-model="search"
-        placeholder="메모 검색"
-        class="memo_window search-input"
-      />
-
-      <button
-        class="mobile-search-btn mobile-only"
-        type="button"
-        aria-label="Search"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <circle
-            cx="11"
-            cy="11"
-            r="7"
-            stroke="currentColor"
-            stroke-width="2"
-          />
-          <path
-            d="M20 20L17 17"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
-      </button>
+      <div class="search-wrapper">
+        <input v-model="search" placeholder="메모 검색" class="search-input" />
+      </div>
     </div>
 
     <CategoryFilter
@@ -46,11 +22,21 @@
       class="filter-bar"
     />
 
+    <!-- 선택 삭제 바: 데스크톱/모바일 공용으로 리스트 상단 배치 -->
+    <div class="bulk-action-bar" v-show="selectedIds.length > 0">
+      <div class="bulk-action-content">
+        <span class="selected-count">{{ selectedIds.length }}건 선택됨</span>
+        <button class="bulk-delete-btn" type="button" @click="deleteSelected">
+          삭제하기
+        </button>
+      </div>
+    </div>
+
     <div class="table-container desktop-only">
       <table class="table">
         <thead>
           <tr>
-            <th width="65px">
+            <th width="50px">
               <input
                 type="checkbox"
                 :checked="isAllSelected"
@@ -61,23 +47,7 @@
             <th width="210px">거래 내역</th>
             <th width="210px">금액</th>
             <th width="210px">카테고리</th>
-            <th width="180px">
-              <div
-                class="bulk-action-container"
-                v-show="selectedIds.length > 0"
-              >
-                <span class="selected-count"
-                  >{{ selectedIds.length }}건 선택</span
-                >
-                <button
-                  class="bulk-delete-btn"
-                  type="button"
-                  @click="deleteSelected"
-                >
-                  삭제
-                </button>
-              </div>
-            </th>
+            <th width="120px">관리</th>
           </tr>
         </thead>
         <tbody>
@@ -174,6 +144,9 @@
           class="mobile-card"
           :class="{ upcoming: isUpcoming(item.date) }"
         >
+          <div class="mobile-checkbox">
+            <input type="checkbox" :value="item.id" v-model="selectedIds" />
+          </div>
           <div class="mobile-card-main">
             <div class="mobile-card-left">
               <span
@@ -508,18 +481,19 @@ const executeDelete = async () => {
 
 .header {
   display: flex;
-  gap: 12px;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 10px;
   min-width: 0;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.month-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  min-width: 60px;
-  text-align: center;
+.search-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 200px;
 }
 
 .nav-btn {
@@ -611,10 +585,10 @@ const executeDelete = async () => {
 .table thead th {
   position: sticky;
   top: 0;
-  z-index: 0;
+  z-index: 10;
   background-color: #fff;
   box-shadow: inset 0 -1px 0 #eee;
-  height: 64px;
+  height: 50px;
   vertical-align: middle;
 }
 
@@ -677,22 +651,11 @@ input[type='checkbox'] {
   transition: all 0.2s ease;
 }
 
-.bulk-action-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
 .mobile-only {
   display: none;
 }
 
 @media (max-width: 768px) {
-  .container {
-    padding: 0 12px 20px;
-  }
-
   .mobile-page-title {
     display: block;
     font-size: 14px;
@@ -702,37 +665,19 @@ input[type='checkbox'] {
   }
 
   .header {
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
   }
 
-  .month-picker-area {
+  .search-wrapper {
+    width: 100%;
     justify-content: flex-start;
-    gap: 16px;
-    flex: 1;
+    min-width: 0;
   }
 
-  .month-title {
-    font-size: 2rem;
-    min-width: auto;
-  }
-
-  .memo_window {
-    display: none;
-  }
-
-  .mobile-search-btn {
-    width: 42px;
-    height: 42px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #ececec;
-    border-radius: 50%;
-    background: #fff;
-    color: #b4b4b4;
-    flex-shrink: 0;
+  .search-input {
+    max-width: none;
   }
 
   .filter-bar {
@@ -801,9 +746,17 @@ input[type='checkbox'] {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobile-checkbox {
+    flex-shrink: 0;
   }
 
   .mobile-card-main {
+    flex: 1;
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 10px;

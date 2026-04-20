@@ -235,4 +235,59 @@ textarea {
 .btn-save:hover {
   opacity: 0.9;
 }
+
+/* 모바일 최적화 스타일 추가 */
+@media (max-width: 480px) {
+  .modal-backdrop {
+    align-items: flex-end; /* 모달을 하단에 배치 */
+  }
+
+  .modal-card {
+    width: 100%;
+    max-width: 100%;
+    height: 50vh; /* 화면 높이의 정확히 절반 */
+    padding: 20px 16px;
+    border-radius: 24px 24px 0 0; /* 상단 모서리만 둥글게 */
+    overflow-y: auto; /* 내용이 많을 경우 내부 스크롤 */
+    margin-bottom: 0;
+  }
+
+  .modal-header {
+    margin-bottom: 16px;
+  }
+
+  .modal-header h3 {
+    font-size: 1rem;
+  }
+
+  .type-toggle {
+    margin-bottom: 10px;
+  }
+
+  .type-toggle button {
+    height: 32px;
+    font-size: 0.85rem;
+  }
+
+  .input-group {
+    margin-bottom: 8px;
+  }
+
+  .input-group label {
+    font-size: 0.75rem;
+  }
+
+  .input-group input,
+  .input-group select,
+  .input-group textarea {
+    padding: 8px;
+    font-size: 0.85rem;
+  }
+
+  .btn-save {
+    height: 40px;
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+}
 </style>
